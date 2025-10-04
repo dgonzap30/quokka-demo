@@ -67,6 +67,14 @@ export function NavHeader() {
           >
             Ask Question
           </Link>
+          <Link
+            href="/quokka"
+            className={`transition-colors hover:text-accent ${
+              isActive("/quokka") ? "text-accent" : "text-muted-foreground"
+            }`}
+          >
+            AI Chat
+          </Link>
         </nav>
 
         {/* User Menu */}
@@ -99,6 +107,9 @@ export function NavHeader() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/ask">Ask Question</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/quokka">AI Chat</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
