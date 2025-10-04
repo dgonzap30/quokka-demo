@@ -1,0 +1,231 @@
+[
+  {
+    "id": "thread-1",
+    "title": "How do I implement binary search in Python?",
+    "content": "I'm trying to understand binary search but I'm confused about the implementation. Can someone explain how the mid-point calculation works and why we use `left <= right` as the condition?",
+    "authorId": "user-2",
+    "status": "answered",
+    "createdAt": "2025-10-01T10:30:00Z",
+    "updatedAt": "2025-10-01T14:20:00Z",
+    "tags": ["algorithms", "python"],
+    "views": 45,
+    "endorsed": true,
+    "posts": [
+      {
+        "id": "post-1",
+        "threadId": "thread-1",
+        "authorId": "user-6",
+        "content": "Great question! The key insight is that binary search works by repeatedly dividing the search space in half. Here's a step-by-step breakdown:\n\n1. Calculate mid = (left + right) // 2\n2. Compare target with arr[mid]\n3. If equal, return mid\n4. If target < arr[mid], search left half (right = mid - 1)\n5. If target > arr[mid], search right half (left = mid + 1)\n\nThe condition `left <= right` ensures we keep searching while there's a valid range.",
+        "createdAt": "2025-10-01T11:15:00Z",
+        "updatedAt": "2025-10-01T11:15:00Z",
+        "isAnswer": true,
+        "endorsed": true
+      },
+      {
+        "id": "post-2",
+        "threadId": "thread-1",
+        "authorId": "user-2",
+        "content": "Thanks! That makes sense. What's the time complexity?",
+        "createdAt": "2025-10-01T11:30:00Z",
+        "updatedAt": "2025-10-01T11:30:00Z"
+      },
+      {
+        "id": "post-3",
+        "threadId": "thread-1",
+        "authorId": "user-6",
+        "content": "It's O(log n) because we're halving the search space with each iteration!",
+        "createdAt": "2025-10-01T14:20:00Z",
+        "updatedAt": "2025-10-01T14:20:00Z"
+      }
+    ],
+    "aiAnswer": {
+      "id": "ai-1",
+      "threadId": "thread-1",
+      "text": "Binary search is an efficient algorithm for finding a target value in a sorted array. The implementation uses a divide-and-conquer approach:\n\n```python\ndef binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        \n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    \n    return -1\n```\n\nThe time complexity is O(log n) because the search space is halved with each iteration.",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/library/bisect.html",
+          "snippet": "This module provides support for maintaining a list in sorted order...",
+          "title": "Python bisect module documentation"
+        },
+        {
+          "url": "https://course-materials.example.com/week3/binary-search.pdf",
+          "snippet": "Binary search algorithm overview and implementation details...",
+          "title": "Week 3: Search Algorithms"
+        }
+      ],
+      "confidence": 0.92,
+      "confidenceLevel": "high",
+      "createdAt": "2025-10-01T10:35:00Z"
+    }
+  },
+  {
+    "id": "thread-2",
+    "title": "Difference between append() and extend() in Python lists?",
+    "content": "I keep getting confused about when to use append() vs extend(). Can someone clarify the difference?",
+    "authorId": "user-3",
+    "status": "answered",
+    "createdAt": "2025-10-02T09:00:00Z",
+    "updatedAt": "2025-10-02T09:45:00Z",
+    "tags": ["python", "lists"],
+    "views": 32,
+    "posts": [
+      {
+        "id": "post-4",
+        "threadId": "thread-2",
+        "authorId": "user-4",
+        "content": "`append()` adds its argument as a single element to the end of the list. `extend()` iterates over its argument and adds each element to the list.\n\nExample:\n```python\nlist1 = [1, 2, 3]\nlist1.append([4, 5])  # [1, 2, 3, [4, 5]]\n\nlist2 = [1, 2, 3]\nlist2.extend([4, 5])  # [1, 2, 3, 4, 5]\n```",
+        "createdAt": "2025-10-02T09:45:00Z",
+        "updatedAt": "2025-10-02T09:45:00Z",
+        "isAnswer": true
+      }
+    ],
+    "aiAnswer": {
+      "id": "ai-2",
+      "threadId": "thread-2",
+      "text": "The key difference:\n\n- **append(x)**: Adds x as a single element to the end of the list\n- **extend(iterable)**: Adds each element from the iterable to the list\n\nThink of append as adding one thing (even if it's a list), while extend unpacks an iterable and adds each item individually.",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/tutorial/datastructures.html",
+          "snippet": "list.append(x) adds an item to the end of the list...",
+          "title": "Python Data Structures Tutorial"
+        }
+      ],
+      "confidence": 0.88,
+      "confidenceLevel": "high",
+      "createdAt": "2025-10-02T09:05:00Z"
+    }
+  },
+  {
+    "id": "thread-3",
+    "title": "What's the difference between == and is in Python?",
+    "content": "I've been using == to compare objects, but I've seen code using `is`. What's the difference and when should I use each?",
+    "authorId": "user-5",
+    "status": "answered",
+    "createdAt": "2025-10-02T14:30:00Z",
+    "updatedAt": "2025-10-02T15:10:00Z",
+    "tags": ["python", "operators"],
+    "views": 28,
+    "endorsed": true,
+    "posts": [
+      {
+        "id": "post-5",
+        "threadId": "thread-3",
+        "authorId": "user-1",
+        "content": "Important distinction!\n\n- `==` checks for **value equality** (are the contents the same?)\n- `is` checks for **identity** (are they the same object in memory?)\n\nUse `is` for:\n- Comparing with None: `if x is None:`\n- Checking if two variables reference the exact same object\n\nUse `==` for:\n- Comparing values of objects\n\nExample:\n```python\na = [1, 2, 3]\nb = [1, 2, 3]\nc = a\n\na == b  # True (same values)\na is b  # False (different objects)\na is c  # True (same object)\n```",
+        "createdAt": "2025-10-02T15:10:00Z",
+        "updatedAt": "2025-10-02T15:10:00Z",
+        "isAnswer": true,
+        "endorsed": true
+      }
+    ],
+    "aiAnswer": {
+      "id": "ai-3",
+      "threadId": "thread-3",
+      "text": "The `==` operator checks for value equality, while `is` checks for object identity (same memory location).\n\nBest practices:\n- Use `==` to compare values\n- Use `is` only for singleton objects like None, True, False\n- Never use `is` to compare numbers or strings (except in very specific cases)",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/reference/expressions.html#is",
+          "snippet": "The operators is and is not test for object identity...",
+          "title": "Python Expressions Documentation"
+        },
+        {
+          "url": "https://course-materials.example.com/week2/python-operators.pdf",
+          "snippet": "Understanding equality vs identity in Python...",
+          "title": "Week 2: Python Operators"
+        }
+      ],
+      "confidence": 0.90,
+      "confidenceLevel": "high",
+      "createdAt": "2025-10-02T14:35:00Z"
+    }
+  },
+  {
+    "id": "thread-4",
+    "title": "How to handle exceptions in Python?",
+    "content": "I'm getting errors in my code and want to learn about proper exception handling. What's the best way to use try/except blocks?",
+    "authorId": "user-7",
+    "status": "open",
+    "createdAt": "2025-10-03T08:00:00Z",
+    "updatedAt": "2025-10-03T08:00:00Z",
+    "tags": ["python", "exceptions"],
+    "views": 12,
+    "posts": [],
+    "aiAnswer": {
+      "id": "ai-4",
+      "threadId": "thread-4",
+      "text": "Python exception handling uses try/except blocks:\n\n```python\ntry:\n    # Code that might raise an exception\n    result = risky_operation()\nexcept SpecificError as e:\n    # Handle specific error\n    print(f\"Error: {e}\")\nexcept AnotherError:\n    # Handle another error\n    pass\nelse:\n    # Runs if no exception occurred\n    print(\"Success!\")\nfinally:\n    # Always runs, cleanup code\n    cleanup()\n```\n\nBest practices:\n- Catch specific exceptions, not bare `except:`\n- Use `finally` for cleanup (close files, connections)\n- Don't silence exceptions without good reason",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/tutorial/errors.html",
+          "snippet": "Errors detected during execution are called exceptions...",
+          "title": "Python Errors and Exceptions Tutorial"
+        },
+        {
+          "url": "https://course-materials.example.com/week4/error-handling.pdf",
+          "snippet": "Best practices for exception handling in Python...",
+          "title": "Week 4: Error Handling"
+        }
+      ],
+      "confidence": 0.85,
+      "confidenceLevel": "high",
+      "createdAt": "2025-10-03T08:05:00Z"
+    }
+  },
+  {
+    "id": "thread-5",
+    "title": "What are Python decorators and how do they work?",
+    "content": "I've seen @decorator syntax in Python code but don't understand what they do. Can someone explain?",
+    "authorId": "user-8",
+    "status": "open",
+    "createdAt": "2025-10-03T10:00:00Z",
+    "updatedAt": "2025-10-03T10:00:00Z",
+    "tags": ["python", "decorators"],
+    "views": 8,
+    "posts": [],
+    "aiAnswer": {
+      "id": "ai-5",
+      "threadId": "thread-5",
+      "text": "Decorators are a way to modify or enhance functions without changing their code. They're functions that take another function and extend its behavior.\n\nBasic example:\n```python\ndef my_decorator(func):\n    def wrapper():\n        print(\"Before function\")\n        func()\n        print(\"After function\")\n    return wrapper\n\n@my_decorator\ndef say_hello():\n    print(\"Hello!\")\n\n# Equivalent to: say_hello = my_decorator(say_hello)\n```\n\nCommon uses:\n- Logging\n- Authentication\n- Timing/profiling\n- Caching",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/glossary.html#term-decorator",
+          "snippet": "A decorator is a function that returns another function...",
+          "title": "Python Glossary: Decorator"
+        },
+        {
+          "url": "https://course-materials.example.com/week6/decorators.pdf",
+          "snippet": "Understanding and using Python decorators...",
+          "title": "Week 6: Advanced Python"
+        }
+      ],
+      "confidence": 0.72,
+      "confidenceLevel": "medium",
+      "createdAt": "2025-10-03T10:05:00Z"
+    }
+  },
+  {
+    "id": "thread-6",
+    "title": "Confused about list comprehensions",
+    "content": "I understand for loops, but list comprehensions look complicated. When should I use them?",
+    "authorId": "user-2",
+    "status": "open",
+    "createdAt": "2025-10-03T11:00:00Z",
+    "updatedAt": "2025-10-03T11:00:00Z",
+    "tags": ["python", "comprehensions"],
+    "views": 5,
+    "posts": []
+  },
+  {
+    "id": "thread-7",
+    "title": "How does Python's GIL affect multi-threading?",
+    "content": "I've heard about the Global Interpreter Lock but don't understand what it means for my multi-threaded programs.",
+    "authorId": "user-3",
+    "status": "open",
+    "createdAt": "2025-10-03T09:30:00Z",
+    "updatedAt": "2025-10-03T09:30:00Z",
+    "tags": ["python", "threading", "performance"],
+    "views": 15,
+    "posts": []
+  }
+]

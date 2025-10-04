@@ -1,0 +1,110 @@
+{
+  "responses": {
+    "list comprehension": {
+      "text": "List comprehensions provide a concise way to create lists. They consist of brackets containing an expression followed by a for clause, then zero or more for or if clauses.\n\nBasic syntax:\n```python\n[expression for item in iterable if condition]\n```\n\nExamples:\n```python\n# Square numbers\nsquares = [x**2 for x in range(10)]\n\n# Filter even numbers\nevens = [x for x in range(20) if x % 2 == 0]\n\n# Transform strings\nupper = [s.upper() for s in ['hello', 'world']]\n```\n\nUse them when:\n- Creating new lists from existing iterables\n- You need a simple transformation/filter\n- The logic fits in one readable line\n\nAvoid when:\n- The logic is complex (use regular for loops)\n- You need multiple statements",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions",
+          "snippet": "List comprehensions provide a concise way to create lists...",
+          "title": "Python List Comprehensions"
+        },
+        {
+          "url": "https://course-materials.example.com/week5/comprehensions.pdf",
+          "snippet": "Advanced Python: comprehensions and generator expressions...",
+          "title": "Week 5: Python Comprehensions"
+        }
+      ],
+      "confidence": 0.88,
+      "confidenceLevel": "high"
+    },
+    "gil": {
+      "text": "The Global Interpreter Lock (GIL) is a mutex that protects access to Python objects, preventing multiple native threads from executing Python bytecodes simultaneously.\n\nKey impacts:\n- **CPU-bound programs**: Only one thread executes Python code at a time, so multi-threading won't speed up CPU-intensive tasks\n- **I/O-bound programs**: The GIL is released during I/O operations, so threading works well for network/disk operations\n\nAlternatives for CPU-bound parallelism:\n- **multiprocessing**: Use separate processes instead of threads\n- **asyncio**: For I/O-bound concurrent operations\n- **C extensions**: Can release the GIL during compute-heavy operations\n\nExample:\n```python\n# For CPU-bound: use multiprocessing\nfrom multiprocessing import Pool\nwith Pool(4) as p:\n    results = p.map(cpu_intensive_func, data)\n\n# For I/O-bound: threading works fine\nfrom concurrent.futures import ThreadPoolExecutor\nwith ThreadPoolExecutor(max_workers=10) as executor:\n    results = executor.map(fetch_url, urls)\n```",
+      "citations": [
+        {
+          "url": "https://docs.python.org/3/glossary.html#term-global-interpreter-lock",
+          "snippet": "The mechanism used by the CPython interpreter to assure that only one thread executes Python bytecode at a time...",
+          "title": "Python Glossary: GIL"
+        },
+        {
+          "url": "https://course-materials.example.com/week8/concurrency.pdf",
+          "snippet": "Understanding Python's GIL and choosing the right concurrency model...",
+          "title": "Week 8: Concurrency in Python"
+        }
+      ],
+      "confidence": 0.82,
+      "confidenceLevel": "high"
+    },
+    "default": {
+      "text": "I don't have enough information in the course materials to answer this question confidently. Here are some general suggestions:\n\n1. Review the relevant course documentation\n2. Check the official Python documentation\n3. Post a more specific question with code examples\n4. Attend office hours for personalized help\n\nIf you can provide more context or specific code examples, I might be able to give a better answer.",
+      "citations": [],
+      "confidence": 0.35,
+      "confidenceLevel": "low"
+    }
+  },
+  "similarQuestions": {
+    "list comprehension": [
+      {
+        "id": "thread-6",
+        "title": "Confused about list comprehensions",
+        "similarity": 0.95,
+        "hasAnswer": false
+      }
+    ],
+    "comprehension": [
+      {
+        "id": "thread-6",
+        "title": "Confused about list comprehensions",
+        "similarity": 0.88,
+        "hasAnswer": false
+      }
+    ],
+    "binary search": [
+      {
+        "id": "thread-1",
+        "title": "How do I implement binary search in Python?",
+        "similarity": 0.92,
+        "hasAnswer": true
+      }
+    ],
+    "append extend": [
+      {
+        "id": "thread-2",
+        "title": "Difference between append() and extend() in Python lists?",
+        "similarity": 0.90,
+        "hasAnswer": true
+      }
+    ],
+    "== is operator": [
+      {
+        "id": "thread-3",
+        "title": "What's the difference between == and is in Python?",
+        "similarity": 0.93,
+        "hasAnswer": true
+      }
+    ],
+    "exception": [
+      {
+        "id": "thread-4",
+        "title": "How to handle exceptions in Python?",
+        "similarity": 0.87,
+        "hasAnswer": false
+      }
+    ],
+    "decorator": [
+      {
+        "id": "thread-5",
+        "title": "What are Python decorators and how do they work?",
+        "similarity": 0.91,
+        "hasAnswer": false
+      }
+    ],
+    "gil threading": [
+      {
+        "id": "thread-7",
+        "title": "How does Python's GIL affect multi-threading?",
+        "similarity": 0.89,
+        "hasAnswer": false
+      }
+    ]
+  }
+}
