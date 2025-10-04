@@ -113,46 +113,50 @@ export default function QuokkaPage() {
   ];
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-primary glass-text">Quokka AI</h1>
-          <p className="text-muted-foreground">
-            Your friendly AI study assistant
-          </p>
+    <div className="min-h-screen p-8 md:p-12">
+      <div className="container-narrow space-y-12">
+        {/* Hero Section */}
+        <div className="text-center py-8 md:py-12 space-y-6">
+          <div className="space-y-4">
+            <h1 className="heading-2 glass-text">Quokka AI</h1>
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              Your friendly AI study assistant. Get instant help with computer science, mathematics, and more.
+            </p>
+          </div>
         </div>
 
         {/* Chat Container */}
-        <Card variant="glass-strong" className="h-[600px] flex flex-col">
-          <CardHeader className="border-b border-border/40">
+        <Card variant="glass-strong" className="flex flex-col" style={{ height: "calc(100vh - 400px)", minHeight: "500px", maxHeight: "700px" }}>
+          <CardHeader className="p-6 md:p-8 border-b border-[var(--border-glass)]">
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Chat with Quokka</CardTitle>
-                <CardDescription>Ask me anything about your courses</CardDescription>
+              <div className="space-y-1">
+                <CardTitle className="heading-4 glass-text">Chat with Quokka</CardTitle>
+                <CardDescription className="text-base">Ask me anything about your courses</CardDescription>
               </div>
-              <Badge variant="outline" className="bg-success/10 text-success">
+              <Badge variant="outline" className="bg-success/10 text-success border-success/30">
                 ● Online
               </Badge>
             </div>
           </CardHeader>
 
           {/* Messages */}
-          <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+          <CardContent className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-4 ${
+                  className={`max-w-[85%] p-4 md:p-5 ${
                     message.role === "user"
-                      ? "bg-accent text-accent-foreground"
-                      : "bg-primary/10 text-foreground"
+                      ? "message-user"
+                      : "message-assistant"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className="text-xs opacity-60 mt-2">
+                  <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                    {message.content}
+                  </p>
+                  <p className="text-xs text-subtle mt-3">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
@@ -161,8 +165,11 @@ export default function QuokkaPage() {
 
             {isThinking && (
               <div className="flex justify-start">
-                <div className="bg-primary/10 text-foreground rounded-lg p-4">
-                  <p className="text-sm">Quokka is thinking...</p>
+                <div className="message-assistant p-4 md:p-5">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-pulse">💭</div>
+                    <p className="text-sm md:text-base">Quokka is thinking...</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -171,10 +178,10 @@ export default function QuokkaPage() {
           </CardContent>
 
           {/* Input */}
-          <div className="border-t border-border/40 p-4">
+          <div className="border-t border-[var(--border-glass)] p-6 md:p-8">
             {messages.length === 1 && (
-              <div className="mb-4">
-                <p className="text-xs text-muted-foreground mb-2">Quick prompts:</p>
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-muted-foreground mb-3">Quick prompts:</p>
                 <div className="flex flex-wrap gap-2">
                   {quickPrompts.map((prompt) => (
                     <Button
@@ -182,7 +189,7 @@ export default function QuokkaPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setInput(prompt)}
-                      className="text-xs"
+                      className="text-xs md:text-sm"
                     >
                       {prompt}
                     </Button>
@@ -191,17 +198,19 @@ export default function QuokkaPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex gap-3">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
                 disabled={isThinking}
-                className="flex-1"
+                className="flex-1 h-12 text-base"
+                aria-label="Message input"
               />
               <Button
                 type="submit"
                 variant="glass-primary"
+                size="lg"
                 disabled={isThinking || !input.trim()}
               >
                 Send
@@ -212,12 +221,23 @@ export default function QuokkaPage() {
 
         {/* Tips */}
         <Card variant="glass">
-          <CardContent className="p-4 text-sm text-muted-foreground">
-            <p className="font-semibold mb-2">💡 Tips:</p>
-            <ul className="space-y-1 list-disc list-inside">
-              <li>I&apos;m best at CS and Math topics</li>
-              <li>For complex questions, consider posting a thread for peer/instructor help</li>
-              <li>I use keyword matching - be specific in your questions!</li>
+          <CardHeader className="p-8">
+            <CardTitle className="heading-5 glass-text">💡 Tips for Using Quokka AI</CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 pt-0">
+            <ul className="space-y-3 text-sm md:text-base text-muted-foreground leading-relaxed">
+              <li className="flex items-start gap-3">
+                <span className="text-accent mt-0.5">✓</span>
+                <span>I&apos;m best at Computer Science and Mathematics topics</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-accent mt-0.5">✓</span>
+                <span>For complex questions, consider posting a thread for detailed peer/instructor help</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-accent mt-0.5">✓</span>
+                <span>I use keyword matching - be specific and include key terms in your questions!</span>
+              </li>
             </ul>
           </CardContent>
         </Card>

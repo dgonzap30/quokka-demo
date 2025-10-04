@@ -50,13 +50,14 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
 
   if (userLoading || threadLoading) {
     return (
-      <div className="min-h-screen p-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <Skeleton className="h-12 w-96" />
-          <Skeleton className="h-48 w-full" />
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Skeleton key={i} className="h-32" />
+      <div className="min-h-screen p-8 md:p-12">
+        <div className="container-narrow space-y-12">
+          <Skeleton className="h-6 w-32 bg-glass-medium rounded-lg" />
+          <Skeleton className="h-16 w-96 bg-glass-medium rounded-lg" />
+          <Skeleton className="h-64 bg-glass-medium rounded-xl" />
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-40 bg-glass-medium rounded-xl" />
             ))}
           </div>
         </div>
@@ -66,11 +67,24 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
 
   if (!threadData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card variant="glass">
-          <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">Thread not found</p>
-          </CardContent>
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <Card variant="glass" className="p-16 text-center">
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="flex justify-center">
+              <div className="text-6xl opacity-50">🔍</div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold">Thread Not Found</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                The discussion thread you&apos;re looking for doesn&apos;t exist or has been removed.
+              </p>
+            </div>
+            <Link href="/courses">
+              <Button variant="glass-primary" size="lg">
+                Back to Courses
+              </Button>
+            </Link>
+          </div>
         </Card>
       </div>
     );
@@ -78,54 +92,58 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
 
   const { thread, posts } = threadData;
 
-  const getStatusBadge = (status: typeof thread.status) => {
+  const getStatusClass = (status: typeof thread.status) => {
     const variants = {
-      open: "bg-warning/20 text-warning",
-      answered: "bg-accent/20 text-accent",
-      resolved: "bg-success/20 text-success",
+      open: "status-open",
+      answered: "status-answered",
+      resolved: "status-resolved",
     };
     return variants[status] || variants.open;
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen p-8 md:p-12">
+      <div className="container-narrow space-y-12">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/courses" className="hover:text-accent">
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
+          <Link href="/courses" className="hover:text-accent transition-colors">
             Courses
           </Link>
           <span>/</span>
-          <Link href={`/courses/${thread.courseId}`} className="hover:text-accent">
+          <Link href={`/courses/${thread.courseId}`} className="hover:text-accent transition-colors">
             Course
           </Link>
           <span>/</span>
-          <span>Thread</span>
-        </div>
+          <span className="text-foreground">Thread</span>
+        </nav>
 
         {/* Thread Question */}
         <Card variant="glass-strong">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-2xl">{thread.title}</CardTitle>
-                <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
+          <CardHeader className="p-8">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="flex-1 space-y-3">
+                <CardTitle className="heading-3 glass-text leading-snug">
+                  {thread.title}
+                </CardTitle>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-subtle">
                   <span>{thread.views} views</span>
                   <span>•</span>
                   <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <Badge className={getStatusBadge(thread.status)}>
+              <Badge className={getStatusClass(thread.status)}>
                 {thread.status}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-foreground whitespace-pre-wrap">{thread.content}</p>
+          <CardContent className="p-8 pt-0">
+            <p className="text-base leading-relaxed whitespace-pre-wrap mb-6">
+              {thread.content}
+            </p>
             {thread.tags && thread.tags.length > 0 && (
-              <div className="flex gap-2 mt-4">
+              <div className="flex gap-2 flex-wrap">
                 {thread.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
+                  <Badge key={tag} variant="outline" className="text-xs">
                     {tag}
                   </Badge>
                 ))}
@@ -135,63 +153,96 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
         </Card>
 
         {/* Replies */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">
+        <div className="space-y-6">
+          <h2 className="heading-3 glass-text">
             {posts.length} {posts.length === 1 ? "Reply" : "Replies"}
           </h2>
-          <div className="space-y-4">
-            {posts.map((post) => (
-              <Card key={post.id} variant={post.endorsed ? "glass-liquid" : "glass"}>
-                <CardHeader>
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10 bg-primary/20">
-                      <span className="text-sm">U</span>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">User {post.authorId.slice(-4)}</span>
-                        {post.endorsed && (
-                          <Badge variant="outline" className="bg-success/10 text-success">
-                            ✓ Endorsed
-                          </Badge>
-                        )}
+          {posts.length > 0 ? (
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <Card key={post.id} variant={post.endorsed ? "glass-liquid" : "glass-hover"}>
+                  <CardHeader className="p-8">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-11 w-11 avatar-placeholder">
+                        <span className="text-sm font-semibold">
+                          {post.authorId.slice(-2).toUpperCase()}
+                        </span>
+                      </Avatar>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-base">
+                            User {post.authorId.slice(-4)}
+                          </span>
+                          {post.endorsed && (
+                            <Badge variant="outline" className="bg-success/10 text-success border-success/30">
+                              ✓ Endorsed
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-subtle">
+                          {new Date(post.createdAt).toLocaleString()}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(post.createdAt).toLocaleString()}
-                      </p>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardHeader>
+                  <CardContent className="p-8 pt-0">
+                    <p className="text-base leading-relaxed whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card variant="glass" className="p-16 text-center">
+              <div className="max-w-md mx-auto space-y-6">
+                <div className="flex justify-center">
+                  <div className="text-6xl opacity-50">💬</div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold">No Replies Yet</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Be the first to contribute to this discussion!
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Reply Form */}
         <Card variant="glass-strong">
-          <CardHeader>
-            <CardTitle>Post a Reply</CardTitle>
-            <CardDescription>Share your thoughts or answer this question</CardDescription>
+          <CardHeader className="p-8">
+            <div className="space-y-2">
+              <CardTitle className="heading-4 glass-text">Post a Reply</CardTitle>
+              <CardDescription className="text-base">
+                Share your thoughts or answer this question
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmitReply} className="space-y-4">
-              <Textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Write your reply..."
-                rows={5}
-                required
-              />
-              <Button
-                type="submit"
-                variant="glass-primary"
-                disabled={isSubmitting || !replyContent.trim()}
-              >
-                {isSubmitting ? "Posting..." : "Post Reply"}
-              </Button>
+          <CardContent className="p-8 pt-0">
+            <form onSubmit={handleSubmitReply} className="space-y-6">
+              <div className="space-y-3">
+                <Textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  placeholder="Write your reply..."
+                  rows={8}
+                  className="min-h-[200px] text-base"
+                  required
+                  aria-required="true"
+                />
+              </div>
+              <div className="flex justify-end pt-6 border-t border-[var(--border-glass)]">
+                <Button
+                  type="submit"
+                  variant="glass-primary"
+                  size="lg"
+                  disabled={isSubmitting || !replyContent.trim()}
+                >
+                  {isSubmitting ? "Posting..." : "Post Reply"}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>

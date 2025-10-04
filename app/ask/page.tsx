@@ -69,40 +69,49 @@ function AskQuestionForm() {
 
   if (userLoading || coursesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="glass-panel px-8 py-6 inline-flex items-center gap-4 rounded-2xl">
+          <div className="animate-spin h-6 w-6 border-3 border-primary border-t-transparent rounded-full"></div>
+          <p className="text-base text-foreground glass-text font-medium">
+            Loading courses...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-4xl font-bold text-primary glass-text">Ask a Question</h1>
-          <p className="text-muted-foreground mt-2">
-            Get help from your classmates and instructors
-          </p>
+    <div className="min-h-screen p-8 md:p-12">
+      <div className="container-narrow space-y-12">
+        {/* Hero Section */}
+        <div className="py-8 md:py-12 space-y-6">
+          <div className="space-y-4">
+            <h1 className="heading-2 glass-text">Ask a Question</h1>
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+              Get help from your classmates and instructors. Provide detailed information to receive the best answers.
+            </p>
+          </div>
         </div>
 
         {/* Form */}
         <Card variant="glass-strong">
-          <CardHeader>
-            <CardTitle>New Discussion Thread</CardTitle>
-            <CardDescription>
-              Provide a clear title and detailed description of your question
-            </CardDescription>
+          <CardHeader className="p-8 md:p-10">
+            <div className="space-y-2">
+              <CardTitle className="heading-3 glass-text">New Discussion Thread</CardTitle>
+              <CardDescription className="text-base leading-relaxed">
+                Provide a clear title and detailed description of your question
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="p-8 md:p-10 pt-0">
+            <form onSubmit={handleSubmit} className="space-y-8">
               {/* Course Selection */}
-              <div className="space-y-2">
-                <label htmlFor="course" className="text-sm font-medium">
+              <div className="space-y-3">
+                <label htmlFor="course" className="text-sm font-semibold">
                   Course *
                 </label>
                 <Select value={selectedCourseId} onValueChange={setSelectedCourseId} required>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 text-base">
                     <SelectValue placeholder="Select a course" />
                   </SelectTrigger>
                   <SelectContent>
@@ -116,8 +125,8 @@ function AskQuestionForm() {
               </div>
 
               {/* Title */}
-              <div className="space-y-2">
-                <label htmlFor="title" className="text-sm font-medium">
+              <div className="space-y-3">
+                <label htmlFor="title" className="text-sm font-semibold">
                   Question Title *
                 </label>
                 <Input
@@ -125,7 +134,9 @@ function AskQuestionForm() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., How does binary search work?"
+                  className="h-12 text-base"
                   required
+                  aria-required="true"
                   maxLength={200}
                 />
                 <p className="text-xs text-muted-foreground">
@@ -134,8 +145,8 @@ function AskQuestionForm() {
               </div>
 
               {/* Content */}
-              <div className="space-y-2">
-                <label htmlFor="content" className="text-sm font-medium">
+              <div className="space-y-3">
+                <label htmlFor="content" className="text-sm font-semibold">
                   Question Details *
                 </label>
                 <Textarea
@@ -143,14 +154,16 @@ function AskQuestionForm() {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Provide a detailed description of your question. Include any relevant code, error messages, or context that will help others understand and answer your question."
-                  rows={10}
+                  rows={12}
+                  className="min-h-[300px] text-base"
                   required
+                  aria-required="true"
                 />
               </div>
 
               {/* Tags */}
-              <div className="space-y-2">
-                <label htmlFor="tags" className="text-sm font-medium">
+              <div className="space-y-3">
+                <label htmlFor="tags" className="text-sm font-semibold">
                   Tags (optional)
                 </label>
                 <Input
@@ -158,6 +171,7 @@ function AskQuestionForm() {
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="e.g., algorithms, binary-search, recursion"
+                  className="h-12 text-base"
                 />
                 <p className="text-xs text-muted-foreground">
                   Separate tags with commas
@@ -165,10 +179,11 @@ function AskQuestionForm() {
               </div>
 
               {/* Submit Button */}
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-[var(--border-glass)]">
                 <Button
                   type="submit"
                   variant="glass-primary"
+                  size="lg"
                   disabled={isSubmitting || !selectedCourseId || !title.trim() || !content.trim()}
                 >
                   {isSubmitting ? "Posting..." : "Post Question"}
@@ -176,6 +191,7 @@ function AskQuestionForm() {
                 <Button
                   type="button"
                   variant="outline"
+                  size="lg"
                   onClick={() => router.back()}
                   disabled={isSubmitting}
                 >
@@ -188,15 +204,17 @@ function AskQuestionForm() {
 
         {/* Tips */}
         <Card variant="glass">
-          <CardHeader>
-            <CardTitle className="text-lg">Tips for Asking Good Questions</CardTitle>
+          <CardHeader className="p-8">
+            <CardTitle className="heading-4 glass-text">Tips for Asking Good Questions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>✓ Search existing threads first to avoid duplicates</p>
-            <p>✓ Use a clear, specific title that summarizes your question</p>
-            <p>✓ Provide enough context and details for others to understand</p>
-            <p>✓ Include relevant code snippets or error messages</p>
-            <p>✓ Use appropriate tags to help others find your question</p>
+          <CardContent className="p-8 pt-0">
+            <div className="space-y-3 text-sm md:text-base text-muted-foreground leading-relaxed">
+              <p>✓ Search existing threads first to avoid duplicates</p>
+              <p>✓ Use a clear, specific title that summarizes your question</p>
+              <p>✓ Provide enough context and details for others to understand</p>
+              <p>✓ Include relevant code snippets or error messages</p>
+              <p>✓ Use appropriate tags to help others find your question</p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -207,9 +225,12 @@ function AskQuestionForm() {
 export default function AskQuestionPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen p-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="glass-panel px-8 py-6 inline-flex items-center gap-4 rounded-2xl">
+          <div className="animate-spin h-6 w-6 border-3 border-primary border-t-transparent rounded-full"></div>
+          <p className="text-base text-foreground glass-text font-medium">
+            Loading...
+          </p>
         </div>
       </div>
     }>
