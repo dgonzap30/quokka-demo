@@ -77,19 +77,29 @@ import Link from "next/link";
 
 function StudentDashboard({ data, user }: { data: StudentDashboardData; user: User }) {
   return (
-    <div className="min-h-screen p-8 md:p-12">
-      <div className="container-wide space-y-12">
-        {/* Hero Section */}
-        <div className="py-8 md:py-12 space-y-6">
-          <div className="space-y-4">
-            <h1 className="heading-2 glass-text">Welcome back, {user.name}!</h1>
+    <>
+      {/* Skip link - position absolute, visible on focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-e2"
+      >
+        Skip to main content
+      </a>
+
+      <main id="main-content" className="min-h-screen p-8 md:p-12">
+        <div className="container-wide space-y-12">
+          {/* Hero Section */}
+          <section aria-labelledby="welcome-heading" className="py-8 md:py-12 space-y-6">
+            <div className="space-y-4">
+              <h1 id="welcome-heading" className="heading-2 glass-text">Welcome back, {user.name}!</h1>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
               Your academic dashboard - track your courses, recent activity, and stay updated
             </p>
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6" role="region" aria-labelledby="stats-heading">
+            <h2 id="stats-heading" className="sr-only">Dashboard Statistics</h2>
             <Card variant="glass">
               <CardContent className="p-6">
                 <div className="space-y-2">
@@ -123,13 +133,13 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
               </CardContent>
             </Card>
           </div>
-        </div>
+        </section>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Courses - 2 columns on large screens */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="heading-3 glass-text">My Courses</h2>
+          <section aria-labelledby="courses-heading" className="lg:col-span-2 space-y-6">
+            <h2 id="courses-heading" className="heading-3 glass-text">My Courses</h2>
             {data.enrolledCourses.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {data.enrolledCourses.map((course) => (
@@ -181,11 +191,11 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
                 </div>
               </Card>
             )}
-          </div>
+          </section>
 
           {/* Activity Feed - 1 column on large screens */}
-          <div className="space-y-6">
-            <h2 className="heading-3 glass-text">Recent Activity</h2>
+          <aside aria-labelledby="activity-heading" className="space-y-6">
+            <h2 id="activity-heading" className="heading-3 glass-text">Recent Activity</h2>
             {data.recentActivity.length > 0 ? (
               <div className="space-y-4">
                 {data.recentActivity.map((activity) => (
@@ -216,10 +226,11 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
                 </div>
               </Card>
             )}
-          </div>
+          </aside>
         </div>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 }
 
@@ -231,19 +242,29 @@ import type { InstructorDashboardData } from "@/lib/models/types";
 
 function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
   return (
-    <div className="min-h-screen p-8 md:p-12">
-      <div className="container-wide space-y-12">
-        {/* Hero Section */}
-        <div className="py-8 md:py-12 space-y-6">
-          <div className="space-y-4">
-            <h1 className="heading-2 glass-text">Instructor Dashboard</h1>
+    <>
+      {/* Skip link - position absolute, visible on focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-e2"
+      >
+        Skip to main content
+      </a>
+
+      <main id="main-content" className="min-h-screen p-8 md:p-12">
+        <div className="container-wide space-y-12">
+          {/* Hero Section */}
+          <section aria-labelledby="dashboard-heading" className="py-8 md:py-12 space-y-6">
+            <div className="space-y-4">
+              <h1 id="dashboard-heading" className="heading-2 glass-text">Instructor Dashboard</h1>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
               Manage your courses, monitor student engagement, and address unanswered questions
             </p>
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6" role="region" aria-labelledby="instructor-stats-heading">
+            <h2 id="instructor-stats-heading" className="sr-only">Dashboard Statistics</h2>
             <Card variant="glass">
               <CardContent className="p-6">
                 <div className="space-y-2">
@@ -277,13 +298,13 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </section>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Managed Courses - 2 columns */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="heading-3 glass-text">Managed Courses</h2>
+          <section aria-labelledby="managed-courses-heading" className="lg:col-span-2 space-y-6">
+            <h2 id="managed-courses-heading" className="heading-3 glass-text">Managed Courses</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {data.managedCourses.map((course) => (
                 <Link key={course.id} href={`/courses/${course.id}`}>
@@ -320,11 +341,11 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
                 </Link>
               ))}
             </div>
-          </div>
+          </section>
 
           {/* Unanswered Queue - 1 column */}
-          <div className="space-y-6">
-            <h2 className="heading-3 glass-text">Unanswered Queue</h2>
+          <aside aria-labelledby="unanswered-queue-heading" className="space-y-6">
+            <h2 id="unanswered-queue-heading" className="heading-3 glass-text">Unanswered Queue</h2>
             {data.unansweredQueue.length > 0 ? (
               <div className="space-y-4">
                 {data.unansweredQueue.slice(0, 5).map((thread) => (
@@ -351,9 +372,10 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
                 </div>
               </Card>
             )}
-          </div>
+          </aside>
         </div>
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 }

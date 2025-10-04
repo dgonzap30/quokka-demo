@@ -564,6 +564,15 @@
     @apply bg-[hsl(var(--status-resolved-bg))] text-[hsl(var(--status-resolved-text))] border border-[hsl(var(--status-resolved-border))];
   }
 
+  /* Status Online (for FloatingQuokka and real-time indicators) */
+  .status-online {
+    @apply bg-[hsl(122_40%_92%)] text-[hsl(122_50%_30%)] border border-[hsl(122_45%_70%)];
+  }
+
+  .dark .status-online {
+    @apply bg-[hsl(122_40%_18%)] text-[hsl(122_45%_70%)] border border-[hsl(122_40%_35%)];
+  }
+
   /* Avatar Utilities */
   .avatar-placeholder {
     @apply bg-[hsl(var(--avatar-bg))] text-[hsl(var(--avatar-text))];

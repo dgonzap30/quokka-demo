@@ -265,8 +265,54 @@
 
 ---
 
+### Dashboard QDS Audit (2025-10-04)
+
+**Research:** `research/qds-dashboard-audit.md`
+**Implementation Plan:** `plans/qds-dashboard-fixes.md`
+
+**Audit Results - 92/100 Score (Excellent):**
+
+**Critical Issues (2):**
+1. Hardcoded opacity `bg-primary/10` in FloatingQuokka avatar → Use `avatar-placeholder` token
+2. Inline style `style={{ height: "500px" }}` → Replace with `h-[500px]` class
+
+**Medium Issues (4):**
+3. Input height `h-11` not on 4pt grid → Change to `h-12` (48px)
+4. Textarea `min-h-[200px]` arbitrary → Change to `min-h-48` (192px)
+5. Missing `aria-required="true"` on required form fields → Add for accessibility
+6. Badge `bg-success/10 border-success/30` arbitrary → Create `.status-online` utility
+
+**Minor Issues (1):**
+7. Quick prompt buttons `size="sm"` (36px) → Add `min-h-[44px]` for WCAG 2.5.5
+
+**Accessibility Findings:**
+- ✅ All text contrast meets WCAG AA (4.5:1+), most achieve AAA (7:1+)
+- ✅ Focus indicators meet 3:1 contrast minimum
+- ✅ Semantic HTML used throughout
+- ✅ Keyboard navigation fully accessible
+- ⚠️ 2 touch targets below 44px minimum (covered in fixes)
+
+**Dark Mode Coverage:**
+- ✅ Comprehensive - all tokens have dark variants
+- ✅ Contrast ratios maintained in dark mode
+- ✅ Glass effects properly inverted
+
+**Performance:**
+- ✅ Glassmorphism layers controlled (8-16 per view)
+- ✅ Within performance recommendations
+- ✅ Responsive design verified at 360/768/1024/1280px
+
+**Implementation Impact:**
+- 7 className changes + 1 new CSS utility
+- No TypeScript changes
+- No logic changes
+- Projected score after fixes: 98/100
+
+---
+
 ## Changelog
 
+- `2025-10-04` | [Dashboard Audit] | QDS compliance audit complete: 92/100 score, 12 violations identified, implementation plan created
 - `2025-10-04` | [Phase 3 Complete] | ✅ Production build verified, all routes <200KB, bundle optimization successful
 - `2025-10-04` | [Phase 2 Complete] | Added animated floating gradient orbs for liquid glass aesthetic
 - `2025-10-04` | [Phase 1 Complete] | Modernized Thread Detail, Ask Question, and Quokka AI Chat pages

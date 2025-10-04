@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
+import { FocusScope } from "@radix-ui/react-focus-scope";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,9 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
   const [isThinking, setIsThinking] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const fabButtonRef = useRef<HTMLButtonElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize state from localStorage
   useEffect(() => {
@@ -75,6 +79,10 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
   // Handle minimize
   const handleMinimize = () => {
     updateState("minimized");
+    // Restore focus to FAB button after minimize
+    setTimeout(() => {
+      fabButtonRef.current?.focus();
+    }, 100);
   };
 
   // Handle dismiss
@@ -207,6 +215,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
     return (
       <div className="fixed bottom-8 right-8 z-40">
         <Button
+          ref={fabButtonRef}
           onClick={handleExpand}
           variant="glass-primary"
           size="lg"
@@ -228,17 +237,43 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
 
   // Expanded state - show chat window
   return (
-    <div className="fixed bottom-8 right-8 z-40 w-[90vw] max-w-[400px]">
-      <Card variant="glass-strong" className="flex flex-col shadow-e3" style={{ height: "500px" }}>
+    <FocusScope
+      trapped={state === "expanded"}
+      onMountAutoFocus={(e) => {
+        // Focus message input on mount
+        e.preventDefault();
+        setTimeout(() => {
+          messageInputRef.current?.focus();
+        }, 100);
+      }}
+      onUnmountAutoFocus={(e) => {
+        // Do not auto-restore focus (handled by handleMinimize)
+        e.preventDefault();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        className="fixed bottom-8 right-8 z-40 w-[90vw] max-w-[400px]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quokka-title"
+        aria-describedby="quokka-description"
+      >
+      <Card variant="glass-strong" className="flex flex-col shadow-e3 h-[500px]">
         {/* Header */}
         <CardHeader className="p-4 border-b border-[var(--border-glass)] flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full avatar-placeholder flex items-center justify-center">
               <MessageCircle className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-base glass-text">Quokka AI</CardTitle>
-              <Badge variant="outline" className="mt-1 bg-success/10 text-success border-success/30 text-xs">
+              <CardTitle id="quokka-title" className="text-base glass-text">
+                Quokka AI
+              </CardTitle>
+              <p id="quokka-description" className="sr-only">
+                AI study assistant for {courseCode}
+              </p>
+              <Badge variant="outline" className="mt-1 status-online text-xs">
                 ● Online
               </Badge>
             </div>
@@ -270,32 +305,44 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
 
         {/* Messages */}
         <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
+          <div
+            role="log"
+            aria-live="polite"
+            aria-atomic="false"
+            aria-relevant="additions"
+            aria-label="Chat message history"
+          >
+            {messages.map((message) => (
               <div
-                className={`max-w-[85%] p-3 ${
-                  message.role === "user" ? "message-user" : "message-assistant"
-                }`}
+                key={message.id}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                <p className="text-xs text-subtle mt-2">{message.timestamp.toLocaleTimeString()}</p>
-              </div>
-            </div>
-          ))}
-
-          {isThinking && (
-            <div className="flex justify-start">
-              <div className="message-assistant p-3">
-                <div className="flex items-center gap-2">
-                  <div className="animate-pulse">💭</div>
-                  <p className="text-sm">Quokka is thinking...</p>
+                <div
+                  className={`max-w-[85%] p-3 ${
+                    message.role === "user" ? "message-user" : "message-assistant"
+                  }`}
+                  aria-label={message.role === "user" ? "You said" : "Quokka said"}
+                >
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-xs text-subtle mt-2">
+                    <span className="sr-only">{message.role === "user" ? "Sent" : "Received"} at </span>
+                    {message.timestamp.toLocaleTimeString()}
+                  </p>
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+
+            {isThinking && (
+              <div className="flex justify-start" role="status" aria-live="polite">
+                <div className="message-assistant p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-pulse" aria-hidden="true">💭</div>
+                    <p className="text-sm">Quokka is thinking...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div ref={messagesEndRef} />
         </CardContent>
@@ -310,9 +357,9 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
                   <Button
                     key={prompt}
                     variant="outline"
-                    size="sm"
+                    size="default"
                     onClick={() => setInput(prompt)}
-                    className="text-xs"
+                    className="text-xs min-h-[44px]"
                   >
                     {prompt}
                   </Button>
@@ -323,6 +370,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
 
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
+              ref={messageInputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me anything..."
@@ -342,6 +390,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
           </form>
         </div>
       </Card>
-    </div>
+      </div>
+    </FocusScope>
   );
 }

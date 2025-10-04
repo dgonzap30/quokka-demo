@@ -178,8 +178,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., How does binary search work?"
-                    className="h-11 text-base"
+                    className="h-12 text-base"
                     required
+                    aria-required="true"
                     maxLength={200}
                   />
                   <p className="text-xs text-muted-foreground">
@@ -197,9 +198,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Provide a detailed description of your question. Include any relevant code, error messages, or context."
-                    rows={8}
-                    className="min-h-[200px] text-base"
+                    rows={10}
+                    className="min-h-48 text-base"
                     required
+                    aria-required="true"
                   />
                 </div>
 
@@ -213,7 +215,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="e.g., algorithms, binary-search, homework"
-                    className="h-11 text-base"
+                    className="h-12 text-base"
                   />
                   <p className="text-xs text-muted-foreground">
                     Separate tags with commas
