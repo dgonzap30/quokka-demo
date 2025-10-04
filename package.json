@@ -6,8 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint",
-    "seed": "node scripts/seed-demo.mjs"
+    "lint": "eslint"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
