@@ -1,0 +1,47 @@
+[
+  {
+    "id": "user-student-1",
+    "name": "Alice Student",
+    "email": "student@demo.com",
+    "password": "demo123",
+    "role": "student",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+    "createdAt": "2025-09-15T10:00:00Z"
+  },
+  {
+    "id": "user-instructor-1",
+    "name": "Dr. Bob Teacher",
+    "email": "instructor@demo.com",
+    "password": "demo123",
+    "role": "instructor",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
+    "createdAt": "2025-09-01T09:00:00Z"
+  },
+  {
+    "id": "user-ta-1",
+    "name": "Charlie TA",
+    "email": "ta@demo.com",
+    "password": "demo123",
+    "role": "ta",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie",
+    "createdAt": "2025-09-10T08:00:00Z"
+  },
+  {
+    "id": "user-student-2",
+    "name": "Diana Chen",
+    "email": "diana@example.com",
+    "password": "demo123",
+    "role": "student",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Diana",
+    "createdAt": "2025-09-20T11:30:00Z"
+  },
+  {
+    "id": "user-student-3",
+    "name": "Ethan Kumar",
+    "email": "ethan@example.com",
+    "password": "demo123",
+    "role": "student",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Ethan",
+    "createdAt": "2025-09-18T14:00:00Z"
+  }
+]
