@@ -8,9 +8,12 @@ import type {
   Course,
   Enrollment,
   Thread,
+  Post,
   Notification,
   CourseInsight,
   CourseMetrics,
+  CreateThreadInput,
+  CreatePostInput,
 } from "@/lib/models/types";
 
 import {
@@ -27,6 +30,11 @@ import {
   getThreads,
   getThreadsByCourse,
   getThreadById,
+  addThread,
+  updateThread,
+  getPosts,
+  getPostsByThread,
+  addPost,
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
@@ -381,5 +389,83 @@ export const api = {
     seedData();
 
     markAllNotificationsRead(userId, courseId);
+  },
+
+  // ============================================
+  // Thread API Methods
+  // ============================================
+
+  /**
+   * Get thread by ID with posts
+   */
+  async getThread(threadId: string): Promise<{ thread: Thread; posts: Post[] } | null> {
+    await delay();
+    seedData();
+
+    const thread = getThreadById(threadId);
+    if (!thread) return null;
+
+    const posts = getPostsByThread(threadId);
+
+    // Increment view count
+    updateThread(threadId, { views: thread.views + 1 });
+
+    return {
+      thread: { ...thread, views: thread.views + 1 },
+      posts: posts.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      ),
+    };
+  },
+
+  /**
+   * Create new thread
+   */
+  async createThread(input: CreateThreadInput, authorId: string): Promise<Thread> {
+    await delay(400 + Math.random() * 200); // 400-600ms
+    seedData();
+
+    const newThread: Thread = {
+      id: `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      courseId: input.courseId,
+      title: input.title,
+      content: input.content,
+      authorId,
+      status: "open",
+      tags: input.tags || [],
+      views: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    addThread(newThread);
+    return newThread;
+  },
+
+  /**
+   * Create new post/reply
+   */
+  async createPost(input: CreatePostInput, authorId: string): Promise<Post> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    const newPost: Post = {
+      id: `post-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      threadId: input.threadId,
+      authorId,
+      content: input.content,
+      endorsed: false,
+      flagged: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    addPost(newPost);
+
+    // Update thread's updatedAt timestamp
+    updateThread(input.threadId, { updatedAt: new Date().toISOString() });
+
+    return newPost;
   },
 };

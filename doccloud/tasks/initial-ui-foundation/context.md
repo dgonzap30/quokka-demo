@@ -130,6 +130,7 @@
 2. **Integration complexity** - Auth, courses, threads, AI need to work together
 3. **Mock data consistency** - Need deterministic seed data across all features
 4. **Performance** - Multiple data layers could impact bundle size
+5. **Styling polish** - QDS v2.0 glassmorphism needs significant refinement for production quality
 
 **Rollback:**
 - All routes are additive (won't break existing pages)

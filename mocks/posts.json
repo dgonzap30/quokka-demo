@@ -1,0 +1,52 @@
+[
+  {
+    "id": "post-1",
+    "threadId": "thread-1",
+    "authorId": "user-ta-1",
+    "content": "Binary search works by repeatedly dividing a sorted array in half. Here's how:\n\n1. Start with the middle element\n2. If it matches your target, you're done!\n3. If target is smaller, search the left half\n4. If target is larger, search the right half\n5. Repeat until found or array is empty\n\nTime complexity: O(log n) - much faster than linear search!",
+    "endorsed": true,
+    "flagged": false,
+    "createdAt": "2025-10-01T11:00:00Z",
+    "updatedAt": "2025-10-01T11:00:00Z"
+  },
+  {
+    "id": "post-2",
+    "threadId": "thread-1",
+    "authorId": "user-student-2",
+    "content": "Thanks! That makes sense. So it only works on sorted arrays, right?",
+    "endorsed": false,
+    "flagged": false,
+    "createdAt": "2025-10-01T12:30:00Z",
+    "updatedAt": "2025-10-01T12:30:00Z"
+  },
+  {
+    "id": "post-3",
+    "threadId": "thread-1",
+    "authorId": "user-instructor-1",
+    "content": "Exactly! Binary search requires the array to be sorted first. If your data isn't sorted, you'd need to sort it first (O(n log n)) or use linear search (O(n)).",
+    "endorsed": true,
+    "flagged": false,
+    "createdAt": "2025-10-01T14:20:00Z",
+    "updatedAt": "2025-10-01T14:20:00Z"
+  },
+  {
+    "id": "post-4",
+    "threadId": "thread-2",
+    "authorId": "user-ta-1",
+    "content": "Great question! Here are the key differences:\n\n**Arrays:**\n- Fixed size (in most languages)\n- O(1) random access by index\n- O(n) insertion/deletion (need to shift elements)\n- Contiguous memory\n\n**Linked Lists:**\n- Dynamic size\n- O(n) access by index (must traverse)\n- O(1) insertion/deletion at known position\n- Non-contiguous memory\n\nUse arrays when you need fast lookups, linked lists when you need frequent insertions/deletions.",
+    "endorsed": true,
+    "flagged": false,
+    "createdAt": "2025-09-28T10:00:00Z",
+    "updatedAt": "2025-09-28T10:00:00Z"
+  },
+  {
+    "id": "post-5",
+    "threadId": "thread-4",
+    "authorId": "user-instructor-1",
+    "content": "For integration by parts, remember the LIATE rule for choosing u:\n\nL - Logarithmic\nI - Inverse trig\nA - Algebraic\nT - Trigonometric\nE - Exponential\n\nPick u from higher on this list. For problem 3.4, you have x² · e^x, so u = x² (algebraic) and dv = e^x dx (exponential).",
+    "endorsed": true,
+    "flagged": false,
+    "createdAt": "2025-10-02T17:00:00Z",
+    "updatedAt": "2025-10-02T17:00:00Z"
+  }
+]

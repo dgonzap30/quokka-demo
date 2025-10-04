@@ -7,9 +7,12 @@ import type {
   AuthSession,
   Course,
   Thread,
+  Post,
   Notification,
   CourseMetrics,
   CourseInsight,
+  CreateThreadInput,
+  CreatePostInput,
 } from "@/lib/models/types";
 import { api } from "./client";
 import { isAuthSuccess } from "@/lib/models/types";
@@ -27,6 +30,7 @@ const queryKeys = {
   courseThreads: (courseId: string) => ["courseThreads", courseId] as const,
   courseMetrics: (courseId: string) => ["courseMetrics", courseId] as const,
   courseInsights: (courseId: string) => ["courseInsights", courseId] as const,
+  thread: (threadId: string) => ["thread", threadId] as const,
   notifications: (userId: string, courseId?: string) =>
     courseId ? ["notifications", userId, courseId] as const : ["notifications", userId] as const,
 };
@@ -243,6 +247,55 @@ export function useMarkAllNotificationsRead() {
     onSuccess: () => {
       // Invalidate all notification queries
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+// ============================================
+// Thread Hooks
+// ============================================
+
+/**
+ * Get thread by ID with posts
+ */
+export function useThread(threadId: string | undefined) {
+  return useQuery({
+    queryKey: threadId ? queryKeys.thread(threadId) : ["thread"],
+    queryFn: () => (threadId ? api.getThread(threadId) : Promise.resolve(null)),
+    enabled: !!threadId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Create new thread mutation
+ */
+export function useCreateThread() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ input, authorId }: { input: CreateThreadInput; authorId: string }) =>
+      api.createThread(input, authorId),
+    onSuccess: (newThread) => {
+      // Invalidate course threads query
+      queryClient.invalidateQueries({ queryKey: queryKeys.courseThreads(newThread.courseId) });
+    },
+  });
+}
+
+/**
+ * Create new post mutation
+ */
+export function useCreatePost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ input, authorId }: { input: CreatePostInput; authorId: string }) =>
+      api.createPost(input, authorId),
+    onSuccess: (newPost) => {
+      // Invalidate thread query to refetch with new post
+      queryClient.invalidateQueries({ queryKey: queryKeys.thread(newPost.threadId) });
     },
   });
 }

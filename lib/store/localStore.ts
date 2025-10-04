@@ -1,4 +1,4 @@
-import type { User, AuthSession, Course, Enrollment, Thread, Notification } from "@/lib/models/types";
+import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post } from "@/lib/models/types";
 
 const KEYS = {
   users: "quokkaq.users",
@@ -6,6 +6,7 @@ const KEYS = {
   courses: "quokkaq.courses",
   enrollments: "quokkaq.enrollments",
   threads: "quokkaq.threads",
+  posts: "quokkaq.posts",
   notifications: "quokkaq.notifications",
   initialized: "quokkaq.initialized",
 } as const;
@@ -28,11 +29,13 @@ export function seedData(): void {
     const courses = require("@/mocks/courses.json") as Course[];
     const enrollments = require("@/mocks/enrollments.json") as Enrollment[];
     const threads = require("@/mocks/threads.json") as Thread[];
+    const posts = require("@/mocks/posts.json") as Post[];
 
     localStorage.setItem(KEYS.users, JSON.stringify(users));
     localStorage.setItem(KEYS.courses, JSON.stringify(courses));
     localStorage.setItem(KEYS.enrollments, JSON.stringify(enrollments));
     localStorage.setItem(KEYS.threads, JSON.stringify(threads));
+    localStorage.setItem(KEYS.posts, JSON.stringify(posts));
     localStorage.setItem(KEYS.notifications, JSON.stringify([])); // Empty notifications initially
     localStorage.setItem(KEYS.initialized, "true");
   } catch (error) {
@@ -231,6 +234,71 @@ export function getThreadsByCourse(courseId: string): Thread[] {
 export function getThreadById(id: string): Thread | null {
   const threads = getThreads();
   return threads.find((t) => t.id === id) ?? null;
+}
+
+/**
+ * Add new thread
+ */
+export function addThread(thread: Thread): void {
+  if (typeof window === "undefined") return;
+
+  const threads = getThreads();
+  threads.push(thread);
+  localStorage.setItem(KEYS.threads, JSON.stringify(threads));
+}
+
+/**
+ * Update thread
+ */
+export function updateThread(threadId: string, updates: Partial<Thread>): void {
+  if (typeof window === "undefined") return;
+
+  const threads = getThreads();
+  const thread = threads.find((t) => t.id === threadId);
+
+  if (thread) {
+    Object.assign(thread, updates);
+    localStorage.setItem(KEYS.threads, JSON.stringify(threads));
+  }
+}
+
+// ============================================
+// Post Data Access
+// ============================================
+
+/**
+ * Get all posts
+ */
+export function getPosts(): Post[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.posts);
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data) as Post[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get posts by thread ID
+ */
+export function getPostsByThread(threadId: string): Post[] {
+  const posts = getPosts();
+  return posts.filter((p) => p.threadId === threadId);
+}
+
+/**
+ * Add new post
+ */
+export function addPost(post: Post): void {
+  if (typeof window === "undefined") return;
+
+  const posts = getPosts();
+  posts.push(post);
+  localStorage.setItem(KEYS.posts, JSON.stringify(posts));
 }
 
 // ============================================

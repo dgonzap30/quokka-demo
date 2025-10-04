@@ -207,3 +207,21 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * Input for creating a new thread
+ */
+export interface CreateThreadInput {
+  courseId: string;
+  title: string;
+  content: string;
+  tags?: string[];
+}
+
+/**
+ * Input for creating a new post/reply
+ */
+export interface CreatePostInput {
+  threadId: string;
+  content: string;
+}
