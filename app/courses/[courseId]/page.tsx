@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FloatingQuokka } from "@/components/course/floating-quokka";
 import type { Thread } from "@/lib/models/types";
 
 export default function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
@@ -26,12 +27,15 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   if (userLoading || courseLoading || threadsLoading) {
     return (
       <div className="min-h-screen p-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <Skeleton className="h-12 w-96" />
-          <Skeleton className="h-24 w-full" />
+        <div className="container-wide space-y-12">
           <div className="space-y-4">
+            <Skeleton className="h-6 w-32 bg-glass-medium rounded-lg" />
+            <Skeleton className="h-16 w-96 bg-glass-medium rounded-lg" />
+            <Skeleton className="h-8 w-full max-w-2xl bg-glass-medium rounded-lg" />
+          </div>
+          <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32" />
+              <Skeleton key={i} className="h-40 bg-glass-medium rounded-xl" />
             ))}
           </div>
         </div>
@@ -41,83 +45,105 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
 
   if (!course) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card variant="glass">
-          <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">Course not found</p>
-          </CardContent>
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <Card variant="glass" className="p-16 text-center">
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="flex justify-center">
+              <div className="text-6xl opacity-50">🔍</div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold">Course Not Found</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                The course you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
+              </p>
+            </div>
+            <Link href="/courses">
+              <Button variant="glass-primary" size="lg">
+                Back to Courses
+              </Button>
+            </Link>
+          </div>
         </Card>
       </div>
     );
   }
 
-  const getStatusBadge = (status: Thread["status"]) => {
+  const getStatusClass = (status: Thread["status"]) => {
     const variants = {
-      open: "bg-warning/20 text-warning",
-      answered: "bg-accent/20 text-accent",
-      resolved: "bg-success/20 text-success",
+      open: "status-open",
+      answered: "status-answered",
+      resolved: "status-resolved",
     };
     return variants[status] || variants.open;
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Link href="/courses" className="hover:text-accent">
+    <div className="min-h-screen p-8 md:p-12">
+      <div className="container-wide space-y-12">
+        {/* Breadcrumb & Header */}
+        <div className="space-y-8">
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
+            <Link href="/courses" className="hover:text-accent transition-colors">
               Courses
             </Link>
             <span>/</span>
-            <span>{course.code}</span>
-          </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-primary glass-text">{course.name}</h1>
-              <p className="text-muted-foreground mt-2">{course.description}</p>
-              <div className="flex gap-4 mt-4 text-sm text-muted-foreground">
-                <span>{course.term}</span>
+            <span className="text-foreground">{course.code}</span>
+          </nav>
+
+          {/* Course Hero */}
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+            <div className="flex-1 space-y-4">
+              <h1 className="heading-2 glass-text">{course.name}</h1>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
+                {course.description}
+              </p>
+              <div className="flex items-center gap-6 text-sm text-subtle">
+                <span className="font-medium">{course.term}</span>
                 <span>•</span>
-                <span>{course.enrollmentCount} students</span>
+                <span>{course.enrollmentCount} students enrolled</span>
               </div>
             </div>
             <Link href={`/ask?courseId=${courseId}`}>
-              <Button variant="glass-primary">Ask Question</Button>
+              <Button variant="glass-primary" size="lg">
+                Ask Question
+              </Button>
             </Link>
           </div>
         </div>
 
-        {/* Threads List */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Discussion Threads</h2>
+        {/* Threads Section */}
+        <div className="space-y-6">
+          <h2 className="heading-3 glass-text">Discussion Threads</h2>
+
           {threads && threads.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {threads.map((thread) => (
                 <Link key={thread.id} href={`/threads/${thread.id}`}>
-                  <Card variant="glass-hover" className="transition-all duration-200">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{thread.title}</CardTitle>
-                          <CardDescription className="mt-2 line-clamp-2">
+                  <Card variant="glass-hover">
+                    <CardHeader className="p-8">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <CardTitle className="text-xl md:text-2xl glass-text leading-snug">
+                            {thread.title}
+                          </CardTitle>
+                          <CardDescription className="text-base leading-relaxed line-clamp-2">
                             {thread.content}
                           </CardDescription>
                         </div>
-                        <Badge className={getStatusBadge(thread.status)}>
+                        <Badge className={getStatusClass(thread.status)}>
                           {thread.status}
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <CardContent className="p-8 pt-0">
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-subtle">
                         <span>{thread.views} views</span>
                         <span>•</span>
                         <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
                         {thread.tags && thread.tags.length > 0 && (
                           <>
                             <span>•</span>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               {thread.tags.slice(0, 3).map((tag) => (
                                 <Badge key={tag} variant="outline" className="text-xs">
                                   {tag}
@@ -133,18 +159,33 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
               ))}
             </div>
           ) : (
-            <Card variant="glass" className="p-12 text-center">
-              <p className="text-muted-foreground">
-                No threads yet. Be the first to ask a question!
-              </p>
-              <Link href={`/ask?courseId=${courseId}`}>
-                <Button variant="glass-primary" className="mt-4">
-                  Ask Question
-                </Button>
-              </Link>
+            <Card variant="glass" className="p-16 text-center">
+              <div className="max-w-md mx-auto space-y-6">
+                <div className="flex justify-center">
+                  <div className="text-6xl opacity-50">💬</div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold">No Threads Yet</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Be the first to start a discussion in this course!
+                  </p>
+                </div>
+                <Link href={`/ask?courseId=${courseId}`}>
+                  <Button variant="glass-primary" size="lg">
+                    Ask First Question
+                  </Button>
+                </Link>
+              </div>
             </Card>
           )}
         </div>
+
+        {/* Floating Quokka AI Agent */}
+        <FloatingQuokka
+          courseId={course.id}
+          courseName={course.name}
+          courseCode={course.code}
+        />
       </div>
     </div>
   );
