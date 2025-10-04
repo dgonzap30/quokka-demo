@@ -289,6 +289,25 @@
   --chart-4: #96B380; /* Olive 300 */
   --chart-5: #86A9F6; /* Sky 300 */
 
+  /* ===== Status Badges ===== */
+  --status-open-bg: 38 60% 92%;           /* warning/20 equivalent */
+  --status-open-text: 38 95% 40%;         /* warning dark */
+  --status-open-border: 38 80% 75%;       /* warning light */
+
+  --status-answered-bg: 217 65% 92%;      /* accent/20 equivalent */
+  --status-answered-text: 217 75% 45%;    /* accent dark */
+  --status-answered-border: 217 70% 75%;  /* accent light */
+
+  --status-resolved-bg: 122 40% 92%;      /* success/20 equivalent */
+  --status-resolved-text: 122 50% 30%;    /* success dark */
+  --status-resolved-border: 122 45% 70%;  /* success light */
+
+  /* ===== Avatar & UI Elements ===== */
+  --avatar-bg: 35 40% 92%;                /* primary/20 equivalent */
+  --avatar-text: 35 45% 35%;              /* primary dark */
+
+  --text-subtle: 35 8% 55%;               /* opacity-60 replacement */
+
   /* ===== Sidebar ===== */
   --sidebar: var(--surface-2);
   --sidebar-foreground: var(--text);
@@ -391,6 +410,25 @@
   --chart-4: #5E7D4A; /* Olive 500 */
   --chart-5: #2D6CDF; /* Sky 500 */
 
+  /* ===== Status Badges (Dark) ===== */
+  --status-open-bg: 38 50% 18%;           /* warning dark bg */
+  --status-open-text: 38 85% 70%;         /* warning light text */
+  --status-open-border: 38 60% 35%;       /* warning dark border */
+
+  --status-answered-bg: 217 55% 20%;      /* accent dark bg */
+  --status-answered-text: 217 75% 75%;    /* accent light text */
+  --status-answered-border: 217 60% 40%;  /* accent dark border */
+
+  --status-resolved-bg: 122 40% 18%;      /* success dark bg */
+  --status-resolved-text: 122 45% 70%;    /* success light text */
+  --status-resolved-border: 122 40% 35%;  /* success dark border */
+
+  /* ===== Avatar & UI Elements (Dark) ===== */
+  --avatar-bg: 35 30% 22%;                /* primary dark bg */
+  --avatar-text: 35 35% 65%;              /* primary light text */
+
+  --text-subtle: 35 10% 65%;              /* subtle text for dark */
+
   /* ===== Sidebar (Dark) ===== */
   --sidebar: var(--surface);
   --sidebar-foreground: var(--text);
@@ -409,6 +447,24 @@
 
   *:focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+    box-shadow: 0 0 0 4px rgba(45, 108, 223, 0.3);
+  }
+
+  .dark *:focus-visible {
+    box-shadow: 0 0 0 4px rgba(134, 169, 246, 0.4);
+  }
+
+  /* Enhanced focus for glass backgrounds */
+  .glass-panel *:focus-visible,
+  .glass-panel-strong *:focus-visible,
+  .glass-overlay *:focus-visible {
+    box-shadow: 0 0 0 4px rgba(45, 108, 223, 0.5);
+  }
+
+  .dark .glass-panel *:focus-visible,
+  .dark .glass-panel-strong *:focus-visible,
+  .dark .glass-overlay *:focus-visible {
+    box-shadow: 0 0 0 4px rgba(134, 169, 246, 0.6);
   }
 
   body {
@@ -436,6 +492,95 @@
 
   .generous-spacing {
     @apply space-y-8;
+  }
+
+  /* Glass Text Shadow for Readability */
+  .glass-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .glass-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Typography Hierarchy Utilities */
+  .heading-1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight;
+  }
+
+  .heading-2 {
+    @apply text-3xl md:text-4xl font-bold leading-tight;
+  }
+
+  .heading-3 {
+    @apply text-2xl md:text-3xl font-bold leading-snug;
+  }
+
+  .heading-4 {
+    @apply text-xl md:text-2xl font-semibold leading-snug;
+  }
+
+  .heading-5 {
+    @apply text-lg md:text-xl font-semibold leading-normal;
+  }
+
+  /* Hero Section Utilities */
+  .hero-title {
+    @apply text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .hero-title {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-subtitle {
+    @apply text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed;
+  }
+
+  /* Container Utilities */
+  .container-narrow {
+    @apply max-w-4xl mx-auto;
+  }
+
+  .container-wide {
+    @apply max-w-6xl mx-auto;
+  }
+
+  .container-full {
+    @apply max-w-7xl mx-auto;
+  }
+
+  /* Status Badge Utilities */
+  .status-open {
+    @apply bg-[hsl(var(--status-open-bg))] text-[hsl(var(--status-open-text))] border border-[hsl(var(--status-open-border))];
+  }
+
+  .status-answered {
+    @apply bg-[hsl(var(--status-answered-bg))] text-[hsl(var(--status-answered-text))] border border-[hsl(var(--status-answered-border))];
+  }
+
+  .status-resolved {
+    @apply bg-[hsl(var(--status-resolved-bg))] text-[hsl(var(--status-resolved-text))] border border-[hsl(var(--status-resolved-border))];
+  }
+
+  /* Avatar Utilities */
+  .avatar-placeholder {
+    @apply bg-[hsl(var(--avatar-bg))] text-[hsl(var(--avatar-text))];
+  }
+
+  /* Message Bubble Utilities */
+  .message-user {
+    @apply backdrop-blur-md bg-accent/90 text-accent-foreground border border-accent/30 shadow-[var(--shadow-glass-sm)] rounded-2xl;
+  }
+
+  .message-assistant {
+    @apply backdrop-blur-md bg-glass-strong border border-[var(--border-glass)] shadow-[var(--shadow-glass-sm)] text-foreground rounded-2xl;
+  }
+
+  /* Text Utilities */
+  .text-subtle {
+    @apply text-[hsl(var(--text-subtle))];
   }
 }
 
@@ -549,10 +694,16 @@
               var(--liquid-gradient-2) border-box;
 }
 
-/* Glass text shadow for readability */
+/* Stronger shadow for glass-strong backgrounds */
 @supports (backdrop-filter: blur(1px)) {
-  .glass-text {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  .glass-panel-strong .glass-text,
+  .glass-strong .glass-text {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+
+  .dark .glass-panel-strong .glass-text,
+  .dark .glass-strong .glass-text {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 }
 

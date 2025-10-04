@@ -26,7 +26,6 @@ import {
   setAuthSession,
   clearAuthSession,
   getUserByEmail,
-  getUserById,
   validateCredentials,
   createUser,
   getCourses,
@@ -614,7 +613,6 @@ export const api = {
 
     const allCourses = getCourses();
     const allThreads = getThreads();
-    const allPosts = getPosts();
     const users = getUsers();
 
     // Get courses where user is instructor

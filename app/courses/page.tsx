@@ -2,7 +2,6 @@
 
 import { useCurrentUser, useUserCourses } from "@/lib/api/hooks";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,11 +20,14 @@ export default function CoursesPage() {
   if (userLoading || coursesLoading) {
     return (
       <div className="min-h-screen p-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <Skeleton className="h-12 w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="container-wide space-y-12">
+          <div className="space-y-4">
+            <Skeleton className="h-16 w-96 bg-glass-medium rounded-lg" />
+            <Skeleton className="h-8 w-64 bg-glass-medium rounded-lg" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48" />
+              <Skeleton key={i} className="h-56 bg-glass-medium rounded-xl" />
             ))}
           </div>
         </div>
@@ -34,42 +36,37 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-primary glass-text">My Courses</h1>
-            <p className="text-muted-foreground mt-2">
-              Welcome back, {user?.name}!
+    <div className="min-h-screen p-8 md:p-12">
+      <div className="container-wide space-y-12">
+        {/* Hero Section */}
+        <div className="py-8 md:py-12 space-y-6">
+          <div className="space-y-4">
+            <h1 className="heading-2 glass-text">My Courses</h1>
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+              Welcome back, {user?.name}! Select a course to view discussions and ask questions.
             </p>
           </div>
-          <Button variant="glass-primary" onClick={() => router.push("/login")} className="hidden">
-            Logout
-          </Button>
         </div>
 
         {/* Course Grid */}
         {courses && courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {courses.map((course) => (
               <Link key={course.id} href={`/courses/${course.id}`}>
-                <Card variant="glass-hover" className="h-full transition-all duration-200">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl">{course.code}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {course.name}
-                        </CardDescription>
-                      </div>
+                <Card variant="glass-hover" className="h-full">
+                  <CardHeader className="p-8">
+                    <div className="space-y-3">
+                      <CardTitle className="text-2xl glass-text">{course.code}</CardTitle>
+                      <CardDescription className="text-base leading-relaxed">
+                        {course.name}
+                      </CardDescription>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
+                  <CardContent className="p-8 pt-0">
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-6">
                       {course.description}
                     </p>
-                    <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4 text-xs text-subtle">
                       <span>{course.term}</span>
                       <span>•</span>
                       <span>{course.enrollmentCount} students</span>
@@ -80,10 +77,18 @@ export default function CoursesPage() {
             ))}
           </div>
         ) : (
-          <Card variant="glass" className="p-12 text-center">
-            <p className="text-muted-foreground">
-              No courses found. You&apos;re not enrolled in any courses yet.
-            </p>
+          <Card variant="glass" className="p-16 text-center">
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="flex justify-center">
+                <div className="text-6xl opacity-50">📚</div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">No Courses Yet</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  You&apos;re not enrolled in any courses yet. Check back after enrolling in a course.
+                </p>
+              </div>
+            </div>
           </Card>
         )}
       </div>

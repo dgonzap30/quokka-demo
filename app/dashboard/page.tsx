@@ -60,7 +60,7 @@ export default function DashboardPage() {
   }
 
   if ((user.role === "instructor" || user.role === "ta") && instructorData) {
-    return <InstructorDashboard data={instructorData} user={user} />;
+    return <InstructorDashboard data={instructorData} />;
   }
 
   return null;
@@ -176,7 +176,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
                   <div className="text-5xl opacity-50">📚</div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">No Courses Yet</h3>
-                    <p className="text-muted-foreground">You're not enrolled in any courses</p>
+                    <p className="text-muted-foreground">You&apos;re not enrolled in any courses</p>
                   </div>
                 </div>
               </Card>
@@ -229,7 +229,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
 
 import type { InstructorDashboardData } from "@/lib/models/types";
 
-function InstructorDashboard({ data, user }: { data: InstructorDashboardData; user: User }) {
+function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
   return (
     <div className="min-h-screen p-8 md:p-12">
       <div className="container-wide space-y-12">
