@@ -82,7 +82,7 @@ export default function CoursesPage() {
         ) : (
           <Card variant="glass" className="p-12 text-center">
             <p className="text-muted-foreground">
-              No courses found. You're not enrolled in any courses yet.
+              No courses found. You&apos;re not enrolled in any courses yet.
             </p>
           </Card>
         )}

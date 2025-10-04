@@ -215,7 +215,7 @@ export default function QuokkaPage() {
           <CardContent className="p-4 text-sm text-muted-foreground">
             <p className="font-semibold mb-2">💡 Tips:</p>
             <ul className="space-y-1 list-disc list-inside">
-              <li>I'm best at CS and Math topics</li>
+              <li>I&apos;m best at CS and Math topics</li>
               <li>For complex questions, consider posting a thread for peer/instructor help</li>
               <li>I use keyword matching - be specific in your questions!</li>
             </ul>

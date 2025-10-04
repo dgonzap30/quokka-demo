@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
-import type { Post } from "@/lib/models/types";
 
 export default function ThreadDetailPage({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = use(params);

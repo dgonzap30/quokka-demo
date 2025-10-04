@@ -1,5 +1,11 @@
 import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post } from "@/lib/models/types";
 
+import usersData from "@/mocks/users.json";
+import coursesData from "@/mocks/courses.json";
+import enrollmentsData from "@/mocks/enrollments.json";
+import threadsData from "@/mocks/threads.json";
+import postsData from "@/mocks/posts.json";
+
 const KEYS = {
   users: "quokkaq.users",
   authSession: "quokkaq.authSession",
@@ -25,11 +31,11 @@ export function seedData(): void {
   if (initialized) return; // Already seeded
 
   try {
-    const users = require("@/mocks/users.json") as User[];
-    const courses = require("@/mocks/courses.json") as Course[];
-    const enrollments = require("@/mocks/enrollments.json") as Enrollment[];
-    const threads = require("@/mocks/threads.json") as Thread[];
-    const posts = require("@/mocks/posts.json") as Post[];
+    const users = usersData as User[];
+    const courses = coursesData as Course[];
+    const enrollments = enrollmentsData as Enrollment[];
+    const threads = threadsData as Thread[];
+    const posts = postsData as Post[];
 
     localStorage.setItem(KEYS.users, JSON.stringify(users));
     localStorage.setItem(KEYS.courses, JSON.stringify(courses));

@@ -1,16 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  User,
   LoginInput,
   SignupInput,
   AuthResult,
-  AuthSession,
-  Course,
-  Thread,
-  Post,
-  Notification,
-  CourseMetrics,
-  CourseInsight,
   CreateThreadInput,
   CreatePostInput,
 } from "@/lib/models/types";
