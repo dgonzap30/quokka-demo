@@ -22,19 +22,19 @@
 - LTI integration
 
 **Done When:**
-- [ ] Users can login/signup with mock authentication
-- [ ] Course dashboard displays enrolled courses with glass styling
-- [ ] Thread list shows Q&A threads filtered by course
-- [ ] Thread detail shows full conversation with replies
-- [ ] Users can create new threads via Ask page
-- [ ] Users can reply to existing threads
-- [ ] Quokka AI chat responds to questions with mock responses
-- [ ] All UI follows QDS v2.0 glassmorphism design system
-- [ ] All routes render without console errors in prod build
-- [ ] a11y: keyboard nav + focus ring visible + AA contrast
-- [ ] Responsive at 360/768/1024/1280
-- [ ] Types pass (`npx tsc --noEmit`)
-- [ ] Lint clean (`npm run lint`)
+- [x] Users can login/signup with mock authentication
+- [x] Course dashboard displays enrolled courses with glass styling
+- [x] Thread list shows Q&A threads filtered by course
+- [x] Thread detail shows full conversation with replies
+- [x] Users can create new threads via Ask page
+- [x] Users can reply to existing threads
+- [x] Quokka AI chat responds to questions with mock responses
+- [x] All UI follows QDS v2.0 glassmorphism design system
+- [x] All routes render without console errors in prod build
+- [x] a11y: keyboard nav + focus ring visible + AA contrast
+- [x] Responsive at 360/768/1024/1280
+- [x] Types pass (`npx tsc --noEmit`)
+- [x] Lint clean (`npm run lint`)
 - [ ] Demo script updated (README section)
 
 ---
@@ -156,20 +156,22 @@
 ## TODO
 
 - [x] Create task context and folder structure
-- [ ] Launch agents for authentication planning
-- [ ] Implement authentication system
-- [ ] Implement course dashboard (use existing plans)
-- [ ] Launch agents for thread view planning
-- [ ] Implement thread views
-- [ ] Launch agents for AI Quokka planning
-- [ ] Implement AI Quokka
-- [ ] Integration and quality checks
+- [x] Launch agents for authentication planning
+- [x] Implement authentication system
+- [x] Implement course dashboard (use existing plans)
+- [x] Launch agents for thread view planning
+- [x] Implement thread views
+- [x] Launch agents for AI Quokka planning (skipped - simple keyword matching)
+- [x] Implement AI Quokka
+- [x] Integration and quality checks
 - [ ] Final verification and documentation
 
 ---
 
 ## Changelog
 
+- `2025-10-04` | [QA & Bug Fixes] | Fixed lint errors (unescaped apostrophes, require() imports), added Suspense boundary for useSearchParams, verified all routes build successfully under 200KB, all type checks pass
+- `2025-10-04` | [AI Quokka] | Implemented AI chat page with keyword-based responses for CS/Math topics, added navigation header with logout, integrated into app layout
 - `2025-10-04` | [Thread Views] | Implemented thread/post types, API methods, React Query hooks; created course detail page (thread list), thread detail page (with replies), and Ask page (create new threads)
 - `2025-10-04` | [Course Dashboard] | Implemented course data layer (types, API, hooks), created courses page with glass cards, updated home page to redirect based on auth state
 - `2025-10-04` | [Auth Data Layer] | Implemented authentication types, API client, React Query hooks, and localStorage persistence
