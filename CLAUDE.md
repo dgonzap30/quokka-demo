@@ -91,6 +91,7 @@ doccloud/tasks/
 
 2. **Research Plans (Sub-Agents - Optional)**
    - UI Planner: `plans/ui-plan.md` + `research/ui-sources.md`
+     - **Tools Available**: Playwright MCP for browser automation, visual testing, and UI verification
    - AI SDK Planner: `plans/ai-sdk-plan.md` + `research/ai-notes.md`
    - Data/API Planner: `plans/api-plan.md` + `research/api-notes.md`
    - Each updates **Decisions** in `context.md` with 5 lines + file paths
