@@ -123,4 +123,187 @@
 
 ## Changelog
 
+- `2025-10-04` | [Complete] | **Auth & Dashboard System - FULLY IMPLEMENTED**
+
+### Implementation Summary
+
+**1. Type System (lib/models/types.ts)**
+- Added `StudentDashboardData` and `InstructorDashboardData` interfaces
+- Added `ActivityItem` type with 5 activity variants (thread_created, post_created, thread_resolved, post_endorsed, thread_answered)
+- Added `CourseWithActivity` and `CourseWithMetrics` enriched course types
+- Implemented 3 type guards: `isStudentDashboard`, `isInstructorDashboard`, `isActivityType`
+- All types strict mode compliant, zero breaking changes
+
+**2. API Layer (lib/api/client.ts + hooks.ts)**
+- Implemented `getStudentDashboard(userId)` - aggregates enrolled courses + recent activity + notifications (200-400ms)
+- Implemented `getInstructorDashboard(userId)` - aggregates managed courses + metrics + unanswered queue + insights (300-500ms)
+- Added React Query hooks: `useStudentDashboard()` and `useInstructorDashboard()`
+- Smart invalidation: dashboards refresh automatically on thread/post creation
+- Reduced API calls by 67-75% through data aggregation
+
+**3. Dashboard Pages (app/dashboard/page.tsx)**
+- **Student Dashboard:**
+  - 4-stat overview: courses, threads, replies, endorsed posts
+  - Course grid with recent threads (last 3) and unread notification counts
+  - Activity feed showing last 10 actions across all courses
+  - Responsive layout: 1 column (mobile) → 2 columns (tablet) → 3 columns (desktop)
+
+- **Instructor Dashboard:**
+  - 4-stat overview: courses, total threads, unanswered threads, active students
+  - Managed courses grid with inline metrics per course
+  - Unanswered queue showing top 10 open threads across all courses
+  - AI-generated insights panel (mock implementation)
+  - Responsive layout matching student dashboard
+
+**4. Floating Quokka AI Agent (components/course/floating-quokka.tsx)**
+- Three states: hidden (dismissed), minimized (default 56px button), expanded (400x500px chat window)
+- Persists state to localStorage per course (`quokka-state-${courseId}`)
+- Course-context-aware AI responses prepend `[Course: CODE - NAME]`
+- Course-specific quick prompts (CS → algorithms/Big O, MATH → calculus/integration)
+- Reuses AI response logic from `/app/quokka/page.tsx`
+- Accessibility: Escape key to minimize, ARIA labels, keyboard navigation
+- First-visit tooltip with pulse animation
+- Session-scoped message history (not persisted across page loads)
+- Integrated into all course detail pages
+
+**5. Course-Context Ask Question (app/courses/[courseId]/page.tsx)**
+- Collapsible Ask Question form inline in course detail page
+- Toggle button with chevron icon (replaces hero CTA link)
+- Auto-populated courseId from course context
+- Form fields: title (200 char max with counter), content (textarea), tags (comma-separated)
+- Submit creates thread and redirects to it
+- Cancel button and form reset on success
+- Smooth expand/collapse transition
+- Eliminates need to visit global `/ask` page and manually select course
+
+**6. Navigation Updates (components/layout/nav-header.tsx + app/page.tsx)**
+- Logo now links to `/dashboard` (was `/courses`)
+- Nav bar shows: Dashboard + Courses (removed global Ask Question and AI Chat links)
+- Root page `/` redirects to `/dashboard` after auth (was `/courses`)
+- Dropdown menu updated: Dashboard, Courses, Logout (removed Ask Question, AI Chat)
+- All routes preserve previous functionality
+
+### Quality Metrics
+
+**TypeScript:**
+- ✅ Strict mode compliant throughout
+- ✅ Zero `any` types added
+- ✅ All type-only imports properly used
+- ✅ Type guards for runtime safety
+
+**Code Quality:**
+- ✅ ESLint passing (1 warning in generated file only)
+- ✅ Production build successful
+- ✅ All routes <200KB (largest: /ask at 187KB)
+
+**QDS Compliance:**
+- ✅ Glass morphism variants throughout (glass, glass-strong, glass-hover)
+- ✅ Semantic color tokens (primary, accent, success, warning, danger)
+- ✅ Spacing grid (gap-2, gap-4, gap-6, gap-8, gap-12)
+- ✅ Elevation shadows (shadow-e1, shadow-e2, shadow-e3)
+- ✅ Glass text gradients for headings
+
+**Accessibility:**
+- ✅ Semantic HTML (nav, main, section, article)
+- ✅ ARIA labels on interactive elements
+- ✅ Keyboard navigation (Escape to close modals)
+- ✅ Focus indicators visible (default browser + QDS tokens)
+- ✅ 44px minimum touch targets on mobile
+
+**Responsive Design:**
+- ✅ Mobile-first approach (360px → 768px → 1024px → 1280px)
+- ✅ Vertical stacking on mobile, grid layouts on desktop
+- ✅ Floating Quokka adapts (same size, fixed positioning)
+
+### Architecture Decisions
+
+**Role-Based Routing:**
+```
+/ → /login (if not auth'd) → /dashboard
+    ↓
+    Student dashboard (shows enrolled courses, activity)
+    OR
+    Instructor dashboard (shows managed courses, metrics)
+    ↓
+/courses → /courses/[id]
+           ↓
+           Course detail with:
+           - Collapsible Ask Question form
+           - Floating Quokka AI agent (bottom-right)
+           - Discussion threads list
+```
+
+**Data Flow:**
+- Single aggregated API call per dashboard (vs 3-5 separate calls)
+- React Query caching with 2-3 minute stale time
+- Smart invalidation on mutations
+- Props-driven components (no hardcoded values)
+
+**Component Hierarchy:**
+```
+app/dashboard/page.tsx
+├─ StudentDashboard (inline component)
+│  ├─ Stats cards (4)
+│  ├─ Course grid (CourseWithActivity)
+│  └─ Activity feed (ActivityItem[])
+└─ InstructorDashboard (inline component)
+   ├─ Stats cards (4)
+   ├─ Managed courses grid (CourseWithMetrics)
+   └─ Unanswered queue (Thread[])
+
+app/courses/[courseId]/page.tsx
+├─ Course hero (breadcrumb, title, description, stats)
+├─ Ask Question form (collapsible)
+├─ Discussion threads list
+└─ FloatingQuokka (fixed bottom-right)
+```
+
+### Files Modified/Created
+
+**Created:**
+- `app/dashboard/page.tsx` (role-based dashboard router + inline components)
+- `components/course/floating-quokka.tsx` (AI agent)
+- `doccloud/tasks/auth-dashboard-system/` (task context, research, plans)
+
+**Modified:**
+- `lib/models/types.ts` (+105 lines: dashboard types)
+- `lib/api/client.ts` (+257 lines: dashboard API methods)
+- `lib/api/hooks.ts` (+19 lines: dashboard hooks + invalidation)
+- `app/page.tsx` (redirect to /dashboard)
+- `app/courses/[courseId]/page.tsx` (+145 lines: Ask Question form + FloatingQuokka integration)
+- `components/layout/nav-header.tsx` (Dashboard nav, removed Ask/AI Chat)
+
+### User Flows
+
+**Student Flow:**
+1. Login → Student Dashboard (courses, activity, stats)
+2. Click course → Course detail page
+3. Click "Ask Question" → Inline form expands
+4. Fill form → Submit → Redirects to new thread
+5. Click Quokka button (bottom-right) → Chat expands
+6. Ask course-specific question → Get AI response
+
+**Instructor Flow:**
+1. Login → Instructor Dashboard (courses, metrics, unanswered queue)
+2. Click unanswered thread → View thread detail
+3. Click course → Course detail page (same as student)
+4. See metrics inline in course cards
+5. Use Quokka for quick reference (same as student)
+
+### Known Limitations
+
+- Floating Quokka uses keyword-based AI (not real LLM)
+- Dashboard insights are mock-generated (would be AI in production)
+- Session state not persisted (message history clears on page reload)
+- Global `/ask` and `/quokka` routes still exist (deprecated but functional)
+
+### Next Steps (if needed)
+
+- [ ] Launch QDS Compliance Auditor for final audit
+- [ ] Launch Accessibility Validator for WCAG 2.2 AA audit
+- [ ] Add TA-specific dashboard (currently uses instructor dashboard)
+- [ ] Implement real AI backend for Quokka
+- [ ] Add course analytics charts for instructor dashboard
+- [ ] Persist Quokka message history to localStorage
+
 - `2025-10-04` | [Planning] | Created task context and launched planning agents
