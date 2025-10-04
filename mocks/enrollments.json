@@ -1,0 +1,107 @@
+[
+  {
+    "id": "enroll-1",
+    "userId": "demo-student-1",
+    "courseId": "course-cs101",
+    "role": "student",
+    "enrolledAt": "2025-08-20T10:00:00Z"
+  },
+  {
+    "id": "enroll-2",
+    "userId": "demo-student-1",
+    "courseId": "course-cs201",
+    "role": "student",
+    "enrolledAt": "2025-08-20T10:00:00Z"
+  },
+  {
+    "id": "enroll-3",
+    "userId": "demo-student-1",
+    "courseId": "course-math221",
+    "role": "student",
+    "enrolledAt": "2025-08-20T10:00:00Z"
+  },
+  {
+    "id": "enroll-4",
+    "userId": "demo-instructor-1",
+    "courseId": "course-cs301",
+    "role": "instructor",
+    "enrolledAt": "2025-08-15T08:00:00Z"
+  },
+  {
+    "id": "enroll-5",
+    "userId": "demo-instructor-1",
+    "courseId": "course-math341",
+    "role": "instructor",
+    "enrolledAt": "2025-08-15T08:00:00Z"
+  },
+  {
+    "id": "enroll-6",
+    "userId": "user-2",
+    "courseId": "course-cs101",
+    "role": "student",
+    "enrolledAt": "2025-08-21T14:30:00Z"
+  },
+  {
+    "id": "enroll-7",
+    "userId": "user-2",
+    "courseId": "course-math221",
+    "role": "student",
+    "enrolledAt": "2025-08-21T14:30:00Z"
+  },
+  {
+    "id": "enroll-8",
+    "userId": "user-3",
+    "courseId": "course-cs101",
+    "role": "student",
+    "enrolledAt": "2025-08-22T09:15:00Z"
+  },
+  {
+    "id": "enroll-9",
+    "userId": "user-3",
+    "courseId": "course-cs201",
+    "role": "student",
+    "enrolledAt": "2025-08-22T09:15:00Z"
+  },
+  {
+    "id": "enroll-10",
+    "userId": "user-4",
+    "courseId": "course-cs201",
+    "role": "student",
+    "enrolledAt": "2025-08-22T11:00:00Z"
+  },
+  {
+    "id": "enroll-11",
+    "userId": "user-5",
+    "courseId": "course-math221",
+    "role": "student",
+    "enrolledAt": "2025-08-23T08:45:00Z"
+  },
+  {
+    "id": "enroll-12",
+    "userId": "user-6",
+    "courseId": "course-cs101",
+    "role": "ta",
+    "enrolledAt": "2025-08-16T10:00:00Z"
+  },
+  {
+    "id": "enroll-13",
+    "userId": "user-6",
+    "courseId": "course-cs201",
+    "role": "ta",
+    "enrolledAt": "2025-08-16T10:00:00Z"
+  },
+  {
+    "id": "enroll-14",
+    "userId": "user-7",
+    "courseId": "course-cs301",
+    "role": "student",
+    "enrolledAt": "2025-08-24T13:20:00Z"
+  },
+  {
+    "id": "enroll-15",
+    "userId": "user-8",
+    "courseId": "course-phys141",
+    "role": "student",
+    "enrolledAt": "2025-08-24T15:00:00Z"
+  }
+]

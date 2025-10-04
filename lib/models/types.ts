@@ -89,6 +89,81 @@ export interface InstructorMetrics {
   activeStudents: number;
 }
 
+/**
+ * Represents an academic course
+ */
+export interface Course {
+  id: string;
+  code: string;          // e.g., "CS101", "MATH221"
+  name: string;          // e.g., "Introduction to Computer Science"
+  term: string;          // e.g., "Fall 2025", "Spring 2025"
+  description: string;
+  instructorIds: string[];
+  enrollmentCount: number;
+  status: 'active' | 'archived';
+  createdAt: string;
+}
+
+/**
+ * Represents a user's enrollment in a course
+ */
+export interface Enrollment {
+  id: string;
+  userId: string;
+  courseId: string;
+  role: UserRole;        // Reuses existing UserRole type
+  enrolledAt: string;
+}
+
+/**
+ * Types of notifications in the system
+ */
+export type NotificationType =
+  | 'new_thread'
+  | 'new_post'
+  | 'endorsed'
+  | 'resolved'
+  | 'flagged';
+
+/**
+ * Represents an activity notification for a user
+ */
+export interface Notification {
+  id: string;
+  userId: string;
+  courseId: string;
+  threadId?: string;     // Optional: some notifications aren't thread-specific
+  type: NotificationType;
+  content: string;       // Human-readable notification text
+  read: boolean;
+  createdAt: string;
+}
+
+/**
+ * AI-generated insights for a course
+ */
+export interface CourseInsight {
+  id: string;
+  courseId: string;
+  summary: string;                // Brief course activity summary
+  activeThreads: number;
+  topQuestions: string[];         // Array of popular thread titles
+  trendingTopics: string[];       // Array of trending tags/topics
+  generatedAt: string;
+}
+
+/**
+ * Metrics for course activity and engagement
+ */
+export interface CourseMetrics {
+  threadCount: number;
+  unansweredCount: number;
+  answeredCount: number;
+  resolvedCount: number;
+  activeStudents: number;         // Unique students who posted
+  recentActivity: number;         // Threads created in last 7 days
+}
+
 export interface Session {
   id: string;
   email: string;
