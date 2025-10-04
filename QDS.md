@@ -1,6 +1,6 @@
 # Quokka Design System (QDS) — Implementation Guide
 
-**Version:** 1.0
+**Version:** 2.0 Glassmorphism Edition
 **Status:** Active
 **Last Updated:** October 2025
 
@@ -8,19 +8,167 @@
 
 ## Overview
 
-The **Quokka Design System (QDS)** is a professional, warm, and approachable design language built for the QuokkaQ academic Q&A platform. It combines academic credibility with friendly accessibility, inspired by the quokka: cheerful, reliable, and trustworthy.
+The **Quokka Design System (QDS)** is a modern, approachable design language built for the QuokkaQ academic Q&A platform. Version 2.0 introduces **glassmorphism and liquid glass aesthetics** — translucent surfaces with backdrop blur effects create depth, hierarchy, and a sophisticated yet friendly interface.
 
-**Core Attributes:** Approachable • Competent • Cheerful • Reliable • Academic-grade
+**Core Attributes:** Modern • Approachable • Fluid • Translucent • Sophisticated • Academic-grade
+
+**Design Philosophy:** Translucent layers over solid blocks • Backdrop blur for depth • Fluid animations with liquid morphing • Subtle glow instead of hard shadows • WCAG AA maintained • Approachable + sophisticated balance
 
 ---
 
 ## Design Principles
 
 1. **Clarity first** — Minimize cognitive load; one clear action per view
-2. **Warm professionalism** — Friendly shapes/tones without cartoonish excess
-3. **Grounded motion** — Subtle, purposeful animations only
+2. **Translucent depth** — Use glass layers to create visual hierarchy
+3. **Fluid motion** — Liquid morphing and smooth transitions
 4. **Accessible by default** — WCAG 2.2 AA minimum, AAA for CTAs when feasible
 5. **System over pages** — Tokens and components power consistency
+6. **Performance-conscious** — Maximum 3 blur layers per view
+
+---
+
+## Glassmorphism System
+
+QDS 2.0 introduces a comprehensive glassmorphism design language with translucent surfaces, backdrop blur effects, and liquid animations.
+
+### Glass Surface Tokens
+
+#### Light Theme Glass
+```css
+--glass-ultra: rgba(255, 255, 255, 0.4)    /* Ultra transparent */
+--glass-strong: rgba(255, 255, 255, 0.6)   /* Strong glass effect */
+--glass-medium: rgba(255, 255, 255, 0.7)   /* Default glass */
+--glass-subtle: rgba(255, 255, 255, 0.85)  /* Subtle glass */
+```
+
+#### Dark Theme Glass
+```css
+--glass-ultra: rgba(23, 21, 17, 0.4)
+--glass-strong: rgba(23, 21, 17, 0.6)
+--glass-medium: rgba(23, 21, 17, 0.7)
+--glass-subtle: rgba(23, 21, 17, 0.85)
+```
+
+### Backdrop Blur Scale
+
+```css
+--blur-xs: 4px    /* Minimal blur */
+--blur-sm: 8px    /* Small blur */
+--blur-md: 12px   /* Medium blur (default) */
+--blur-lg: 16px   /* Large blur */
+--blur-xl: 24px   /* Extra large blur */
+--blur-2xl: 32px  /* Maximum blur */
+```
+
+### Glass Borders & Glows
+
+```css
+/* Light theme */
+--border-glass: rgba(255, 255, 255, 0.18)
+--glow-primary: 0 0 20px rgba(138, 107, 61, 0.15)
+--glow-secondary: 0 0 20px rgba(94, 125, 74, 0.15)
+--glow-accent: 0 0 20px rgba(45, 108, 223, 0.15)
+
+/* Dark theme */
+--border-glass: rgba(255, 255, 255, 0.08)
+--glow-primary: 0 0 24px rgba(193, 165, 118, 0.2)
+--glow-secondary: 0 0 24px rgba(150, 179, 128, 0.2)
+--glow-accent: 0 0 24px rgba(134, 169, 246, 0.2)
+```
+
+### Glass Shadows
+
+Softer, more diffuse than traditional shadows:
+
+```css
+/* Light theme */
+--shadow-glass-sm: 0 2px 16px rgba(15, 14, 12, 0.04)
+--shadow-glass-md: 0 4px 24px rgba(15, 14, 12, 0.06)
+--shadow-glass-lg: 0 8px 32px rgba(15, 14, 12, 0.08)
+
+/* Dark theme */
+--shadow-glass-sm: 0 2px 16px rgba(0, 0, 0, 0.2)
+--shadow-glass-md: 0 4px 24px rgba(0, 0, 0, 0.3)
+--shadow-glass-lg: 0 8px 32px rgba(0, 0, 0, 0.4)
+```
+
+### Liquid Gradients
+
+```css
+--liquid-gradient-1: linear-gradient(135deg, rgba(138,107,61,0.1) 0%, rgba(94,125,74,0.1) 100%)
+--liquid-gradient-2: linear-gradient(135deg, rgba(45,108,223,0.08) 0%, rgba(139,92,246,0.08) 100%)
+--liquid-mesh: radial-gradient(at 40% 20%, rgba(138,107,61,0.15) 0px, transparent 50%),
+               radial-gradient(at 80% 80%, rgba(94,125,74,0.12) 0px, transparent 50%)
+```
+
+### Glass Utility Classes
+
+Pre-built classes for common glass effects:
+
+```css
+.glass-panel {
+  backdrop-filter: blur(12px);
+  background: var(--glass-medium);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass-md);
+}
+
+.glass-panel-strong {
+  backdrop-filter: blur(16px);
+  background: var(--glass-strong);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass-lg);
+}
+
+.glass-overlay {
+  backdrop-filter: blur(24px) saturate(150%);
+  background: var(--glass-strong);
+  border: 1px solid var(--border-glass);
+}
+
+.liquid-border {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+              var(--liquid-gradient-2) border-box;
+}
+```
+
+### Accessibility Safeguards
+
+**Text Readability:**
+```css
+@supports (backdrop-filter: blur(1px)) {
+  .glass-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+```
+
+**Browser Fallback:**
+```css
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    backdrop-filter: none;
+  }
+}
+```
+
+### Performance Guidelines
+
+**✅ DO:**
+- Limit to 3 blur layers maximum per view
+- Use `will-change: backdrop-filter` on glass elements
+- Apply `contain: layout style paint` for optimization
+- Enable GPU acceleration with `transform: translateZ(0)`
+
+**❌ DON'T:**
+- Stack more than 3 glass layers
+- Apply blur to large background images
+- Use heavy blur values (>32px) without testing
+- Forget reduced motion support
 
 ---
 
@@ -288,6 +436,45 @@ wide: 1200px    /* Wide layouts, dashboards */
 --ease-out:    cubic-bezier(0.4, 0.0, 1.0, 1)  /* Exits */
 ```
 
+### Liquid Animations (New in 2.0)
+
+**Liquid Morphing**
+```css
+@keyframes liquid-morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+}
+
+.animate-liquid {
+  animation: liquid-morph 8s ease-in-out infinite;
+}
+```
+
+**Liquid Float**
+```css
+@keyframes liquid-float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-8px) scale(1.02); }
+}
+
+.animate-liquid-float {
+  animation: liquid-float 4s ease-in-out infinite;
+}
+```
+
+**Glass Shimmer**
+```css
+@keyframes glass-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-glass-shimmer {
+  background-size: 200% 100%;
+  animation: glass-shimmer 3s linear infinite;
+}
+```
+
 ### Reduced Motion
 
 ```css
@@ -296,6 +483,13 @@ wide: 1200px    /* Wide layouts, dashboards */
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Disable liquid animations */
+  .animate-liquid,
+  .animate-liquid-float,
+  .animate-glass-shimmer {
+    animation: none !important;
   }
 }
 ```
@@ -339,7 +533,43 @@ All components are built with shadcn/ui and support:
 
 ### Buttons
 
-#### Primary
+#### Glass Variants (New in 2.0)
+
+**Glass Primary**
+```tsx
+<Button variant="glass-primary">
+  Glass Primary
+</Button>
+```
+**Style:** Translucent primary color with backdrop blur, subtle glow on hover
+
+**Glass Secondary**
+```tsx
+<Button variant="glass-secondary">
+  Glass Secondary
+</Button>
+```
+**Style:** Translucent secondary color with backdrop blur
+
+**Glass Accent**
+```tsx
+<Button variant="glass-accent">
+  Glass Accent
+</Button>
+```
+**Style:** Translucent accent color with backdrop blur, accent glow
+
+**Glass Neutral**
+```tsx
+<Button variant="glass">
+  Glass Neutral
+</Button>
+```
+**Style:** Neutral glass effect, adapts to light/dark theme
+
+#### Traditional Variants
+
+**Primary**
 ```tsx
 <Button variant="default">
   Primary Action
@@ -347,7 +577,7 @@ All components are built with shadcn/ui and support:
 ```
 **Style:** Filled primary color, white text, shadow-e1
 
-#### Secondary
+**Secondary**
 ```tsx
 <Button variant="outline">
   Secondary Action
@@ -355,7 +585,7 @@ All components are built with shadcn/ui and support:
 ```
 **Style:** Outline border, transparent background, hover fill
 
-#### Tertiary
+**Tertiary**
 ```tsx
 <Button variant="ghost">
   Tertiary Action
@@ -363,7 +593,7 @@ All components are built with shadcn/ui and support:
 ```
 **Style:** Text only, subtle background on hover
 
-#### Destructive
+**Destructive**
 ```tsx
 <Button variant="destructive">
   Delete Thread
@@ -397,7 +627,64 @@ All components are built with shadcn/ui and support:
 
 ### Cards
 
-#### Default Card
+#### Glass Variants (New in 2.0)
+
+**Glass Card (Default Glass)**
+```tsx
+<Card variant="glass">
+  <CardHeader>
+    <CardTitle>Glass Card</CardTitle>
+    <CardDescription>Standard glass effect</CardDescription>
+  </CardHeader>
+  <CardContent>
+    Translucent background with subtle blur
+  </CardContent>
+</Card>
+```
+**Style:** `backdrop-blur-md` with medium glass background
+
+**Glass Strong**
+```tsx
+<Card variant="glass-strong">
+  <CardHeader>
+    <CardTitle>Strong Glass</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Enhanced blur for elevated components
+  </CardContent>
+</Card>
+```
+**Style:** `backdrop-blur-lg` with stronger glass background
+
+**Glass Hover**
+```tsx
+<Card variant="glass-hover">
+  <CardHeader>
+    <CardTitle>Interactive Glass</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Intensifies on hover
+  </CardContent>
+</Card>
+```
+**Style:** Dynamic blur effect that increases on hover, with lift animation
+
+**Glass Liquid**
+```tsx
+<Card variant="glass-liquid">
+  <CardHeader>
+    <CardTitle>Liquid Glass</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Glass with animated gradient border
+  </CardContent>
+</Card>
+```
+**Style:** Glass effect with liquid gradient border
+
+#### Traditional Variants
+
+**Default Card**
 ```tsx
 <Card className="rounded-lg shadow-e1 p-6">
   <CardHeader>
@@ -409,10 +696,24 @@ All components are built with shadcn/ui and support:
 </Card>
 ```
 
-#### Highlight Card
+**Elevated Card**
 ```tsx
-<Card className="border-t-2 border-t-accent">
-  Emphasized content
+<Card variant="elevated">
+  Solid card with enhanced shadow
+</Card>
+```
+
+**Hover Card**
+```tsx
+<Card variant="hover">
+  Solid card with hover effect
+</Card>
+```
+
+**AI Card**
+```tsx
+<Card variant="ai">
+  AI-powered content with purple gradient
 </Card>
 ```
 
