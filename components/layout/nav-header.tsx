@@ -39,41 +39,35 @@ export function NavHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-8">
+    <header className="sticky top-0 z-50 w-full glass-panel-strong border-b border-[var(--border-glass)]">
+      <div className="container-wide flex h-16 items-center justify-between px-6 md:px-8">
         {/* Logo */}
-        <Link href="/courses" className="flex items-center space-x-2">
+        <Link href="/dashboard" className="flex items-center space-x-2 min-h-[44px] min-w-[44px] -ml-3 pl-3">
           <div className="flex items-center">
-            <span className="text-2xl font-bold text-primary">Quokka</span>
-            <span className="text-2xl font-bold text-accent">Q</span>
+            <span className="text-2xl font-bold text-primary glass-text">Quokka</span>
+            <span className="text-2xl font-bold text-accent glass-text">Q</span>
           </div>
         </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center space-x-1 text-sm font-medium" role="navigation" aria-label="Main navigation">
+          <Link
+            href="/dashboard"
+            aria-current={isActive("/dashboard") ? "page" : undefined}
+            className={`transition-colors hover:text-accent px-4 py-2 min-h-[44px] flex items-center rounded-md ${
+              isActive("/dashboard") ? "text-accent bg-accent/10" : "text-muted-foreground"
+            }`}
+          >
+            Dashboard
+          </Link>
           <Link
             href="/courses"
-            className={`transition-colors hover:text-accent ${
-              isActive("/courses") ? "text-accent" : "text-muted-foreground"
+            aria-current={isActive("/courses") ? "page" : undefined}
+            className={`transition-colors hover:text-accent px-4 py-2 min-h-[44px] flex items-center rounded-md ${
+              isActive("/courses") ? "text-accent bg-accent/10" : "text-muted-foreground"
             }`}
           >
             Courses
-          </Link>
-          <Link
-            href="/ask"
-            className={`transition-colors hover:text-accent ${
-              isActive("/ask") ? "text-accent" : "text-muted-foreground"
-            }`}
-          >
-            Ask Question
-          </Link>
-          <Link
-            href="/quokka"
-            className={`transition-colors hover:text-accent ${
-              isActive("/quokka") ? "text-accent" : "text-muted-foreground"
-            }`}
-          >
-            AI Chat
           </Link>
         </nav>
 
@@ -81,9 +75,9 @@ export function NavHeader() {
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10 bg-primary/20">
-                  <span className="text-sm font-semibold text-primary">
+              <Button variant="ghost" className="relative h-11 w-11 rounded-full" aria-label="User menu">
+                <Avatar className="h-11 w-11 avatar-placeholder">
+                  <span className="text-sm font-semibold">
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 </Avatar>
@@ -103,13 +97,10 @@ export function NavHeader() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/courses">My Courses</Link>
+                <Link href="/dashboard">Dashboard</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/ask">Ask Question</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/quokka">AI Chat</Link>
+                <Link href="/courses">Courses</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
