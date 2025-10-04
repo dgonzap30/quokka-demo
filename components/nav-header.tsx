@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, MessageSquare, BookOpen, Bell, Search, LogOut, User } from "lucide-react";
+import { LayoutDashboard, BookOpen, Bell, Search, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clearSession } from "@/lib/session";
 
@@ -22,19 +22,12 @@ export function NavHeader() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isActive = (path: string) => {
-    if (pathname === path) return true;
-    if (path !== "/" && pathname?.startsWith(path)) return true;
-    return false;
-  };
-
   const handleSignOut = () => {
     clearSession();
     router.push("/auth");
   };
 
   // Determine correct routes based on user role
-  const threadsRoute = user?.role === "instructor" ? "/instructor/threads" : "/student/threads";
   const dashboardRoute = "/instructor/dashboard";
   const coursesRoute = user?.role === "instructor" ? "/instructor/courses" : "/courses";
 
@@ -42,7 +35,7 @@ export function NavHeader() {
     <header className="sticky top-0 z-50 border-b bg-background backdrop-blur-sm shadow-sm">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href={user ? (user.role === "instructor" ? dashboardRoute : threadsRoute) : "/"} className="flex items-center gap-2 md:gap-2.5 group">
+        <Link href={user ? coursesRoute : "/"} className="flex items-center gap-2 md:gap-2.5 group">
           <div className="text-xl md:text-2xl">🦘</div>
           <div className="text-xl md:text-2xl font-bold text-primary">
             QuokkaQ
@@ -86,24 +79,9 @@ export function NavHeader() {
                     <span className="font-medium">Courses</span>
                   </div>
                 </Link>
-
-                {/* Threads Link - instructor threads */}
-                <Link href={threadsRoute}>
-                  <div
-                    className={cn(
-                      "flex items-center gap-2.5 h-10 px-4 rounded-lg transition-colors",
-                      pathname?.startsWith("/instructor/threads")
-                        ? "bg-neutral-100 dark:bg-neutral-800 text-primary"
-                        : "text-neutral-600 dark:text-neutral-400 hover:text-foreground"
-                    )}
-                  >
-                    <MessageSquare className="h-5 w-5" />
-                    <span className="font-medium">Threads</span>
-                  </div>
-                </Link>
               </>
             ) : (
-              /* Student navigation - courses and threads */
+              /* Student navigation - courses only */
               <>
                 <Link href={coursesRoute}>
                   <div
@@ -116,20 +94,6 @@ export function NavHeader() {
                   >
                     <BookOpen className="h-5 w-5" />
                     <span className="font-medium">Courses</span>
-                  </div>
-                </Link>
-
-                <Link href={threadsRoute}>
-                  <div
-                    className={cn(
-                      "flex items-center gap-2.5 h-10 px-4 rounded-lg transition-colors",
-                      isActive(threadsRoute) || pathname === "/"
-                        ? "bg-neutral-100 dark:bg-neutral-800 text-primary"
-                        : "text-neutral-600 dark:text-neutral-400 hover:text-foreground"
-                    )}
-                  >
-                    <MessageSquare className="h-5 w-5" />
-                    <span className="font-medium">Threads</span>
                   </div>
                 </Link>
               </>

@@ -1,6 +1,7 @@
 [
   {
     "id": "thread-1",
+    "courseId": "course-cs101",
     "title": "How do I implement binary search in Python?",
     "content": "I'm trying to understand binary search but I'm confused about the implementation. Can someone explain how the mid-point calculation works and why we use `left <= right` as the condition?",
     "authorId": "user-2",
@@ -61,6 +62,7 @@
   },
   {
     "id": "thread-2",
+    "courseId": "course-cs101",
     "title": "Difference between append() and extend() in Python lists?",
     "content": "I keep getting confused about when to use append() vs extend(). Can someone clarify the difference?",
     "authorId": "user-3",
@@ -98,6 +100,7 @@
   },
   {
     "id": "thread-3",
+    "courseId": "course-cs101",
     "title": "What's the difference between == and is in Python?",
     "content": "I've been using == to compare objects, but I've seen code using `is`. What's the difference and when should I use each?",
     "authorId": "user-5",
@@ -142,6 +145,7 @@
   },
   {
     "id": "thread-4",
+    "courseId": "course-cs101",
     "title": "How to handle exceptions in Python?",
     "content": "I'm getting errors in my code and want to learn about proper exception handling. What's the best way to use try/except blocks?",
     "authorId": "user-7",
@@ -174,57 +178,55 @@
   },
   {
     "id": "thread-5",
-    "title": "What are Python decorators and how do they work?",
-    "content": "I've seen @decorator syntax in Python code but don't understand what they do. Can someone explain?",
+    "courseId": "course-cs201",
+    "title": "How do I implement a linked list in Python?",
+    "content": "I need to implement a singly linked list from scratch. What's the best way to structure the Node class and LinkedList class?",
     "authorId": "user-8",
     "status": "open",
     "createdAt": "2025-10-03T10:00:00Z",
     "updatedAt": "2025-10-03T10:00:00Z",
-    "tags": ["python", "decorators"],
+    "tags": ["data-structures", "linked-lists"],
     "views": 8,
     "posts": [],
     "aiAnswer": {
       "id": "ai-5",
       "threadId": "thread-5",
-      "text": "Decorators are a way to modify or enhance functions without changing their code. They're functions that take another function and extend its behavior.\n\nBasic example:\n```python\ndef my_decorator(func):\n    def wrapper():\n        print(\"Before function\")\n        func()\n        print(\"After function\")\n    return wrapper\n\n@my_decorator\ndef say_hello():\n    print(\"Hello!\")\n\n# Equivalent to: say_hello = my_decorator(say_hello)\n```\n\nCommon uses:\n- Logging\n- Authentication\n- Timing/profiling\n- Caching",
+      "text": "A linked list implementation requires two classes:\n\n```python\nclass Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n    \n    def append(self, data):\n        new_node = Node(data)\n        if not self.head:\n            self.head = new_node\n            return\n        current = self.head\n        while current.next:\n            current = current.next\n        current.next = new_node\n```\n\nKey operations: append O(n), prepend O(1), search O(n), delete O(n)",
       "citations": [
         {
-          "url": "https://docs.python.org/3/glossary.html#term-decorator",
-          "snippet": "A decorator is a function that returns another function...",
-          "title": "Python Glossary: Decorator"
-        },
-        {
-          "url": "https://course-materials.example.com/week6/decorators.pdf",
-          "snippet": "Understanding and using Python decorators...",
-          "title": "Week 6: Advanced Python"
+          "url": "https://course-materials.example.com/cs201/linked-lists.pdf",
+          "snippet": "Implementing linked lists in Python...",
+          "title": "CS201: Linked List Implementation"
         }
       ],
-      "confidence": 0.72,
-      "confidenceLevel": "medium",
+      "confidence": 0.88,
+      "confidenceLevel": "high",
       "createdAt": "2025-10-03T10:05:00Z"
     }
   },
   {
     "id": "thread-6",
-    "title": "Confused about list comprehensions",
-    "content": "I understand for loops, but list comprehensions look complicated. When should I use them?",
+    "courseId": "course-cs201",
+    "title": "Time complexity of sorting algorithms?",
+    "content": "Can someone explain the time complexity differences between bubble sort, merge sort, and quick sort?",
     "authorId": "user-2",
     "status": "open",
     "createdAt": "2025-10-03T11:00:00Z",
     "updatedAt": "2025-10-03T11:00:00Z",
-    "tags": ["python", "comprehensions"],
+    "tags": ["algorithms", "sorting", "complexity"],
     "views": 5,
     "posts": []
   },
   {
     "id": "thread-7",
-    "title": "How does Python's GIL affect multi-threading?",
-    "content": "I've heard about the Global Interpreter Lock but don't understand what it means for my multi-threaded programs.",
+    "courseId": "course-math221",
+    "title": "How do I find the derivative of x^2?",
+    "content": "I'm struggling with basic derivatives. Can someone walk me through finding the derivative of x^2 using the power rule?",
     "authorId": "user-3",
     "status": "open",
     "createdAt": "2025-10-03T09:30:00Z",
     "updatedAt": "2025-10-03T09:30:00Z",
-    "tags": ["python", "threading", "performance"],
+    "tags": ["calculus", "derivatives"],
     "views": 15,
     "posts": []
   }
