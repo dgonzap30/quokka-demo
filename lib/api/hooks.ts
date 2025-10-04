@@ -16,6 +16,15 @@ export const queryKeys = {
   instructorMetrics: ["instructorMetrics"] as const,
   unansweredThreads: ["unansweredThreads"] as const,
   similarThreads: (query: string) => ["similarThreads", query] as const,
+  courses: ["courses"] as const,
+  userCourses: (userId: string) => ["userCourses", userId] as const,
+  courseThreads: (courseId: string) => ["courseThreads", courseId] as const,
+  notifications: (userId: string, courseId?: string) =>
+    courseId
+      ? (["notifications", userId, courseId] as const)
+      : (["notifications", userId] as const),
+  courseInsights: (courseId: string) => ["courseInsights", courseId] as const,
+  courseMetrics: (courseId: string) => ["courseMetrics", courseId] as const,
 };
 
 // Threads
@@ -39,9 +48,21 @@ export function useCreateThread() {
 
   return useMutation({
     mutationFn: (input: CreateThreadInput) => api.createThread(input),
-    onSuccess: () => {
+    onSuccess: (thread) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.threads });
       queryClient.invalidateQueries({ queryKey: queryKeys.instructorMetrics });
+      // Invalidate course-specific queries
+      if (thread.courseId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.courseThreads(thread.courseId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.courseMetrics(thread.courseId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.courseInsights(thread.courseId),
+        });
+      }
     },
   });
 }
@@ -174,5 +195,87 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: queryKeys.currentUser,
     queryFn: () => api.getCurrentUser(),
+  });
+}
+
+// Courses
+export function useCourses() {
+  return useQuery({
+    queryKey: queryKeys.courses,
+    queryFn: () => api.getAllCourses(),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+export function useUserCourses(userId: string) {
+  return useQuery({
+    queryKey: queryKeys.userCourses(userId),
+    queryFn: () => api.getUserCourses(userId),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+export function useCourseThreads(courseId: string) {
+  return useQuery({
+    queryKey: queryKeys.courseThreads(courseId),
+    queryFn: () => api.getCourseThreads(courseId),
+    enabled: !!courseId,
+  });
+}
+
+// Notifications
+export function useNotifications(userId: string, courseId?: string) {
+  return useQuery({
+    queryKey: queryKeys.notifications(userId, courseId),
+    queryFn: () => api.getNotifications(userId, courseId),
+    enabled: !!userId,
+    staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: 1000 * 60, // Refetch every minute
+  });
+}
+
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (notificationId: string) =>
+      api.markNotificationRead(notificationId),
+    onSuccess: () => {
+      // Invalidate all notification queries
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, courseId }: { userId: string; courseId?: string }) =>
+      api.markAllNotificationsRead(userId, courseId),
+    onSuccess: () => {
+      // Invalidate all notification queries
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+// Course Insights & Metrics
+export function useCourseInsights(courseId: string) {
+  return useQuery({
+    queryKey: queryKeys.courseInsights(courseId),
+    queryFn: () => api.getCourseInsights(courseId),
+    enabled: !!courseId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useCourseMetrics(courseId: string) {
+  return useQuery({
+    queryKey: queryKeys.courseMetrics(courseId),
+    queryFn: () => api.getCourseMetrics(courseId),
+    enabled: !!courseId,
+    staleTime: 1000 * 60, // 1 minute
   });
 }
