@@ -13,18 +13,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, Award } from "lucide-react";
+import { ChevronLeft, ChevronRight, Award } from "lucide-react";
 import { formatDate } from "@/lib/utils/date";
 import Link from "next/link";
+import { useUserCourses } from "@/lib/api/hooks";
 
 function StudentThreadDetailPage() {
   const params = useParams();
   const threadId = params.id as string;
   const { data: thread, isLoading } = useThread(threadId);
   const { data: currentUser } = useCurrentUser();
+  const { data: courses = [] } = useUserCourses(currentUser?.id || "");
   const createPost = useCreatePost();
 
   const [replyContent, setReplyContent] = useState("");
+
+  // Get course from thread's courseId
+  const course = thread ? courses.find(c => c.id === thread.courseId) : null;
 
   const handleReply = async () => {
     if (!replyContent.trim() || !currentUser) return;
@@ -66,13 +71,30 @@ function StudentThreadDetailPage() {
     <div className="min-h-screen bg-background">
       <NavHeader />
       <main className="container mx-auto px-4 py-8 pb-24 md:pb-8 max-w-4xl">
-        {/* Back Navigation */}
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+          <Link href="/courses" className="hover:text-foreground transition-colors">
+            Courses
+          </Link>
+          <ChevronRight className="h-4 w-4" />
+          {course ? (
+            <>
+              <Link href={`/courses/${course.id}`} className="hover:text-foreground transition-colors">
+                {course.code}
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+            </>
+          ) : null}
+          <span className="text-foreground font-medium truncate max-w-md">{thread.title}</span>
+        </nav>
+
+        {/* Back to Course Link */}
         <Link
-          href="/student/threads"
+          href={course ? `/courses/${course.id}` : "/courses"}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
         >
           <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Threads</span>
+          <span>Back to {course ? course.code : "Courses"}</span>
         </Link>
 
         {/* Thread Header */}

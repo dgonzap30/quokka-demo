@@ -16,6 +16,7 @@ import {
   Flag,
   Users,
   ArrowRight,
+  Info,
 } from "lucide-react";
 
 function InstructorDashboardPage() {
@@ -27,11 +28,26 @@ function InstructorDashboardPage() {
       <NavHeader />
       <main className="container mx-auto px-6 py-8 pb-24 md:pb-8">
         {/* Hero Section */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Instructor Dashboard</h1>
           <p className="text-sm text-muted-foreground">
             Monitor course activity, track engagement, and manage student questions
           </p>
+        </div>
+
+        {/* Aggregated View Notice */}
+        <div className="mb-8 p-4 bg-info/10 border border-info/20 rounded-lg flex items-start gap-3">
+          <Info className="h-5 w-5 text-info mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-info-foreground">Viewing aggregated metrics across all courses</p>
+            <p className="text-sm text-info-foreground/80 mt-1">
+              Select a specific course from your{" "}
+              <Link href="/courses" className="underline hover:text-info-foreground">
+                courses dashboard
+              </Link>
+              {" "}for detailed threads and course-specific insights.
+            </p>
+          </div>
         </div>
 
         {/* Metrics Grid */}
@@ -153,9 +169,9 @@ function InstructorDashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-bold">Unanswered Questions</h2>
-            <Link href="/instructor/threads">
+            <Link href="/courses">
               <Button variant="outline" size="sm" className="gap-2">
-                View All Threads
+                View Courses
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -183,9 +199,9 @@ function InstructorDashboardPage() {
               <p className="text-sm text-muted-foreground">
                 No unanswered questions at the moment
               </p>
-              <Link href="/instructor/threads" className="mt-4 inline-block">
+              <Link href="/courses" className="mt-4 inline-block">
                 <Button variant="outline" className="gap-2">
-                  Browse All Threads
+                  View Courses
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>

@@ -13,12 +13,8 @@ export default function AuthPage() {
     const account = TEST_ACCOUNTS[role];
     setSession(account);
 
-    // Redirect based on role
-    if (role === "student") {
-      router.push("/student/threads");
-    } else {
-      router.push("/instructor/dashboard");
-    }
+    // Redirect to courses dashboard (course-centric architecture)
+    router.push("/courses");
   };
 
   return (
