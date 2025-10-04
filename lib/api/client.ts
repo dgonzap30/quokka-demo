@@ -13,6 +13,11 @@ import type {
   CourseMetrics,
   CreateThreadInput,
   CreatePostInput,
+  StudentDashboardData,
+  InstructorDashboardData,
+  ActivityItem,
+  CourseWithActivity,
+  CourseWithMetrics,
 } from "@/lib/models/types";
 
 import {
@@ -21,15 +26,18 @@ import {
   setAuthSession,
   clearAuthSession,
   getUserByEmail,
+  getUserById,
   validateCredentials,
   createUser,
   getCourses,
   getCourseById,
   getEnrollments,
+  getThreads,
   getThreadsByCourse,
   getThreadById,
   addThread,
   updateThread,
+  getPosts,
   getPostsByThread,
   addPost,
   getNotifications,
@@ -464,5 +472,252 @@ export const api = {
     updateThread(input.threadId, { updatedAt: new Date().toISOString() });
 
     return newPost;
+  },
+
+  // ============================================
+  // Dashboard API Methods
+  // ============================================
+
+  /**
+   * Get student dashboard data (aggregated)
+   */
+  async getStudentDashboard(userId: string): Promise<StudentDashboardData> {
+    await delay(200 + Math.random() * 200); // 200-400ms (faster for landing page)
+    seedData();
+
+    const enrollments = getEnrollments(userId);
+    const allCourses = getCourses();
+    const allThreads = getThreads();
+    const allPosts = getPosts();
+    const notifications = getNotifications(userId);
+    const users = getUsers();
+
+    // Get enrolled courses with recent activity
+    const enrolledCourses: CourseWithActivity[] = enrollments.map((enrollment) => {
+      const course = allCourses.find((c) => c.id === enrollment.courseId);
+      if (!course) return null;
+
+      const courseThreads = allThreads.filter((t) => t.courseId === course.id);
+      const recentThreads = courseThreads
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 3);
+
+      const unreadCount = notifications.filter(
+        (n) => n.courseId === course.id && !n.read
+      ).length;
+
+      return {
+        ...course,
+        recentThreads,
+        unreadCount,
+      };
+    }).filter((c): c is CourseWithActivity => c !== null);
+
+    // Generate recent activity (last 10 items)
+    const userThreads = allThreads.filter((t) => t.authorId === userId);
+    const userPosts = allPosts.filter((p) => p.authorId === userId);
+
+    const activities: ActivityItem[] = [];
+
+    // Add thread creations
+    userThreads.forEach((thread) => {
+      const course = allCourses.find((c) => c.id === thread.courseId);
+      const author = users.find((u) => u.id === thread.authorId);
+      if (course && author) {
+        activities.push({
+          id: `activity-${thread.id}`,
+          type: 'thread_created',
+          courseId: course.id,
+          courseName: course.name,
+          threadId: thread.id,
+          threadTitle: thread.title,
+          authorId: author.id,
+          authorName: author.name,
+          timestamp: thread.createdAt,
+          summary: `You created a thread: "${thread.title}"`,
+        });
+      }
+    });
+
+    // Add post creations
+    userPosts.forEach((post) => {
+      const thread = allThreads.find((t) => t.id === post.threadId);
+      const course = thread ? allCourses.find((c) => c.id === thread.courseId) : null;
+      const author = users.find((u) => u.id === post.authorId);
+      if (thread && course && author) {
+        activities.push({
+          id: `activity-${post.id}`,
+          type: 'post_created',
+          courseId: course.id,
+          courseName: course.name,
+          threadId: thread.id,
+          threadTitle: thread.title,
+          authorId: author.id,
+          authorName: author.name,
+          timestamp: post.createdAt,
+          summary: `You replied to "${thread.title}"`,
+        });
+      }
+    });
+
+    // Add endorsed posts
+    userPosts.filter((p) => p.endorsed).forEach((post) => {
+      const thread = allThreads.find((t) => t.id === post.threadId);
+      const course = thread ? allCourses.find((c) => c.id === thread.courseId) : null;
+      const author = users.find((u) => u.id === post.authorId);
+      if (thread && course && author) {
+        activities.push({
+          id: `activity-endorsed-${post.id}`,
+          type: 'post_endorsed',
+          courseId: course.id,
+          courseName: course.name,
+          threadId: thread.id,
+          threadTitle: thread.title,
+          authorId: author.id,
+          authorName: author.name,
+          timestamp: post.updatedAt,
+          summary: `Your reply to "${thread.title}" was endorsed`,
+        });
+      }
+    });
+
+    // Sort by timestamp and take last 10
+    const recentActivity = activities
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 10);
+
+    // Calculate stats
+    const stats = {
+      totalCourses: enrolledCourses.length,
+      totalThreads: userThreads.length,
+      totalPosts: userPosts.length,
+      endorsedPosts: userPosts.filter((p) => p.endorsed).length,
+    };
+
+    const unreadCount = notifications.filter((n) => !n.read).length;
+
+    return {
+      enrolledCourses,
+      recentActivity,
+      notifications: notifications.slice(0, 5), // Top 5 notifications
+      unreadCount,
+      stats,
+    };
+  },
+
+  /**
+   * Get instructor dashboard data (aggregated)
+   */
+  async getInstructorDashboard(userId: string): Promise<InstructorDashboardData> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    const allCourses = getCourses();
+    const allThreads = getThreads();
+    const allPosts = getPosts();
+    const users = getUsers();
+
+    // Get courses where user is instructor
+    const managedCourses: CourseWithMetrics[] = allCourses
+      .filter((course) => course.instructorIds.includes(userId))
+      .map((course) => {
+        const courseThreads = allThreads.filter((t) => t.courseId === course.id);
+
+        // Calculate metrics
+        const metrics: CourseMetrics = {
+          threadCount: courseThreads.length,
+          unansweredCount: courseThreads.filter((t) => t.status === 'open').length,
+          answeredCount: courseThreads.filter((t) => t.status === 'answered').length,
+          resolvedCount: courseThreads.filter((t) => t.status === 'resolved').length,
+          activeStudents: new Set(
+            courseThreads.map((t) => t.authorId)
+          ).size,
+          recentActivity: courseThreads.filter(
+            (t) => new Date(t.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+          ).length,
+        };
+
+        return {
+          ...course,
+          metrics,
+        };
+      });
+
+    // Get unanswered threads across all managed courses
+    const managedCourseIds = managedCourses.map((c) => c.id);
+    const unansweredQueue = allThreads
+      .filter((t) => managedCourseIds.includes(t.courseId) && t.status === 'open')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10); // Top 10 unanswered
+
+    // Generate recent activity
+    const activities: ActivityItem[] = [];
+
+    managedCourseIds.forEach((courseId) => {
+      const course = allCourses.find((c) => c.id === courseId);
+      if (!course) return;
+
+      const courseThreads = allThreads
+        .filter((t) => t.courseId === courseId)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
+
+      courseThreads.forEach((thread) => {
+        const author = users.find((u) => u.id === thread.authorId);
+        if (author) {
+          activities.push({
+            id: `activity-${thread.id}`,
+            type: 'thread_created',
+            courseId: course.id,
+            courseName: course.name,
+            threadId: thread.id,
+            threadTitle: thread.title,
+            authorId: author.id,
+            authorName: author.name,
+            timestamp: thread.createdAt,
+            summary: `New thread in ${course.code}: "${thread.title}"`,
+          });
+        }
+      });
+    });
+
+    const recentActivity = activities
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 10);
+
+    // Mock insights (would be AI-generated in production)
+    const insights: CourseInsight[] = managedCourses.map((course) => ({
+      id: `insight-${course.id}`,
+      courseId: course.id,
+      summary: `${course.code} has ${course.metrics.activeStudents} active students with ${course.metrics.recentActivity} threads this week.`,
+      activeThreads: course.metrics.threadCount,
+      topQuestions: allThreads
+        .filter((t) => t.courseId === course.id)
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 3)
+        .map((t) => t.title),
+      trendingTopics: [],
+      generatedAt: new Date().toISOString(),
+    }));
+
+    // Calculate stats
+    const stats = {
+      totalCourses: managedCourses.length,
+      totalThreads: managedCourses.reduce((sum, c) => sum + c.metrics.threadCount, 0),
+      unansweredThreads: managedCourses.reduce((sum, c) => sum + c.metrics.unansweredCount, 0),
+      activeStudents: new Set(
+        allThreads
+          .filter((t) => managedCourseIds.includes(t.courseId))
+          .map((t) => t.authorId)
+      ).size,
+    };
+
+    return {
+      managedCourses,
+      unansweredQueue,
+      recentActivity,
+      insights,
+      stats,
+    };
   },
 };

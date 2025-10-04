@@ -225,3 +225,111 @@ export interface CreatePostInput {
   threadId: string;
   content: string;
 }
+
+// ============================================
+// Dashboard & Activity Types
+// ============================================
+
+/**
+ * Types of activities that appear in activity feeds
+ */
+export type ActivityType =
+  | 'thread_created'
+  | 'post_created'
+  | 'thread_resolved'
+  | 'post_endorsed'
+  | 'thread_answered';
+
+/**
+ * Activity feed item for student/instructor dashboards
+ */
+export interface ActivityItem {
+  id: string;
+  type: ActivityType;
+  courseId: string;
+  courseName: string;
+  threadId: string;
+  threadTitle: string;
+  authorId: string;
+  authorName: string;
+  timestamp: string;
+  summary: string;  // Human-readable description
+}
+
+/**
+ * Course enriched with recent activity (student view)
+ */
+export interface CourseWithActivity extends Course {
+  recentThreads: Thread[];
+  unreadCount: number;
+}
+
+/**
+ * Course enriched with metrics (instructor view)
+ */
+export interface CourseWithMetrics extends Course {
+  metrics: CourseMetrics;
+  insights?: CourseInsight;
+}
+
+/**
+ * Student dashboard aggregated data
+ */
+export interface StudentDashboardData {
+  enrolledCourses: CourseWithActivity[];
+  recentActivity: ActivityItem[];
+  notifications: Notification[];
+  unreadCount: number;
+  stats: {
+    totalCourses: number;
+    totalThreads: number;
+    totalPosts: number;
+    endorsedPosts: number;
+  };
+}
+
+/**
+ * Instructor dashboard aggregated data
+ */
+export interface InstructorDashboardData {
+  managedCourses: CourseWithMetrics[];
+  unansweredQueue: Thread[];
+  recentActivity: ActivityItem[];
+  insights: CourseInsight[];
+  stats: {
+    totalCourses: number;
+    totalThreads: number;
+    unansweredThreads: number;
+    activeStudents: number;
+  };
+}
+
+/**
+ * Dashboard data discriminated union
+ */
+export type DashboardData = StudentDashboardData | InstructorDashboardData;
+
+// ============================================
+// Dashboard Type Guards
+// ============================================
+
+/**
+ * Type guard for student dashboard data
+ */
+export function isStudentDashboard(data: DashboardData): data is StudentDashboardData {
+  return 'enrolledCourses' in data && Array.isArray((data as StudentDashboardData).enrolledCourses);
+}
+
+/**
+ * Type guard for instructor dashboard data
+ */
+export function isInstructorDashboard(data: DashboardData): data is InstructorDashboardData {
+  return 'managedCourses' in data && Array.isArray((data as InstructorDashboardData).managedCourses);
+}
+
+/**
+ * Type guard for activity type checking
+ */
+export function isActivityType(type: string): type is ActivityType {
+  return ['thread_created', 'post_created', 'thread_resolved', 'post_endorsed', 'thread_answered'].includes(type);
+}

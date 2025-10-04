@@ -25,6 +25,8 @@ const queryKeys = {
   thread: (threadId: string) => ["thread", threadId] as const,
   notifications: (userId: string, courseId?: string) =>
     courseId ? ["notifications", userId, courseId] as const : ["notifications", userId] as const,
+  studentDashboard: (userId: string) => ["studentDashboard", userId] as const,
+  instructorDashboard: (userId: string) => ["instructorDashboard", userId] as const,
 };
 
 // ============================================
@@ -272,6 +274,9 @@ export function useCreateThread() {
     onSuccess: (newThread) => {
       // Invalidate course threads query
       queryClient.invalidateQueries({ queryKey: queryKeys.courseThreads(newThread.courseId) });
+      // Invalidate dashboards (activity feeds need update)
+      queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
     },
   });
 }
@@ -288,6 +293,39 @@ export function useCreatePost() {
     onSuccess: (newPost) => {
       // Invalidate thread query to refetch with new post
       queryClient.invalidateQueries({ queryKey: queryKeys.thread(newPost.threadId) });
+      // Invalidate dashboards (activity feeds need update)
+      queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
     },
+  });
+}
+
+// ============================================
+// Dashboard Hooks
+// ============================================
+
+/**
+ * Get student dashboard data
+ */
+export function useStudentDashboard(userId: string | undefined) {
+  return useQuery({
+    queryKey: userId ? queryKeys.studentDashboard(userId) : ["studentDashboard"],
+    queryFn: () => (userId ? api.getStudentDashboard(userId) : Promise.resolve(null)),
+    enabled: !!userId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Get instructor dashboard data
+ */
+export function useInstructorDashboard(userId: string | undefined) {
+  return useQuery({
+    queryKey: userId ? queryKeys.instructorDashboard(userId) : ["instructorDashboard"],
+    queryFn: () => (userId ? api.getInstructorDashboard(userId) : Promise.resolve(null)),
+    enabled: !!userId,
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 }
