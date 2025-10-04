@@ -15,12 +15,8 @@ export default function Home() {
       return;
     }
 
-    // Redirect based on role
-    if (session.role === "instructor" || session.role === "ta") {
-      router.push("/instructor/dashboard");
-    } else {
-      router.push("/student/threads");
-    }
+    // Redirect to courses (course-centric architecture)
+    router.push("/courses");
   }, [router]);
 
   // Show loading state while redirecting

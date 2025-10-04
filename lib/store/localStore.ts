@@ -91,6 +91,7 @@ export function seedData(): void {
  * Get all users
  */
 export function getUsers(): User[] {
+  seedData(); // Ensure data is seeded
   return loadFromStorage<User[]>(KEYS.users, []);
 }
 
@@ -98,6 +99,7 @@ export function getUsers(): User[] {
  * Get all threads
  */
 export function getThreads(): Thread[] {
+  seedData(); // Ensure data is seeded
   return loadFromStorage<Thread[]>(KEYS.threads, []);
 }
 
@@ -321,6 +323,7 @@ export function togglePostFlag(threadId: string, postId: string): void {
  * Get all courses
  */
 export function getCourses(): Course[] {
+  seedData(); // Ensure data is seeded
   return loadFromStorage<Course[]>(KEYS.courses, []);
 }
 
@@ -344,6 +347,7 @@ export function getCourse(id: string): Course | null {
  * Get enrollments for a user
  */
 export function getEnrollments(userId: string): Enrollment[] {
+  seedData(); // Ensure data is seeded
   const enrollments = loadFromStorage<Enrollment[]>(KEYS.enrollments, []);
   return enrollments.filter((e) => e.userId === userId);
 }
