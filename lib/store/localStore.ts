@@ -1,12 +1,26 @@
-import type { Thread, Post, User, Session } from "@/lib/models/types";
+import type {
+  Thread,
+  Post,
+  User,
+  Session,
+  Course,
+  Enrollment,
+  Notification,
+} from "@/lib/models/types";
 import { TEST_ACCOUNTS } from "@/lib/session";
 import threadsData from "@/mocks/threads.json";
 import usersData from "@/mocks/users.json";
+import coursesData from "@/mocks/courses.json";
+import enrollmentsData from "@/mocks/enrollments.json";
+import notificationsData from "@/mocks/notifications.json";
 
 const KEYS = {
   users: "quokkaq.users",
   threads: "quokkaq.threads",
   initialized: "quokkaq.initialized",
+  courses: "quokkaq.courses",
+  enrollments: "quokkaq.enrollments",
+  notifications: "quokkaq.notifications",
 } as const;
 
 // In-memory recently deleted buffer for undo functionality
@@ -60,12 +74,15 @@ export function seedData(): void {
     // Transform threads to add courseId and isAnonymous
     const threads = (threadsData as Array<Record<string, unknown>>).map((thread) => ({
       ...thread,
-      courseId: thread.courseId || "course-demo-101",
+      courseId: thread.courseId || "course-cs101",
       isAnonymous: thread.isAnonymous || false,
     }));
 
     saveToStorage(KEYS.users, allUsers);
     saveToStorage(KEYS.threads, threads);
+    saveToStorage(KEYS.courses, coursesData as Course[]);
+    saveToStorage(KEYS.enrollments, enrollmentsData as Enrollment[]);
+    saveToStorage(KEYS.notifications, notificationsData as Notification[]);
     saveToStorage(KEYS.initialized, true);
   }
 }
@@ -298,4 +315,99 @@ export function togglePostFlag(threadId: string, postId: string): void {
       saveThreads(threads);
     }
   }
+}
+
+/**
+ * Get all courses
+ */
+export function getCourses(): Course[] {
+  return loadFromStorage<Course[]>(KEYS.courses, []);
+}
+
+/**
+ * Get courses by IDs
+ */
+export function getCoursesByIds(ids: string[]): Course[] {
+  const courses = getCourses();
+  return courses.filter((c) => ids.includes(c.id));
+}
+
+/**
+ * Get single course by ID
+ */
+export function getCourse(id: string): Course | null {
+  const courses = getCourses();
+  return courses.find((c) => c.id === id) || null;
+}
+
+/**
+ * Get enrollments for a user
+ */
+export function getEnrollments(userId: string): Enrollment[] {
+  const enrollments = loadFromStorage<Enrollment[]>(KEYS.enrollments, []);
+  return enrollments.filter((e) => e.userId === userId);
+}
+
+/**
+ * Get user's enrolled courses
+ */
+export function getUserCourses(userId: string): Course[] {
+  const enrollments = getEnrollments(userId);
+  const courseIds = enrollments.map((e) => e.courseId);
+  const courses = getCourses();
+  return courses.filter((c) => courseIds.includes(c.id));
+}
+
+/**
+ * Get all notifications, optionally filtered by user and/or course
+ */
+export function getNotifications(userId: string, courseId?: string): Notification[] {
+  const notifications = loadFromStorage<Notification[]>(KEYS.notifications, []);
+
+  let filtered = notifications.filter((n) => n.userId === userId);
+
+  if (courseId) {
+    filtered = filtered.filter((n) => n.courseId === courseId);
+  }
+
+  return filtered;
+}
+
+/**
+ * Mark a notification as read
+ */
+export function markNotificationRead(notificationId: string): void {
+  const notifications = loadFromStorage<Notification[]>(KEYS.notifications, []);
+  const notification = notifications.find((n) => n.id === notificationId);
+
+  if (notification) {
+    notification.read = true;
+    saveToStorage(KEYS.notifications, notifications);
+  }
+}
+
+/**
+ * Mark all notifications as read for a user, optionally filtered by course
+ */
+export function markAllNotificationsRead(userId: string, courseId?: string): void {
+  const notifications = loadFromStorage<Notification[]>(KEYS.notifications, []);
+
+  notifications.forEach((notification) => {
+    if (notification.userId === userId) {
+      if (!courseId || notification.courseId === courseId) {
+        notification.read = true;
+      }
+    }
+  });
+
+  saveToStorage(KEYS.notifications, notifications);
+}
+
+/**
+ * Add a new notification
+ */
+export function addNotification(notification: Notification): void {
+  const notifications = loadFromStorage<Notification[]>(KEYS.notifications, []);
+  notifications.unshift(notification);
+  saveToStorage(KEYS.notifications, notifications);
 }
