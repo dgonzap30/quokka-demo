@@ -6,7 +6,6 @@ import {
   useCurrentUser,
   useUserCourses,
   useNotifications,
-  useCourseMetrics,
 } from "@/lib/api/hooks";
 import type { Notification } from "@/lib/models/types";
 
@@ -25,9 +24,6 @@ export default function CoursesPage() {
     });
     return counts;
   }, [notifications]);
-
-  // Fetch metrics for all courses (in real app, this would be optimized with parallel queries)
-  const courseIds = courses.map((c) => c.id);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
