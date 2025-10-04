@@ -1,14 +1,17 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
+import { useCourse, useCourseThreads, useCurrentUser, useCreateThread } from "@/lib/api/hooks";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Thread } from "@/lib/models/types";
 
 export default function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
@@ -17,6 +20,46 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const { data: course, isLoading: courseLoading } = useCourse(courseId);
   const { data: threads, isLoading: threadsLoading } = useCourseThreads(courseId);
+  const createThreadMutation = useCreateThread();
+
+  // Ask Question form state
+  const [showAskForm, setShowAskForm] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle Ask Question form submission
+  const handleAskQuestion = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim() || !user || !course) return;
+
+    setIsSubmitting(true);
+    try {
+      const newThread = await createThreadMutation.mutateAsync({
+        input: {
+          courseId: course.id,
+          title: title.trim(),
+          content: content.trim(),
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter((t) => t.length > 0),
+        },
+        authorId: user.id,
+      });
+
+      // Reset form and navigate to new thread
+      setTitle("");
+      setContent("");
+      setTags("");
+      setShowAskForm(false);
+      router.push(`/threads/${newThread.id}`);
+    } catch (error) {
+      console.error("Failed to create thread:", error);
+      setIsSubmitting(false);
+    }
+  };
 
   // Redirect to login if not authenticated
   if (!userLoading && !user) {
@@ -103,13 +146,104 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                 <span>{course.enrollmentCount} students enrolled</span>
               </div>
             </div>
-            <Link href={`/ask?courseId=${courseId}`}>
-              <Button variant="glass-primary" size="lg">
-                Ask Question
-              </Button>
-            </Link>
+            <Button
+              variant="glass-primary"
+              size="lg"
+              onClick={() => setShowAskForm(!showAskForm)}
+            >
+              {showAskForm ? "Cancel" : "Ask Question"}
+              {showAskForm ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
+            </Button>
           </div>
         </div>
+
+        {/* Ask Question Form (Collapsible) */}
+        {showAskForm && (
+          <Card variant="glass-strong">
+            <CardHeader className="p-6 md:p-8">
+              <CardTitle className="text-xl glass-text">Ask a Question</CardTitle>
+              <CardDescription className="text-base">
+                Post your question to get help from classmates and instructors
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 md:p-8 pt-0">
+              <form onSubmit={handleAskQuestion} className="space-y-6">
+                {/* Title */}
+                <div className="space-y-2">
+                  <label htmlFor="title" className="text-sm font-semibold">
+                    Question Title *
+                  </label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., How does binary search work?"
+                    className="h-11 text-base"
+                    required
+                    maxLength={200}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {title.length}/200 characters
+                  </p>
+                </div>
+
+                {/* Content */}
+                <div className="space-y-2">
+                  <label htmlFor="content" className="text-sm font-semibold">
+                    Question Details *
+                  </label>
+                  <Textarea
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Provide a detailed description of your question. Include any relevant code, error messages, or context."
+                    rows={8}
+                    className="min-h-[200px] text-base"
+                    required
+                  />
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-2">
+                  <label htmlFor="tags" className="text-sm font-semibold">
+                    Tags (optional)
+                  </label>
+                  <Input
+                    id="tags"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    placeholder="e.g., algorithms, binary-search, homework"
+                    className="h-11 text-base"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Separate tags with commas
+                  </p>
+                </div>
+
+                {/* Submit */}
+                <div className="flex gap-3 pt-4 border-t border-[var(--border-glass)]">
+                  <Button
+                    type="submit"
+                    variant="glass-primary"
+                    size="lg"
+                    disabled={isSubmitting || !title.trim() || !content.trim()}
+                  >
+                    {isSubmitting ? "Posting..." : "Post Question"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setShowAskForm(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Threads Section */}
         <div className="space-y-6">
