@@ -169,6 +169,7 @@
 
 ## Changelog
 
+- `2025-10-04` | [Course Dashboard] | Implemented course data layer (types, API, hooks), created courses page with glass cards, updated home page to redirect based on auth state
 - `2025-10-04` | [Auth Data Layer] | Implemented authentication types, API client, React Query hooks, and localStorage persistence
 - `2025-10-04` | [Auth UI] | Created login page with glass styling, added React Query providers to layout
 - `2025-10-04` | [Setup] | Created task context and folder structure

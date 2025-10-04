@@ -5,6 +5,12 @@ import type {
   AuthResult,
   AuthSession,
   AuthError,
+  Course,
+  Enrollment,
+  Thread,
+  Notification,
+  CourseInsight,
+  CourseMetrics,
 } from "@/lib/models/types";
 
 import {
@@ -15,6 +21,16 @@ import {
   getUserByEmail,
   validateCredentials,
   createUser,
+  getCourses,
+  getCourseById,
+  getEnrollments,
+  getThreads,
+  getThreadsByCourse,
+  getThreadById,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getUsers,
 } from "@/lib/store/localStore";
 
 // ============================================
@@ -180,5 +196,190 @@ export const api = {
     await delay(100 + Math.random() * 100); // 100-200ms
 
     return getAuthSession();
+  },
+
+  // ============================================
+  // Course API Methods
+  // ============================================
+
+  /**
+   * Get all active courses
+   */
+  async getAllCourses(): Promise<Course[]> {
+    await delay();
+    seedData();
+
+    const courses = getCourses();
+    return courses
+      .filter((c) => c.status === "active")
+      .sort((a, b) => a.code.localeCompare(b.code));
+  },
+
+  /**
+   * Get courses for a specific user
+   */
+  async getUserCourses(userId: string): Promise<Course[]> {
+    await delay();
+    seedData();
+
+    const enrollments = getEnrollments(userId);
+    const allCourses = getCourses();
+
+    const courseIds = enrollments.map((e) => e.courseId);
+    return allCourses
+      .filter((c) => courseIds.includes(c.id) && c.status === "active")
+      .sort((a, b) => a.code.localeCompare(b.code));
+  },
+
+  /**
+   * Get course by ID
+   */
+  async getCourse(courseId: string): Promise<Course | null> {
+    await delay();
+    seedData();
+
+    return getCourseById(courseId);
+  },
+
+  /**
+   * Get threads for a course
+   */
+  async getCourseThreads(courseId: string): Promise<Thread[]> {
+    await delay();
+    seedData();
+
+    const threads = getThreadsByCourse(courseId);
+    return threads.sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+  },
+
+  /**
+   * Get course metrics
+   */
+  async getCourseMetrics(courseId: string): Promise<CourseMetrics> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    const threads = getThreadsByCourse(courseId);
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Get unique student authors
+    const users = getUsers();
+    const studentAuthors = new Set(
+      threads
+        .map((t) => t.authorId)
+        .filter((authorId) => {
+          const user = users.find((u) => u.id === authorId);
+          return user?.role === "student";
+        })
+    );
+
+    const recentThreads = threads.filter(
+      (t) => new Date(t.createdAt) >= sevenDaysAgo
+    );
+
+    return {
+      threadCount: threads.length,
+      unansweredCount: threads.filter((t) => t.status === "open").length,
+      answeredCount: threads.filter((t) => t.status === "answered").length,
+      resolvedCount: threads.filter((t) => t.status === "resolved").length,
+      activeStudents: studentAuthors.size,
+      recentActivity: recentThreads.length,
+    };
+  },
+
+  /**
+   * Get AI-generated course insights
+   */
+  async getCourseInsights(courseId: string): Promise<CourseInsight> {
+    await delay(600 + Math.random() * 200); // 600-800ms (AI simulation)
+    seedData();
+
+    const threads = getThreadsByCourse(courseId);
+    const activeThreads = threads.filter(
+      (t) => t.status === "open" || t.status === "answered"
+    ).length;
+
+    // Get top questions by view count
+    const topQuestions = threads
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 5)
+      .map((t) => t.title);
+
+    // Get trending topics from tags
+    const allTags = threads.flatMap((t) => t.tags || []);
+    const tagCounts = allTags.reduce((acc, tag) => {
+      acc[tag] = (acc[tag] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const trendingTopics = Object.entries(tagCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([tag]) => tag);
+
+    // Generate summary based on activity
+    const unansweredCount = threads.filter((t) => t.status === "open").length;
+    const summary =
+      unansweredCount > 5
+        ? `High activity with ${unansweredCount} open questions. Students are actively engaging with ${trendingTopics[0] || "course"} topics.`
+        : `Moderate activity. Most questions are answered. Focus areas: ${trendingTopics.slice(0, 2).join(", ") || "general concepts"}.`;
+
+    return {
+      id: `insight-${courseId}-${Date.now()}`,
+      courseId,
+      summary,
+      activeThreads,
+      topQuestions,
+      trendingTopics,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  // ============================================
+  // Notification API Methods
+  // ============================================
+
+  /**
+   * Get notifications for a user
+   */
+  async getNotifications(
+    userId: string,
+    courseId?: string
+  ): Promise<Notification[]> {
+    await delay(200 + Math.random() * 200); // 200-400ms
+    seedData();
+
+    const notifications = getNotifications(userId, courseId);
+    return notifications.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  },
+
+  /**
+   * Mark notification as read
+   */
+  async markNotificationRead(notificationId: string): Promise<void> {
+    await delay(50); // Quick action
+    seedData();
+
+    markNotificationRead(notificationId);
+  },
+
+  /**
+   * Mark all notifications as read
+   */
+  async markAllNotificationsRead(
+    userId: string,
+    courseId?: string
+  ): Promise<void> {
+    await delay(100);
+    seedData();
+
+    markAllNotificationsRead(userId, courseId);
   },
 };

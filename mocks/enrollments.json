@@ -1,0 +1,65 @@
+[
+  {
+    "id": "enroll-1",
+    "userId": "user-student-1",
+    "courseId": "course-cs101",
+    "role": "student",
+    "enrolledAt": "2025-08-20T10:00:00Z"
+  },
+  {
+    "id": "enroll-2",
+    "userId": "user-student-1",
+    "courseId": "course-cs201",
+    "role": "student",
+    "enrolledAt": "2025-08-20T10:00:00Z"
+  },
+  {
+    "id": "enroll-3",
+    "userId": "user-student-2",
+    "courseId": "course-cs101",
+    "role": "student",
+    "enrolledAt": "2025-08-21T11:00:00Z"
+  },
+  {
+    "id": "enroll-4",
+    "userId": "user-student-2",
+    "courseId": "course-math221",
+    "role": "student",
+    "enrolledAt": "2025-08-21T11:00:00Z"
+  },
+  {
+    "id": "enroll-5",
+    "userId": "user-student-3",
+    "courseId": "course-cs101",
+    "role": "student",
+    "enrolledAt": "2025-08-22T12:00:00Z"
+  },
+  {
+    "id": "enroll-6",
+    "userId": "user-instructor-1",
+    "courseId": "course-cs101",
+    "role": "instructor",
+    "enrolledAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "enroll-7",
+    "userId": "user-instructor-1",
+    "courseId": "course-cs201",
+    "role": "instructor",
+    "enrolledAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "enroll-8",
+    "userId": "user-instructor-1",
+    "courseId": "course-math221",
+    "role": "instructor",
+    "enrolledAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "enroll-9",
+    "userId": "user-ta-1",
+    "courseId": "course-cs101",
+    "role": "ta",
+    "enrolledAt": "2025-08-16T08:00:00Z"
+  }
+]

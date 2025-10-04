@@ -1,0 +1,35 @@
+[
+  {
+    "id": "course-cs101",
+    "code": "CS 101",
+    "name": "Introduction to Computer Science",
+    "term": "Fall 2025",
+    "description": "Fundamental concepts of computer science including algorithms, data structures, and programming.",
+    "instructorIds": ["user-instructor-1"],
+    "enrollmentCount": 45,
+    "status": "active",
+    "createdAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "course-cs201",
+    "code": "CS 201",
+    "name": "Data Structures & Algorithms",
+    "term": "Fall 2025",
+    "description": "Advanced data structures, algorithm design, and complexity analysis.",
+    "instructorIds": ["user-instructor-1"],
+    "enrollmentCount": 38,
+    "status": "active",
+    "createdAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "course-math221",
+    "code": "MATH 221",
+    "name": "Calculus II",
+    "term": "Fall 2025",
+    "description": "Integration techniques, sequences, series, and differential equations.",
+    "instructorIds": ["user-instructor-1"],
+    "enrollmentCount": 52,
+    "status": "active",
+    "createdAt": "2025-08-15T09:00:00Z"
+  }
+]

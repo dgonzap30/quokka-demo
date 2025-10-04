@@ -1,0 +1,50 @@
+[
+  {
+    "id": "thread-1",
+    "courseId": "course-cs101",
+    "title": "How does binary search work?",
+    "content": "I'm having trouble understanding the binary search algorithm. Can someone explain how it works step by step?",
+    "authorId": "user-student-1",
+    "status": "answered",
+    "tags": ["algorithms", "binary-search"],
+    "views": 45,
+    "createdAt": "2025-10-01T10:30:00Z",
+    "updatedAt": "2025-10-01T14:20:00Z"
+  },
+  {
+    "id": "thread-2",
+    "courseId": "course-cs101",
+    "title": "What's the difference between arrays and linked lists?",
+    "content": "I understand both data structures but I'm confused about when to use which one. What are the main differences?",
+    "authorId": "user-student-2",
+    "status": "resolved",
+    "tags": ["data-structures", "arrays", "linked-lists"],
+    "views": 67,
+    "createdAt": "2025-09-28T09:15:00Z",
+    "updatedAt": "2025-09-29T11:30:00Z"
+  },
+  {
+    "id": "thread-3",
+    "courseId": "course-cs201",
+    "title": "Understanding Big O notation",
+    "content": "Can someone explain what O(log n) means in practical terms?",
+    "authorId": "user-student-1",
+    "status": "open",
+    "tags": ["algorithms", "complexity"],
+    "views": 23,
+    "createdAt": "2025-10-03T13:45:00Z",
+    "updatedAt": "2025-10-03T13:45:00Z"
+  },
+  {
+    "id": "thread-4",
+    "courseId": "course-math221",
+    "title": "Integration by parts confusion",
+    "content": "I'm stuck on problem 3.4 from the textbook. How do I choose u and dv?",
+    "authorId": "user-student-2",
+    "status": "answered",
+    "tags": ["integration", "calculus"],
+    "views": 31,
+    "createdAt": "2025-10-02T16:00:00Z",
+    "updatedAt": "2025-10-02T18:30:00Z"
+  }
+]

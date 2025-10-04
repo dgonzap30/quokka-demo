@@ -1,8 +1,12 @@
-import type { User, AuthSession } from "@/lib/models/types";
+import type { User, AuthSession, Course, Enrollment, Thread, Notification } from "@/lib/models/types";
 
 const KEYS = {
   users: "quokkaq.users",
   authSession: "quokkaq.authSession",
+  courses: "quokkaq.courses",
+  enrollments: "quokkaq.enrollments",
+  threads: "quokkaq.threads",
+  notifications: "quokkaq.notifications",
   initialized: "quokkaq.initialized",
 } as const;
 
@@ -21,7 +25,15 @@ export function seedData(): void {
 
   try {
     const users = require("@/mocks/users.json") as User[];
+    const courses = require("@/mocks/courses.json") as Course[];
+    const enrollments = require("@/mocks/enrollments.json") as Enrollment[];
+    const threads = require("@/mocks/threads.json") as Thread[];
+
     localStorage.setItem(KEYS.users, JSON.stringify(users));
+    localStorage.setItem(KEYS.courses, JSON.stringify(courses));
+    localStorage.setItem(KEYS.enrollments, JSON.stringify(enrollments));
+    localStorage.setItem(KEYS.threads, JSON.stringify(threads));
+    localStorage.setItem(KEYS.notifications, JSON.stringify([])); // Empty notifications initially
     localStorage.setItem(KEYS.initialized, "true");
   } catch (error) {
     console.error("Failed to seed data:", error);
@@ -138,4 +150,158 @@ export function clearAuthSession(): void {
  */
 export function isSessionValid(session: AuthSession): boolean {
   return new Date(session.expiresAt) > new Date();
+}
+
+// ============================================
+// Course Data Access
+// ============================================
+
+/**
+ * Get all courses
+ */
+export function getCourses(): Course[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.courses);
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data) as Course[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get course by ID
+ */
+export function getCourseById(id: string): Course | null {
+  const courses = getCourses();
+  return courses.find((c) => c.id === id) ?? null;
+}
+
+/**
+ * Get enrollments for a user
+ */
+export function getEnrollments(userId: string): Enrollment[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.enrollments);
+  if (!data) return [];
+
+  try {
+    const allEnrollments = JSON.parse(data) as Enrollment[];
+    return allEnrollments.filter((e) => e.userId === userId);
+  } catch {
+    return [];
+  }
+}
+
+// ============================================
+// Thread Data Access
+// ============================================
+
+/**
+ * Get all threads
+ */
+export function getThreads(): Thread[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.threads);
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data) as Thread[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get threads by course ID
+ */
+export function getThreadsByCourse(courseId: string): Thread[] {
+  const threads = getThreads();
+  return threads.filter((t) => t.courseId === courseId);
+}
+
+/**
+ * Get thread by ID
+ */
+export function getThreadById(id: string): Thread | null {
+  const threads = getThreads();
+  return threads.find((t) => t.id === id) ?? null;
+}
+
+// ============================================
+// Notification Data Access
+// ============================================
+
+/**
+ * Get notifications for a user
+ */
+export function getNotifications(userId: string, courseId?: string): Notification[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.notifications);
+  if (!data) return [];
+
+  try {
+    const allNotifications = JSON.parse(data) as Notification[];
+    let filtered = allNotifications.filter((n) => n.userId === userId);
+
+    if (courseId) {
+      filtered = filtered.filter((n) => n.courseId === courseId);
+    }
+
+    return filtered;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Mark notification as read
+ */
+export function markNotificationRead(notificationId: string): void {
+  if (typeof window === "undefined") return;
+
+  const data = localStorage.getItem(KEYS.notifications);
+  if (!data) return;
+
+  try {
+    const notifications = JSON.parse(data) as Notification[];
+    const notification = notifications.find((n) => n.id === notificationId);
+
+    if (notification) {
+      notification.read = true;
+      localStorage.setItem(KEYS.notifications, JSON.stringify(notifications));
+    }
+  } catch (error) {
+    console.error("Failed to mark notification as read:", error);
+  }
+}
+
+/**
+ * Mark all notifications as read for a user (optionally filtered by course)
+ */
+export function markAllNotificationsRead(userId: string, courseId?: string): void {
+  if (typeof window === "undefined") return;
+
+  const data = localStorage.getItem(KEYS.notifications);
+  if (!data) return;
+
+  try {
+    const notifications = JSON.parse(data) as Notification[];
+
+    notifications.forEach((n) => {
+      if (n.userId === userId && (!courseId || n.courseId === courseId)) {
+        n.read = true;
+      }
+    });
+
+    localStorage.setItem(KEYS.notifications, JSON.stringify(notifications));
+  } catch (error) {
+    console.error("Failed to mark notifications as read:", error);
+  }
 }

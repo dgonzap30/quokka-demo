@@ -1,5 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { User, LoginInput, SignupInput, AuthResult, AuthSession } from "@/lib/models/types";
+import type {
+  User,
+  LoginInput,
+  SignupInput,
+  AuthResult,
+  AuthSession,
+  Course,
+  Thread,
+  Notification,
+  CourseMetrics,
+  CourseInsight,
+} from "@/lib/models/types";
 import { api } from "./client";
 import { isAuthSuccess } from "@/lib/models/types";
 
@@ -10,6 +21,14 @@ import { isAuthSuccess } from "@/lib/models/types";
 const queryKeys = {
   currentUser: ["currentUser"] as const,
   session: ["session"] as const,
+  courses: ["courses"] as const,
+  userCourses: (userId: string) => ["userCourses", userId] as const,
+  course: (courseId: string) => ["course", courseId] as const,
+  courseThreads: (courseId: string) => ["courseThreads", courseId] as const,
+  courseMetrics: (courseId: string) => ["courseMetrics", courseId] as const,
+  courseInsights: (courseId: string) => ["courseInsights", courseId] as const,
+  notifications: (userId: string, courseId?: string) =>
+    courseId ? ["notifications", userId, courseId] as const : ["notifications", userId] as const,
 };
 
 // ============================================
@@ -94,6 +113,136 @@ export function useLogout() {
       queryClient.setQueryData(queryKeys.session, null);
       // Invalidate all queries
       queryClient.invalidateQueries();
+    },
+  });
+}
+
+// ============================================
+// Course Hooks
+// ============================================
+
+/**
+ * Get all active courses
+ */
+export function useCourses() {
+  return useQuery({
+    queryKey: queryKeys.courses,
+    queryFn: () => api.getAllCourses(),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000,
+  });
+}
+
+/**
+ * Get courses for a specific user
+ */
+export function useUserCourses(userId: string | undefined) {
+  return useQuery({
+    queryKey: userId ? queryKeys.userCourses(userId) : ["userCourses"],
+    queryFn: () => (userId ? api.getUserCourses(userId) : Promise.resolve([])),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Get single course by ID
+ */
+export function useCourse(courseId: string | undefined) {
+  return useQuery({
+    queryKey: courseId ? queryKeys.course(courseId) : ["course"],
+    queryFn: () => (courseId ? api.getCourse(courseId) : Promise.resolve(null)),
+    enabled: !!courseId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+}
+
+/**
+ * Get threads for a course
+ */
+export function useCourseThreads(courseId: string | undefined) {
+  return useQuery({
+    queryKey: courseId ? queryKeys.courseThreads(courseId) : ["courseThreads"],
+    queryFn: () => (courseId ? api.getCourseThreads(courseId) : Promise.resolve([])),
+    enabled: !!courseId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Get course metrics
+ */
+export function useCourseMetrics(courseId: string | undefined) {
+  return useQuery({
+    queryKey: courseId ? queryKeys.courseMetrics(courseId) : ["courseMetrics"],
+    queryFn: () => (courseId ? api.getCourseMetrics(courseId) : Promise.resolve(null)),
+    enabled: !!courseId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Get AI-generated course insights
+ */
+export function useCourseInsights(courseId: string | undefined) {
+  return useQuery({
+    queryKey: courseId ? queryKeys.courseInsights(courseId) : ["courseInsights"],
+    queryFn: () => (courseId ? api.getCourseInsights(courseId) : Promise.resolve(null)),
+    enabled: !!courseId,
+    staleTime: 5 * 60 * 1000, // 5 minutes (expensive AI operation)
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+// ============================================
+// Notification Hooks
+// ============================================
+
+/**
+ * Get notifications for a user
+ */
+export function useNotifications(userId: string | undefined, courseId?: string) {
+  return useQuery({
+    queryKey: userId ? queryKeys.notifications(userId, courseId) : ["notifications"],
+    queryFn: () => (userId ? api.getNotifications(userId, courseId) : Promise.resolve([])),
+    enabled: !!userId,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000,
+    refetchInterval: 60 * 1000, // Poll every minute
+  });
+}
+
+/**
+ * Mark notification as read mutation
+ */
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (notificationId: string) => api.markNotificationRead(notificationId),
+    onSuccess: () => {
+      // Invalidate all notification queries
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+/**
+ * Mark all notifications as read mutation
+ */
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, courseId }: { userId: string; courseId?: string }) =>
+      api.markAllNotificationsRead(userId, courseId),
+    onSuccess: () => {
+      // Invalidate all notification queries
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }
