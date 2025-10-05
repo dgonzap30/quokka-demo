@@ -87,7 +87,7 @@ function AskQuestionForm() {
         <div className="py-8 md:py-12 space-y-6">
           <div className="space-y-4">
             <h1 className="heading-2 glass-text">Ask a Question</h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+            <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl">
               Get help from your classmates and instructors. Provide detailed information to receive the best answers.
             </p>
           </div>
@@ -98,7 +98,7 @@ function AskQuestionForm() {
           <CardHeader className="p-8 md:p-10">
             <div className="space-y-2">
               <CardTitle className="heading-3 glass-text">New Discussion Thread</CardTitle>
-              <CardDescription className="text-base leading-relaxed">
+              <CardDescription className="text-base leading-relaxed glass-text">
                 Provide a clear title and detailed description of your question
               </CardDescription>
             </div>
@@ -139,7 +139,7 @@ function AskQuestionForm() {
                   aria-required="true"
                   maxLength={200}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground glass-text">
                   {title.length}/200 characters
                 </p>
               </div>
@@ -173,7 +173,7 @@ function AskQuestionForm() {
                   placeholder="e.g., algorithms, binary-search, recursion"
                   className="h-12 text-base"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground glass-text">
                   Separate tags with commas
                 </p>
               </div>
@@ -208,7 +208,7 @@ function AskQuestionForm() {
             <CardTitle className="heading-4 glass-text">Tips for Asking Good Questions</CardTitle>
           </CardHeader>
           <CardContent className="p-8 pt-0">
-            <div className="space-y-3 text-sm md:text-base text-muted-foreground leading-relaxed">
+            <div className="space-y-3 text-sm md:text-base text-muted-foreground glass-text leading-relaxed">
               <p>✓ Search existing threads first to avoid duplicates</p>
               <p>✓ Use a clear, specific title that summarizes your question</p>
               <p>✓ Provide enough context and details for others to understand</p>

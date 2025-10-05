@@ -92,7 +92,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
         <Card variant="glass" className="p-16 text-center">
           <div className="max-w-md mx-auto space-y-6">
             <div className="flex justify-center">
-              <div className="text-6xl opacity-50">🔍</div>
+              <div className="text-6xl opacity-50" aria-hidden="true">🔍</div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold">Course Not Found</h3>
@@ -137,10 +137,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
             <div className="flex-1 space-y-4">
               <h1 className="heading-2 glass-text">{course.name}</h1>
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
+              <p className="text-lg text-muted-foreground glass-text leading-relaxed max-w-3xl">
                 {course.description}
               </p>
-              <div className="flex items-center gap-6 text-sm text-subtle">
+              <div className="flex items-center gap-6 text-sm text-subtle glass-text">
                 <span className="font-medium">{course.term}</span>
                 <span>•</span>
                 <span>{course.enrollmentCount} students enrolled</span>
@@ -162,7 +162,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           <Card variant="glass-strong">
             <CardHeader className="p-6 md:p-8">
               <CardTitle className="text-xl glass-text">Ask a Question</CardTitle>
-              <CardDescription className="text-base">
+              <CardDescription className="text-base glass-text">
                 Post your question to get help from classmates and instructors
               </CardDescription>
             </CardHeader>
@@ -183,7 +183,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                     aria-required="true"
                     maxLength={200}
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground glass-text">
                     {title.length}/200 characters
                   </p>
                 </div>
@@ -217,7 +217,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                     placeholder="e.g., algorithms, binary-search, homework"
                     className="h-12 text-base"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground glass-text">
                     Separate tags with commas
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                           <CardTitle className="text-xl md:text-2xl glass-text leading-snug">
                             {thread.title}
                           </CardTitle>
-                          <CardDescription className="text-base leading-relaxed line-clamp-2">
+                          <CardDescription className="text-base leading-relaxed line-clamp-2 glass-text">
                             {thread.content}
                           </CardDescription>
                         </div>
@@ -272,7 +272,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                       </div>
                     </CardHeader>
                     <CardContent className="p-8 pt-0">
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-subtle">
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-subtle glass-text">
                         <span>{thread.views} views</span>
                         <span>•</span>
                         <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
@@ -298,7 +298,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
             <Card variant="glass" className="p-16 text-center">
               <div className="max-w-md mx-auto space-y-6">
                 <div className="flex justify-center">
-                  <div className="text-6xl opacity-50">💬</div>
+                  <div className="text-6xl opacity-50" aria-hidden="true">💬</div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold">No Threads Yet</h3>

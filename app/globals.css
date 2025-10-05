@@ -1,3 +1,4 @@
+@source "../{app,components,lib}";
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -219,6 +220,8 @@
   --glow-primary: 0 0 20px rgba(138, 107, 61, 0.15);
   --glow-secondary: 0 0 20px rgba(94, 125, 74, 0.15);
   --glow-accent: 0 0 20px rgba(45, 108, 223, 0.15);
+  --glow-success: 0 0 20px rgba(46, 125, 50, 0.15);
+  --glow-warning: 0 0 20px rgba(180, 83, 9, 0.15);
 
   /* Glass Shadows (Softer, Diffuse) */
   --shadow-glass-sm: 0 2px 16px rgba(15, 14, 12, 0.04);
@@ -306,7 +309,7 @@
   --avatar-bg: 35 40% 92%;                /* primary/20 equivalent */
   --avatar-text: 35 45% 35%;              /* primary dark */
 
-  --text-subtle: 35 8% 55%;               /* opacity-60 replacement */
+  --text-subtle: 35 8% 45%;               /* Darkened for WCAG AA contrast (4.5:1+) */
 
   /* ===== Sidebar ===== */
   --sidebar: var(--surface-2);
@@ -384,6 +387,8 @@
   --glow-primary: 0 0 24px rgba(193, 165, 118, 0.2);
   --glow-secondary: 0 0 24px rgba(150, 179, 128, 0.2);
   --glow-accent: 0 0 24px rgba(134, 169, 246, 0.2);
+  --glow-success: 0 0 24px rgba(46, 125, 50, 0.2);
+  --glow-warning: 0 0 24px rgba(180, 83, 9, 0.2);
 
   /* Glass Shadows (Dark) */
   --shadow-glass-sm: 0 2px 16px rgba(0, 0, 0, 0.2);

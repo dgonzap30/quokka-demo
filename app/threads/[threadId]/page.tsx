@@ -71,11 +71,11 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
         <Card variant="glass" className="p-16 text-center">
           <div className="max-w-md mx-auto space-y-6">
             <div className="flex justify-center">
-              <div className="text-6xl opacity-50">🔍</div>
+              <div className="text-6xl opacity-50" aria-hidden="true">🔍</div>
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-semibold">Thread Not Found</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground glass-text leading-relaxed">
                 The discussion thread you&apos;re looking for doesn&apos;t exist or has been removed.
               </p>
             </div>
@@ -125,7 +125,7 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
                 <CardTitle className="heading-3 glass-text leading-snug">
                   {thread.title}
                 </CardTitle>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-subtle">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-subtle glass-text">
                   <span>{thread.views} views</span>
                   <span>•</span>
                   <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
@@ -179,7 +179,7 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-subtle">
+                        <p className="text-xs text-subtle glass-text">
                           {new Date(post.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -197,11 +197,11 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
             <Card variant="glass" className="p-16 text-center">
               <div className="max-w-md mx-auto space-y-6">
                 <div className="flex justify-center">
-                  <div className="text-6xl opacity-50">💬</div>
+                  <div className="text-6xl opacity-50" aria-hidden="true">💬</div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold">No Replies Yet</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground glass-text leading-relaxed">
                     Be the first to contribute to this discussion!
                   </p>
                 </div>
@@ -215,7 +215,7 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
           <CardHeader className="p-8">
             <div className="space-y-2">
               <CardTitle className="heading-4 glass-text">Post a Reply</CardTitle>
-              <CardDescription className="text-base">
+              <CardDescription className="text-base glass-text">
                 Share your thoughts or answer this question
               </CardDescription>
             </div>
