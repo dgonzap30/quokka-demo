@@ -8,6 +8,7 @@ import { isAuthSuccess } from "@/lib/models/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { GraduationCap, BookOpen } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -63,9 +64,9 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 onClick={() => handleQuickLogin("student")}
-                className="flex flex-col items-center gap-1 h-auto py-3"
+                className="flex flex-col items-center gap-2 h-auto py-4"
               >
-                <span className="text-2xl">🎓</span>
+                <GraduationCap className="h-8 w-8 text-primary" />
                 <span className="text-sm font-semibold">Student</span>
                 <span className="text-xs text-muted-foreground">Alice Student</span>
               </Button>
@@ -73,9 +74,9 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 onClick={() => handleQuickLogin("instructor")}
-                className="flex flex-col items-center gap-1 h-auto py-3"
+                className="flex flex-col items-center gap-2 h-auto py-4"
               >
-                <span className="text-2xl">👨‍🏫</span>
+                <BookOpen className="h-8 w-8 text-accent" />
                 <span className="text-sm font-semibold">Instructor</span>
                 <span className="text-xs text-muted-foreground">Dr. Bob Teacher</span>
               </Button>
