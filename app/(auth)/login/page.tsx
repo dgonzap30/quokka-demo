@@ -16,6 +16,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  // Quick login functions
+  function handleQuickLogin(role: "student" | "instructor") {
+    if (role === "student") {
+      setEmail("student@demo.com");
+      setPassword("demo123");
+    } else {
+      setEmail("instructor@demo.com");
+      setPassword("demo123");
+    }
+    setError("");
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
@@ -43,6 +55,42 @@ export default function LoginPage() {
           <CardDescription className="text-center">Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Quick Login Buttons */}
+          <div className="mb-6 space-y-3">
+            <p className="text-sm font-semibold text-center text-muted-foreground">Quick Login (Demo)</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleQuickLogin("student")}
+                className="flex flex-col items-center gap-1 h-auto py-3"
+              >
+                <span className="text-2xl">🎓</span>
+                <span className="text-sm font-semibold">Student</span>
+                <span className="text-xs text-muted-foreground">Alice Student</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleQuickLogin("instructor")}
+                className="flex flex-col items-center gap-1 h-auto py-3"
+              >
+                <span className="text-2xl">👨‍🏫</span>
+                <span className="text-sm font-semibold">Instructor</span>
+                <span className="text-xs text-muted-foreground">Dr. Bob Teacher</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-[var(--border-glass)]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[var(--card-bg)] px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="bg-danger/10 border border-danger text-danger px-4 py-3 rounded-lg">
@@ -94,9 +142,6 @@ export default function LoginPage() {
             <Link href="/signup" className="text-accent hover:underline">
               Sign up
             </Link>
-          </p>
-          <p className="text-xs text-muted-foreground text-center">
-            Demo credentials: student@demo.com / demo123
           </p>
         </CardFooter>
       </Card>
