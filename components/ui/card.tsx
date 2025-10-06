@@ -10,6 +10,7 @@ const cardVariants = cva(
       variant: {
         default: "p-6",
         ai: "p-8 relative border-l-4 border-l-ai-purple-500 bg-gradient-to-br from-ai-purple-50/50 via-ai-indigo-50/30 to-ai-cyan-50/50 dark:from-ai-purple-950/20 dark:via-ai-indigo-950/15 dark:to-ai-cyan-950/20 shadow-ai-sm hover:shadow-ai-md",
+        "ai-hero": "p-8 relative border-2 border-transparent rounded-xl shadow-[var(--shadow-e3)] hover:shadow-ai-lg transition-shadow duration-300 [background:linear-gradient(var(--card),var(--card))_padding-box,var(--ai-gradient-border)_border-box] before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-br before:from-ai-purple-50/30 before:to-ai-cyan-50/30 before:-z-10 dark:before:from-ai-purple-950/20 dark:before:to-ai-cyan-950/20",
         hover: "p-6 hover:shadow-e2 hover:-translate-y-1 cursor-pointer",
         elevated: "p-8 shadow-e2",
         glass: "p-6 glass-panel",

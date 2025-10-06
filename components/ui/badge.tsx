@@ -23,6 +23,12 @@ const badgeVariants = cva(
           "border-ai-purple-500 bg-ai-purple-50 text-ai-purple-700 dark:bg-ai-purple-950/30 dark:text-ai-purple-300 [a&]:hover:bg-ai-purple-100 dark:[a&]:hover:bg-ai-purple-900/30",
         "ai-shimmer":
           "border-transparent bg-gradient-to-r from-ai-indigo-500 via-ai-purple-500 to-ai-cyan-500 bg-[length:200%_100%] text-white animate-shimmer shadow-ai-sm",
+        "confidence-high":
+          "border bg-success/10 text-success border-success/20 dark:bg-success/20 dark:border-success/30",
+        "confidence-medium":
+          "border bg-warning/10 text-warning border-warning/20 dark:bg-warning/20 dark:border-warning/30",
+        "confidence-low":
+          "border bg-danger/10 text-danger border-danger/20 dark:bg-danger/20 dark:border-danger/30",
       },
     },
     defaultVariants: {

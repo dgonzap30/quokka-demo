@@ -842,6 +842,36 @@
   z-index: 3;
 }
 
+/* ===== Confidence Meter Utilities ===== */
+.confidence-track {
+  @apply w-full h-2 rounded-full bg-muted/20 overflow-hidden;
+}
+
+.confidence-bar-high {
+  @apply h-full bg-success rounded-full transition-all duration-300;
+}
+
+.confidence-bar-medium {
+  @apply h-full bg-warning rounded-full transition-all duration-300;
+}
+
+.confidence-bar-low {
+  @apply h-full bg-danger rounded-full transition-all duration-300;
+}
+
+/* Confidence text colors */
+.confidence-text-high {
+  @apply text-success font-semibold;
+}
+
+.confidence-text-medium {
+  @apply text-warning font-semibold;
+}
+
+.confidence-text-low {
+  @apply text-danger font-semibold;
+}
+
 /* ===== Reduced Motion Support ===== */
 @media (prefers-reduced-motion: reduce) {
   .liquid-border,
