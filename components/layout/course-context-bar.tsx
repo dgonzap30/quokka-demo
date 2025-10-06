@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface CourseTab {
@@ -35,6 +34,9 @@ export interface CourseContextBarProps {
   /** Whether AI assistance is available (>30% coverage) */
   hasAiCoverage?: boolean;
 
+  /** Whether to show compact mode (reduces height) */
+  isCompact?: boolean;
+
   /** Optional className for composition */
   className?: string;
 }
@@ -46,6 +48,7 @@ export function CourseContextBar({
   term,
   studentCount,
   hasAiCoverage = false,
+  isCompact = false,
   className,
 }: CourseContextBarProps) {
   const pathname = usePathname();
@@ -77,70 +80,69 @@ export function CourseContextBar({
   return (
     <div
       className={cn(
-        "w-full bg-white/70 backdrop-blur-lg border-b border-black/5",
+        "w-full bg-white/70 backdrop-blur-lg border-b border-black/5 transition-[height] duration-200",
         className
       )}
+      style={{ height: isCompact ? '40px' : '48px' }}
       role="navigation"
       aria-label="Course navigation"
     >
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="flex h-12 items-center justify-between gap-4">
-          {/* Left Section: Course Info */}
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-semibold text-neutral-900">
-                  {courseCode}
-                </h1>
-                {hasAiCoverage && (
-                  <div
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200"
-                    title="AI assistance available"
-                  >
-                    <Sparkles className="h-3 w-3 text-purple-600" aria-hidden="true" />
-                    <span className="text-xs font-medium text-purple-700">
-                      AI
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-neutral-600">
-                <span>{courseName}</span>
-                {term && (
-                  <>
-                    <span className="text-neutral-400">·</span>
-                    <span>{term}</span>
-                  </>
-                )}
-                {studentCount && (
-                  <>
-                    <span className="text-neutral-400">·</span>
-                    <span>{studentCount} students</span>
-                  </>
-                )}
-              </div>
-            </div>
+      <div className="mx-auto max-w-7xl px-6 h-full">
+        <div className="flex h-full items-center gap-4">
+          {/* Left Section: Course Info (Single Line) */}
+          <div className="min-w-0 truncate text-sm text-neutral-700">
+            <span className="font-medium text-neutral-900">{courseCode}</span>
+            <span className="mx-1.5">·</span>
+            <span>{courseName}</span>
+            {term && (
+              <>
+                <span className="text-neutral-400 mx-1.5">•</span>
+                <span>{term}</span>
+              </>
+            )}
+            {studentCount && (
+              <>
+                <span className="text-neutral-400 mx-1.5">•</span>
+                <span>{studentCount} students</span>
+              </>
+            )}
+            {hasAiCoverage && (
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                AI Available
+              </span>
+            )}
           </div>
 
-          {/* Right Section: Segmented Control Tabs */}
-          <div className="hidden md:flex items-center gap-1">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className={cn(
-                  "relative px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200",
-                  "min-h-[36px] inline-flex items-center justify-center",
-                  tab.isActive
-                    ? "bg-white text-neutral-900 shadow-sm"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
-                )}
-                aria-current={tab.isActive ? "page" : undefined}
-              >
-                {tab.label}
-              </Link>
-            ))}
-          </div>
+          {/* Right Section: Underline Tabs */}
+          <nav className="ml-auto text-sm" aria-label="Course sections">
+            <ul className="flex gap-6">
+              {tabs.map((tab) => (
+                <li key={tab.href}>
+                  <Link
+                    href={tab.href}
+                    aria-current={tab.isActive ? "page" : undefined}
+                    className={cn(
+                      "group relative py-2 transition-colors duration-200",
+                      tab.isActive
+                        ? "text-neutral-900 font-medium"
+                        : "text-neutral-600 hover:text-neutral-900"
+                    )}
+                  >
+                    {tab.label}
+                    <span
+                      className={cn(
+                        "absolute left-0 right-0 -bottom-0.5 h-[2px] transition-all duration-200",
+                        tab.isActive
+                          ? "bg-amber-500 scale-x-100"
+                          : "bg-transparent group-hover:bg-neutral-300 group-hover:scale-x-100 scale-x-0"
+                      )}
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
     </div>

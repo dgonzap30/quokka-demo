@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { GlobalSearch } from "@/components/ui/global-search";
@@ -39,6 +38,9 @@ export interface GlobalNavBarProps {
   /** Whether nav has scrolled (for shadow effect) */
   hasScrolled?: boolean;
 
+  /** Scroll progress percentage (0-100) for progress bar */
+  scrollProgress?: number;
+
   /** Optional className for composition */
   className?: string;
 }
@@ -49,61 +51,64 @@ export function GlobalNavBar({
   breadcrumb,
   onAskQuestion,
   hasScrolled = false,
+  scrollProgress = 0,
   className,
 }: GlobalNavBarProps) {
   const router = useRouter();
 
   return (
-    <nav
-      className={cn(
-        "sticky top-0 z-50 w-full bg-white/70 backdrop-blur-lg border-b border-black/5 transition-shadow duration-200",
-        hasScrolled && "shadow-sm",
-        className
-      )}
-      role="navigation"
-      aria-label="Global navigation"
-    >
+    <>
+      {/* Scroll Progress Bar */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed left-0 top-0 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 z-[60] transition-all duration-200"
+        style={{ width: `${scrollProgress}%` }}
+      />
+
+      <nav
+        className={cn(
+          "sticky top-0 z-50 w-full bg-white/70 backdrop-blur-lg border-b border-black/5 transition-shadow duration-200",
+          hasScrolled && "shadow-sm",
+          className
+        )}
+        role="navigation"
+        aria-label="Global navigation"
+      >
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-14 items-center justify-between gap-4">
           {/* Left Section: Logo + Breadcrumb */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {/* Logo */}
             <Link
               href="/dashboard"
-              className="flex items-center min-h-[44px] min-w-[44px]"
+              className="flex items-center shrink-0"
+              aria-label="QuokkaQ Home"
             >
               <span className="text-xl font-bold text-neutral-900">
-                Quokka<span className="text-primary">Q</span>
+                Quokka<span className="text-amber-500">Q</span>
               </span>
             </Link>
 
             {/* Breadcrumb (Desktop) */}
             {breadcrumb && (
-              <>
-                <ChevronRight
-                  className="hidden md:block h-4 w-4 text-neutral-400"
-                  aria-hidden="true"
-                />
-                <Link
-                  href={breadcrumb.href}
-                  className="hidden md:block text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors"
-                >
-                  {breadcrumb.label}
+              <nav aria-label="Breadcrumb" className="hidden md:flex items-center text-sm text-neutral-500 min-w-0">
+                <Link href="/dashboard" className="hover:text-neutral-900 shrink-0">
+                  Dashboard
                 </Link>
-              </>
+                <span className="mx-2 text-neutral-300">/</span>
+                <span className="truncate text-neutral-900">{breadcrumb.label}</span>
+              </nav>
             )}
 
             {/* Breadcrumb (Mobile - Back Button) */}
             {breadcrumb && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="md:hidden h-9 text-neutral-700"
-                onClick={() => router.push(breadcrumb.href)}
-                aria-label={`Back to ${breadcrumb.label}`}
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="md:hidden text-sm text-neutral-700 hover:text-neutral-900"
+                aria-label="Back to Dashboard"
               >
                 ← {breadcrumb.label}
-              </Button>
+              </button>
             )}
           </div>
 
@@ -171,5 +176,6 @@ export function GlobalNavBar({
         </div>
       </div>
     </nav>
+    </>
   );
 }

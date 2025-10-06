@@ -20,19 +20,27 @@ export function NavHeader() {
   // Fetch course data (hook must be called unconditionally, before early returns)
   const { data: course } = useCourse(navContext.courseId);
 
-  // Scroll state for shadow effect
+  // Scroll state for shadow effect and progress bar
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Ask modal state for course context
   const [showAskModal, setShowAskModal] = useState(false);
 
-  // Track scroll position for shadow effect
+  // Track scroll position for shadow effect and progress calculation
   useEffect(() => {
     const handleScroll = () => {
-      setHasScrolled(window.scrollY > 2);
+      const sy = window.scrollY;
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+
+      setHasScrolled(sy > 8);
+      setScrollProgress(h > 0 ? Math.min(100, Math.max(0, (sy / h) * 100)) : 0);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    // Initial calculation
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -65,6 +73,7 @@ export function NavHeader() {
         } : undefined}
         onAskQuestion={inCourseContext ? () => setShowAskModal(true) : undefined}
         hasScrolled={hasScrolled}
+        scrollProgress={scrollProgress}
       />
 
       {/* Course Context Bar (Row 2) - Only in course pages */}
@@ -76,6 +85,7 @@ export function NavHeader() {
           term={course.term}
           studentCount={course.enrollmentCount}
           hasAiCoverage={false}
+          isCompact={hasScrolled}
         />
       )}
 
