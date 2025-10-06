@@ -2,12 +2,14 @@
 
 import { useState, FormEvent, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCurrentUser, useUserCourses, useCreateThread } from "@/lib/api/hooks";
+import { useCurrentUser, useUserCourses, useCreateThread, useGenerateAIPreview } from "@/lib/api/hooks";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AIAnswerCard } from "@/components/course/ai-answer-card";
 
 function AskQuestionForm() {
   const router = useRouter();
@@ -17,12 +19,14 @@ function AskQuestionForm() {
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const { data: courses, isLoading: coursesLoading } = useUserCourses(user?.id);
   const createThreadMutation = useCreateThread();
+  const previewMutation = useGenerateAIPreview();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Set preselected course when data loads
   useEffect(() => {
@@ -39,6 +43,28 @@ function AskQuestionForm() {
     router.push("/login");
     return null;
   }
+
+  const handlePreview = () => {
+    if (!selectedCourseId || !title.trim() || !content.trim()) return;
+
+    previewMutation.mutate(
+      {
+        threadId: "preview-temp",
+        courseId: selectedCourseId,
+        title: title.trim(),
+        content: content.trim(),
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0),
+      },
+      {
+        onSuccess: () => {
+          setShowPreview(true);
+        },
+      }
+    );
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -178,8 +204,28 @@ function AskQuestionForm() {
                 </p>
               </div>
 
-              {/* Submit Button */}
+              {/* Preview Helper Text */}
+              <div className="text-sm text-muted-foreground glass-text">
+                💡 Preview the AI-generated answer before posting your question
+              </div>
+
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-[var(--border-glass)]">
+                <Button
+                  type="button"
+                  variant="ai"
+                  size="lg"
+                  onClick={handlePreview}
+                  disabled={
+                    previewMutation.isPending ||
+                    isSubmitting ||
+                    !selectedCourseId ||
+                    !title.trim() ||
+                    !content.trim()
+                  }
+                >
+                  {previewMutation.isPending ? "Generating Preview..." : "Preview AI Answer"}
+                </Button>
                 <Button
                   type="submit"
                   variant="glass-primary"
@@ -193,7 +239,7 @@ function AskQuestionForm() {
                   variant="outline"
                   size="lg"
                   onClick={() => router.back()}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || previewMutation.isPending}
                 >
                   Cancel
                 </Button>
@@ -201,6 +247,76 @@ function AskQuestionForm() {
             </form>
           </CardContent>
         </Card>
+
+        {/* Preview Dialog */}
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="heading-3 glass-text">AI Answer Preview</DialogTitle>
+              <DialogDescription className="text-base glass-text">
+                Review the AI-generated answer before posting your question. You can still edit your question or post it directly.
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* AI Answer Preview */}
+            {previewMutation.data && (
+              <div className="mt-6">
+                <AIAnswerCard
+                  answer={previewMutation.data}
+                  variant="compact"
+                  currentUserEndorsed={false}
+                  onEndorse={undefined}
+                  isEndorsing={false}
+                />
+              </div>
+            )}
+
+            {/* Loading State */}
+            {previewMutation.isPending && (
+              <div className="flex items-center justify-center py-12">
+                <div className="glass-panel px-8 py-6 inline-flex items-center gap-4 rounded-2xl">
+                  <div className="animate-spin h-6 w-6 border-3 border-primary border-t-transparent rounded-full"></div>
+                  <p className="text-base text-foreground glass-text font-medium">
+                    Generating AI answer...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {previewMutation.isError && (
+              <div className="bg-danger/10 border border-danger/20 rounded-lg p-4">
+                <p className="text-sm text-danger font-medium">
+                  Failed to generate preview. Please try again.
+                </p>
+              </div>
+            )}
+
+            {/* Dialog Actions */}
+            <DialogFooter className="gap-3 sm:gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => setShowPreview(false)}
+              >
+                Edit Question
+              </Button>
+              <Button
+                type="button"
+                variant="glass-primary"
+                size="lg"
+                onClick={(e) => {
+                  setShowPreview(false);
+                  handleSubmit(e as unknown as FormEvent);
+                }}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Posting..." : "Post Question"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Tips */}
         <Card variant="glass">

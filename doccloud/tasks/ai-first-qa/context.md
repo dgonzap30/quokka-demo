@@ -199,15 +199,15 @@ AIAnswerCard (hero)
 - [x] Review and consolidate agent plans
 - [x] Implement AIAnswer types
 - [x] Add localStorage functions for AI answers
-- [ ] Implement AI generation template system
-- [ ] Implement mock API methods (generateAIAnswer, getAIAnswer, endorseAIAnswer)
-- [ ] Update createThread to auto-generate AI answers
-- [ ] Implement React Query hooks
-- [ ] Build ConfidenceMeter component
-- [ ] Build CitationList component
-- [ ] Build AIAnswerCard component
-- [ ] Integrate into thread detail page
-- [ ] Add ask page preview
+- [x] Implement AI generation template system
+- [x] Implement mock API methods (generateAIAnswer, getAIAnswer, endorseAIAnswer)
+- [x] Update createThread to auto-generate AI answers
+- [x] Implement React Query hooks
+- [x] Build ConfidenceMeter component
+- [x] Build CitationList component
+- [x] Build AIAnswerCard component
+- [x] Integrate into thread detail page
+- [x] Add ask page preview
 - [ ] Add AI badges to course page
 - [ ] Quality checks (typecheck, lint, build, a11y)
 - [ ] Manual testing all flows
@@ -216,6 +216,15 @@ AIAnswerCard (hero)
 
 ## Changelog
 
+- `2025-10-06` | [Ask Page Preview] | AI preview integration complete (~70 lines added)
+  - Added useGenerateAIPreview hook integration to ask page
+  - Created preview dialog with AIAnswerCard component
+  - Added "Preview AI Answer" button with loading states
+  - Implemented handlePreview function with proper form validation
+  - Added dialog actions: "Edit Question" and "Post Question"
+  - Included loading spinner and error handling
+  - ✅ Typecheck passes, lint clean (no new warnings)
+  - Ready for Playwright testing
 - `2025-10-06` | [Data Layer] | Phase 1 complete: Types, localStorage, API setup (~210 lines, commit 62ed862)
   - Added AIAnswer, Citation, ConfidenceLevel types with strict mode compliance
   - Extended Thread with hasAIAnswer/aiAnswerId, ActivityType/NotificationType for AI events
