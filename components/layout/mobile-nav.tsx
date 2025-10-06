@@ -13,15 +13,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
-import {
-  Menu,
-  LayoutDashboard,
-  MessageSquarePlus,
-  MessagesSquare,
-  LogOut,
-} from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { isNavItemActive, type NavItem } from "@/lib/utils/nav-config";
 
 export interface MobileNavProps {
   /** Current active route path */
@@ -36,54 +30,12 @@ export interface MobileNavProps {
 
   /** Logout handler */
   onLogout: () => void;
+
+  /** Optional navigation items - if not provided or empty, only shows user profile */
+  items?: NavItem[];
 }
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon?: ReactNode;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard className="h-4 w-4" />,
-  },
-  {
-    label: "Ask Question",
-    href: "/ask",
-    icon: <MessageSquarePlus className="h-4 w-4" />,
-  },
-  {
-    label: "Browse Threads",
-    href: "/threads",
-    icon: <MessagesSquare className="h-4 w-4" />,
-  },
-];
-
-/**
- * Determines if a nav item is active based on current path
- */
-function isActiveItem(itemHref: string, currentPath: string): boolean {
-  if (itemHref === "/dashboard") {
-    return currentPath === "/dashboard" ||
-           currentPath.startsWith("/courses/") ||
-           currentPath === "/courses";
-  }
-
-  if (itemHref === "/ask") {
-    return currentPath === "/ask";
-  }
-
-  if (itemHref === "/threads") {
-    return currentPath.startsWith("/threads");
-  }
-
-  return currentPath === itemHref;
-}
-
-export function MobileNav({ currentPath, user, onLogout }: MobileNavProps) {
+export function MobileNav({ currentPath, user, onLogout, items }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -112,26 +64,33 @@ export function MobileNav({ currentPath, user, onLogout }: MobileNavProps) {
             </SheetTitle>
           </SheetHeader>
 
-          {/* Navigation Links */}
-          <nav className="flex flex-col gap-2 mt-8" aria-label="Mobile navigation">
-            {NAV_ITEMS.map((item) => (
-              <SheetClose asChild key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors min-h-[44px]",
-                    isActiveItem(item.href, currentPath)
-                      ? "bg-primary/10 text-primary font-semibold"
-                      : "text-muted-foreground hover:bg-glass-medium hover:text-foreground"
-                  )}
-                  aria-current={isActiveItem(item.href, currentPath) ? "page" : undefined}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              </SheetClose>
-            ))}
-          </nav>
+          {/* Navigation Links - only render if items provided */}
+          {items && items.length > 0 && (
+            <nav className="flex flex-col gap-2 mt-8" aria-label="Mobile navigation">
+              {items.map((item) => (
+                <SheetClose asChild key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors min-h-[44px]",
+                      isNavItemActive(item.href, currentPath)
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-muted-foreground hover:bg-glass-medium hover:text-foreground"
+                    )}
+                    aria-current={isNavItemActive(item.href, currentPath) ? "page" : undefined}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                    {item.badge && item.badge > 0 && (
+                      <span className="ml-auto px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                </SheetClose>
+              ))}
+            </nav>
+          )}
 
           {/* User Profile Section */}
           {user && (

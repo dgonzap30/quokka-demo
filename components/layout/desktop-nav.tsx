@@ -3,9 +3,8 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, MessageSquarePlus, MessagesSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { isNavItemActive, type NavItem } from "@/lib/utils/nav-config";
 
 export interface DesktopNavProps {
   /** Current active route path */
@@ -13,72 +12,23 @@ export interface DesktopNavProps {
 
   /** Optional className for container */
   className?: string;
+
+  /** Optional navigation items - if not provided or empty, renders minimal nav */
+  items?: NavItem[];
 }
 
-export interface NavItem {
-  /** Display label */
-  label: string;
-
-  /** Route path (href) */
-  href: string;
-
-  /** Optional icon (Lucide component) */
-  icon?: ReactNode;
-
-  /** Badge count (for notifications) */
-  badge?: number;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard className="h-4 w-4" />,
-  },
-  {
-    label: "Ask Question",
-    href: "/ask",
-    icon: <MessageSquarePlus className="h-4 w-4" />,
-  },
-  {
-    label: "Browse Threads",
-    href: "/threads",
-    icon: <MessagesSquare className="h-4 w-4" />,
-  },
-];
-
-/**
- * Determines if a nav item is active based on current path
- * Handles nested routes (e.g., /courses/123 highlights Dashboard)
- */
-function isActiveItem(itemHref: string, currentPath: string): boolean {
-  // Exact match for Dashboard
-  if (itemHref === "/dashboard") {
-    return currentPath === "/dashboard" ||
-           currentPath.startsWith("/courses/") ||
-           currentPath === "/courses";
-  }
-
-  // Exact match for Ask
-  if (itemHref === "/ask") {
-    return currentPath === "/ask";
-  }
-
-  // Starts with for Threads
-  if (itemHref === "/threads") {
-    return currentPath.startsWith("/threads");
-  }
-
-  // Default: exact match
-  return currentPath === itemHref;
-}
-
-export function DesktopNav({ currentPath, className }: DesktopNavProps) {
+export function DesktopNav({ currentPath, className, items }: DesktopNavProps) {
   // Determine active tab value
   const activeTab = useMemo(() => {
-    const activeItem = NAV_ITEMS.find((item) => isActiveItem(item.href, currentPath));
-    return activeItem?.href || "/dashboard";
-  }, [currentPath]);
+    if (!items || items.length === 0) return '';
+    const activeItem = items.find((item) => isNavItemActive(item.href, currentPath));
+    return activeItem?.href || items[0]?.href;
+  }, [currentPath, items]);
+
+  // If no items provided or empty array, render minimal nav (no tabs)
+  if (!items || items.length === 0) {
+    return null;
+  }
 
   return (
     <nav
@@ -88,7 +38,7 @@ export function DesktopNav({ currentPath, className }: DesktopNavProps) {
     >
       <Tabs value={activeTab} className="w-full">
         <TabsList className="glass-panel h-11 p-1 gap-1">
-          {NAV_ITEMS.map((item) => (
+          {items.map((item) => (
             <TabsTrigger
               key={item.href}
               value={item.href}
@@ -102,6 +52,11 @@ export function DesktopNav({ currentPath, className }: DesktopNavProps) {
               >
                 {item.icon}
                 <span className="text-sm font-medium">{item.label}</span>
+                {item.badge && item.badge > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             </TabsTrigger>
           ))}

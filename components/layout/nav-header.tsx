@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { GlobalSearch } from "@/components/ui/global-search";
 import { DesktopNav } from "@/components/layout/desktop-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { getNavContext } from "@/lib/utils/nav-config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,11 +38,19 @@ export function NavHeader() {
     return null;
   }
 
+  // Detect navigation context and get appropriate items
+  const { items } = getNavContext(pathname || '');
+
   return (
     <header className="sticky top-0 z-50 w-full glass-panel-strong border-b border-[var(--border-glass)]">
       <div className="container-wide flex h-14 items-center gap-4 px-6 md:px-8">
         {/* Mobile Navigation */}
-        <MobileNav currentPath={pathname || ""} user={user} onLogout={handleLogout} />
+        <MobileNav
+          currentPath={pathname || ""}
+          user={user}
+          onLogout={handleLogout}
+          items={items}
+        />
 
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center space-x-2 min-h-[44px] min-w-[44px]">
@@ -52,7 +61,11 @@ export function NavHeader() {
         </Link>
 
         {/* Desktop Navigation */}
-        <DesktopNav currentPath={pathname || ""} className="flex-shrink-0" />
+        <DesktopNav
+          currentPath={pathname || ""}
+          className="flex-shrink-0"
+          items={items}
+        />
 
         {/* Global Search */}
         <div className="hidden md:block flex-1 max-w-md">
