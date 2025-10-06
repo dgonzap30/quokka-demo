@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { GraduationCap, MessageSquare } from "lucide-react";
 
 export default function ThreadDetailPage({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = use(params);
@@ -105,17 +107,13 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
     <div className="min-h-screen p-8 md:p-12">
       <div className="container-narrow space-y-12">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
-          <Link href="/courses" className="hover:text-accent transition-colors">
-            Courses
-          </Link>
-          <span>/</span>
-          <Link href={`/courses/${thread.courseId}`} className="hover:text-accent transition-colors">
-            Course
-          </Link>
-          <span>/</span>
-          <span className="text-foreground">Thread</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Course", href: `/courses/${thread.courseId}`, icon: <GraduationCap className="h-3 w-3" /> },
+            { label: thread.title.substring(0, 30) + (thread.title.length > 30 ? "..." : ""), icon: <MessageSquare className="h-3 w-3" /> }
+          ]}
+        />
 
         {/* Thread Question */}
         <Card variant="glass-strong">

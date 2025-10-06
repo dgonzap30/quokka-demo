@@ -11,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, GraduationCap } from "lucide-react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import type { Thread } from "@/lib/models/types";
 
 export default function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
@@ -125,13 +126,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       <div className="container-wide space-y-12">
         {/* Breadcrumb & Header */}
         <div className="space-y-8">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
-            <Link href="/courses" className="hover:text-accent transition-colors">
-              Courses
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">{course.code}</span>
-          </nav>
+          <Breadcrumb
+            items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: course.code, icon: <GraduationCap className="h-3 w-3" /> }
+            ]}
+          />
 
           {/* Course Hero */}
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
