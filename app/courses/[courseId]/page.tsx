@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
-import { ChevronDown, ChevronUp, GraduationCap } from "lucide-react";
+import { ChevronDown, ChevronUp, GraduationCap, Sparkles } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import type { Thread } from "@/lib/models/types";
 
@@ -140,10 +140,16 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
               <p className="text-lg text-muted-foreground glass-text leading-relaxed max-w-3xl">
                 {course.description}
               </p>
-              <div className="flex items-center gap-6 text-sm text-subtle glass-text">
-                <span className="font-medium">{course.term}</span>
-                <span>•</span>
-                <span>{course.enrollmentCount} students enrolled</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-6 text-sm text-subtle glass-text">
+                  <span className="font-medium">{course.term}</span>
+                  <span>•</span>
+                  <span>{course.enrollmentCount} students enrolled</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground glass-text">
+                  <Sparkles className="h-4 w-4 ai-gradient-text" aria-hidden="true" />
+                  <span>AI Assistant Available</span>
+                </div>
               </div>
             </div>
             <Button

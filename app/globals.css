@@ -596,6 +596,26 @@
   .text-subtle {
     @apply text-[hsl(var(--text-subtle))];
   }
+
+  /* AI Visual Identity Utilities */
+  .ai-gradient {
+    background: var(--ai-gradient-primary);
+  }
+
+  .ai-gradient-text {
+    background: var(--ai-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .ai-glow {
+    box-shadow: var(--shadow-ai-md);
+  }
+
+  .ai-glow:hover {
+    box-shadow: var(--shadow-ai-lg);
+  }
 }
 
 /* ===== AI-First Animation System ===== */

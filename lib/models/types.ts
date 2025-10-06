@@ -176,6 +176,11 @@ export interface CourseMetrics {
   resolvedCount: number;
   activeStudents: number;         // Unique students who posted
   recentActivity: number;         // Threads created in last 7 days
+
+  // Trend data
+  threadSparkline?: number[];       // 7-day thread creation trend
+  activitySparkline?: number[];     // 7-day activity trend
+  aiCoveragePercent?: number;       // % of threads with AI answers
 }
 
 // ============================================
@@ -281,11 +286,12 @@ export interface StudentDashboardData {
   notifications: Notification[];
   unreadCount: number;
   stats: {
-    totalCourses: number;
-    totalThreads: number;
-    totalPosts: number;
-    endorsedPosts: number;
+    totalCourses: StatWithTrend;
+    totalThreads: StatWithTrend;
+    totalPosts: StatWithTrend;
+    endorsedPosts: StatWithTrend;
   };
+  goals: GoalProgress[];
 }
 
 /**
@@ -297,17 +303,78 @@ export interface InstructorDashboardData {
   recentActivity: ActivityItem[];
   insights: CourseInsight[];
   stats: {
-    totalCourses: number;
-    totalThreads: number;
-    unansweredThreads: number;
-    activeStudents: number;
+    totalCourses: StatWithTrend;
+    totalThreads: StatWithTrend;
+    unansweredThreads: StatWithTrend;
+    activeStudents: StatWithTrend;
+    aiCoverage: StatWithTrend;  // AI coverage percentage
   };
+  goals: GoalProgress[];
 }
 
 /**
  * Dashboard data discriminated union
  */
 export type DashboardData = StudentDashboardData | InstructorDashboardData;
+
+// ============================================
+// Dashboard Analytics & Trends
+// ============================================
+
+/**
+ * A statistic with trend analysis compared to previous period
+ */
+export interface StatWithTrend {
+  /** Current value (e.g., 12 threads) */
+  value: number;
+
+  /** Change from previous period (e.g., +3) */
+  delta: number;
+
+  /** Trend direction */
+  trend: 'up' | 'down' | 'neutral';
+
+  /** Percentage change (e.g., 15.5 for +15.5%) */
+  trendPercent: number;
+
+  /** Label for the statistic (e.g., "Threads", "Posts") */
+  label: string;
+
+  /** Optional sparkline data (7 daily values) */
+  sparkline?: number[];
+}
+
+/**
+ * Goal tracking with progress calculation
+ */
+export interface GoalProgress {
+  /** Goal identifier (e.g., "weekly-participation") */
+  id: string;
+
+  /** Human-readable goal title */
+  title: string;
+
+  /** Detailed description */
+  description: string;
+
+  /** Current progress value */
+  current: number;
+
+  /** Target value to achieve */
+  target: number;
+
+  /** Progress percentage (0-100+) */
+  progress: number;
+
+  /** Whether goal is achieved */
+  achieved: boolean;
+
+  /** Time period for goal (e.g., "weekly", "monthly") */
+  period: 'daily' | 'weekly' | 'monthly';
+
+  /** Goal category (for filtering/grouping) */
+  category: 'participation' | 'quality' | 'engagement' | 'response-time';
+}
 
 // ============================================
 // Dashboard Type Guards

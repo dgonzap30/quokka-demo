@@ -186,6 +186,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
 
 import type { InstructorDashboardData } from "@/lib/models/types";
 import { AlertCircle, Users } from "lucide-react";
+import { AICoverageCard } from "@/components/dashboard/ai-coverage-card";
 
 function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
   return (
@@ -218,9 +219,18 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
             </div>
           </section>
 
-          {/* Unanswered Queue - 1 column */}
-          <aside aria-labelledby="unanswered-queue-heading" className="space-y-4">
-            <h2 id="unanswered-queue-heading" className="heading-3 glass-text">Unanswered Queue</h2>
+          {/* AI Coverage & Unanswered Queue - 1 column */}
+          <aside className="space-y-6">
+            {/* AI Coverage */}
+            <AICoverageCard
+              percentage={data.stats.aiCoverage.value}
+              totalThreads={data.stats.totalThreads.value}
+              aiThreads={Math.round(data.stats.totalThreads.value * data.stats.aiCoverage.value / 100)}
+            />
+
+            {/* Unanswered Queue */}
+            <div aria-labelledby="unanswered-queue-heading" className="space-y-4">
+              <h2 id="unanswered-queue-heading" className="heading-3 glass-text">Unanswered Queue</h2>
             {data.unansweredQueue.length > 0 ? (
               <div className="space-y-3">
                 {data.unansweredQueue.slice(0, 5).map((thread) => (
@@ -247,6 +257,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
                 </div>
               </Card>
             )}
+            </div>
           </aside>
         </div>
 

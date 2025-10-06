@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { X, MessageCircle, Send } from "lucide-react";
+import { AIBadge } from "@/components/ui/ai-badge";
+import { X, Send, Sparkles } from "lucide-react";
 
 interface Message {
   id: string;
@@ -217,14 +218,12 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
         <Button
           ref={fabButtonRef}
           onClick={handleExpand}
-          variant="glass-primary"
-          size="lg"
-          className={`h-14 w-14 rounded-full shadow-e3 hover:shadow-e3 transition-all ${
+          className={`h-14 w-14 rounded-full ai-gradient ai-glow shadow-e3 hover:shadow-e3 transition-all ${
             isFirstVisit ? "animate-pulse" : ""
           }`}
           aria-label="Open Quokka AI Assistant"
         >
-          <MessageCircle className="h-6 w-6" />
+          <Sparkles className="h-6 w-6 text-white" />
         </Button>
         {isFirstVisit && (
           <div className="absolute -top-12 right-0 glass-panel px-3 py-2 rounded-lg shadow-e2 text-sm whitespace-nowrap">
@@ -263,12 +262,13 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
         {/* Header */}
         <CardHeader className="p-4 border-b border-[var(--border-glass)] flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full avatar-placeholder flex items-center justify-center">
-              <MessageCircle className="h-5 w-5 text-primary" />
+            <div className="h-10 w-10 rounded-full ai-gradient flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle id="quokka-title" className="text-base glass-text">
+              <CardTitle id="quokka-title" className="text-base glass-text flex items-center gap-2">
                 Quokka AI
+                <AIBadge variant="compact" />
               </CardTitle>
               <p id="quokka-description" className="sr-only">
                 AI study assistant for {courseCode}

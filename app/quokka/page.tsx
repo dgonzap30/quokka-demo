@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { AIBadge } from "@/components/ui/ai-badge";
+import { Sparkles } from "lucide-react";
 
 interface Message {
   id: string;
@@ -118,8 +120,15 @@ export default function QuokkaPage() {
         {/* Hero Section */}
         <div className="text-center py-8 md:py-12 space-y-6">
           <div className="space-y-4">
-            <h1 className="heading-2 glass-text">Quokka AI</h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <div className="flex items-center justify-center gap-3">
+              <Sparkles className="h-10 w-10 ai-gradient-text" aria-hidden="true" />
+              <h1 className="heading-2 ai-gradient-text">Quokka AI</h1>
+              <Sparkles className="h-10 w-10 ai-gradient-text" aria-hidden="true" />
+            </div>
+            <div className="flex justify-center">
+              <AIBadge variant="default" />
+            </div>
+            <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl mx-auto">
               Your friendly AI study assistant. Get instant help with computer science, mathematics, and more.
             </p>
           </div>
@@ -133,8 +142,8 @@ export default function QuokkaPage() {
                 <CardTitle className="heading-4 glass-text">Chat with Quokka</CardTitle>
                 <CardDescription className="text-base">Ask me anything about your courses</CardDescription>
               </div>
-              <Badge variant="outline" className="bg-success/10 text-success border-success/30">
-                ● Online
+              <Badge className="ai-gradient text-white border-none">
+                ● AI Online
               </Badge>
             </div>
           </CardHeader>

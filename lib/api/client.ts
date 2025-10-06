@@ -21,6 +21,16 @@ import type {
 } from "@/lib/models/types";
 
 import {
+  createStatWithTrend,
+  createGoal,
+  generateSparkline,
+  getCurrentWeekRange,
+  getPreviousWeekRange,
+  countInDateRange,
+  calculateAICoverage,
+} from "@/lib/utils/dashboard-calculations";
+
+import {
   seedData,
   getAuthSession,
   setAuthSession,
@@ -585,13 +595,68 @@ export const api = {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 10);
 
-    // Calculate stats
+    // Calculate current week stats
+    const currentWeek = getCurrentWeekRange();
+    const previousWeek = getPreviousWeekRange();
+
+    const currentCourses = enrolledCourses.length;
+    const previousCourses = enrolledCourses.length; // Courses don't change weekly in mock
+
+    const currentThreads = countInDateRange(userThreads, currentWeek);
+    const previousThreads = countInDateRange(userThreads, previousWeek);
+
+    const currentPosts = countInDateRange(userPosts, currentWeek);
+    const previousPosts = countInDateRange(userPosts, previousWeek);
+
+    const currentEndorsed = userPosts.filter(
+      (p) => p.endorsed && new Date(p.createdAt) >= currentWeek.start
+    ).length;
+    const previousEndorsed = userPosts.filter(
+      (p) => p.endorsed && new Date(p.createdAt) >= previousWeek.start && new Date(p.createdAt) < currentWeek.start
+    ).length;
+
+    // Generate sparklines
+    const threadSparkline = generateSparkline(`student-${userId}-threads`, 7, userThreads.length / 7);
+    const postSparkline = generateSparkline(`student-${userId}-posts`, 7, userPosts.length / 7);
+
+    // Create stats with trends
     const stats = {
-      totalCourses: enrolledCourses.length,
-      totalThreads: userThreads.length,
-      totalPosts: userPosts.length,
-      endorsedPosts: userPosts.filter((p) => p.endorsed).length,
+      totalCourses: createStatWithTrend(currentCourses, previousCourses, "Courses"),
+      totalThreads: createStatWithTrend(currentThreads, previousThreads, "Threads", threadSparkline),
+      totalPosts: createStatWithTrend(currentPosts, previousPosts, "Replies", postSparkline),
+      endorsedPosts: createStatWithTrend(currentEndorsed, previousEndorsed, "Endorsed"),
     };
+
+    // Create student goals
+    const goals = [
+      createGoal(
+        "weekly-participation",
+        "Weekly Participation",
+        "Post in 2 threads per week",
+        currentPosts,
+        2,
+        "weekly",
+        "participation"
+      ),
+      createGoal(
+        "weekly-endorsements",
+        "Get Endorsed",
+        "Receive 1 endorsement per week",
+        currentEndorsed,
+        1,
+        "weekly",
+        "quality"
+      ),
+      createGoal(
+        "weekly-questions",
+        "Ask Questions",
+        "Ask 1 question per week",
+        currentThreads,
+        1,
+        "weekly",
+        "engagement"
+      ),
+    ];
 
     const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -601,6 +666,7 @@ export const api = {
       notifications: notifications.slice(0, 5), // Top 5 notifications
       unreadCount,
       stats,
+      goals,
     };
   },
 
@@ -698,17 +764,84 @@ export const api = {
       generatedAt: new Date().toISOString(),
     }));
 
-    // Calculate stats
+    // Calculate current and previous week stats
+    const currentWeek = getCurrentWeekRange();
+    const previousWeek = getPreviousWeekRange();
+
+    const allManagedThreads = allThreads.filter((t) => managedCourseIds.includes(t.courseId));
+
+    const currentCourses = managedCourses.length;
+    const previousCourses = managedCourses.length; // Courses don't change weekly
+
+    const currentThreads = countInDateRange(allManagedThreads, currentWeek);
+    const previousThreads = countInDateRange(allManagedThreads, previousWeek);
+
+    const currentUnanswered = allManagedThreads.filter(
+      (t) => t.status === 'open' && new Date(t.createdAt) >= currentWeek.start
+    ).length;
+    const previousUnanswered = allManagedThreads.filter(
+      (t) => t.status === 'open' && new Date(t.createdAt) >= previousWeek.start && new Date(t.createdAt) < currentWeek.start
+    ).length;
+
+    const currentStudents = new Set(
+      allManagedThreads
+        .filter((t) => new Date(t.createdAt) >= currentWeek.start)
+        .map((t) => t.authorId)
+    ).size;
+    const previousStudents = new Set(
+      allManagedThreads
+        .filter((t) => new Date(t.createdAt) >= previousWeek.start && new Date(t.createdAt) < currentWeek.start)
+        .map((t) => t.authorId)
+    ).size;
+
+    // Calculate AI coverage (mock)
+    const avgAICoverage = managedCourseIds.reduce((sum, id) => sum + calculateAICoverage(id), 0) / managedCourseIds.length;
+    const currentAICoverage = Math.round(avgAICoverage);
+    const previousAICoverage = Math.round(avgAICoverage - 2); // Mock: slight improvement over time
+
+    // Generate sparklines
+    const threadSparkline = generateSparkline(`instructor-threads`, 7, allManagedThreads.length / 7);
+    const unansweredSparkline = generateSparkline(`instructor-unanswered`, 7, unansweredQueue.length / 7);
+
+    // Create stats with trends
     const stats = {
-      totalCourses: managedCourses.length,
-      totalThreads: managedCourses.reduce((sum, c) => sum + c.metrics.threadCount, 0),
-      unansweredThreads: managedCourses.reduce((sum, c) => sum + c.metrics.unansweredCount, 0),
-      activeStudents: new Set(
-        allThreads
-          .filter((t) => managedCourseIds.includes(t.courseId))
-          .map((t) => t.authorId)
-      ).size,
+      totalCourses: createStatWithTrend(currentCourses, previousCourses, "Courses"),
+      totalThreads: createStatWithTrend(currentThreads, previousThreads, "Threads", threadSparkline),
+      unansweredThreads: createStatWithTrend(currentUnanswered, previousUnanswered, "Unanswered", unansweredSparkline),
+      activeStudents: createStatWithTrend(currentStudents, previousStudents, "Active Students"),
+      aiCoverage: createStatWithTrend(currentAICoverage, previousAICoverage, "AI Coverage"),
     };
+
+    // Create instructor goals
+    const goals = [
+      createGoal(
+        "response-time",
+        "Response Time",
+        "Respond to 80% of threads within 24h",
+        75, // Mock current
+        80,
+        "weekly",
+        "response-time"
+      ),
+      createGoal(
+        "ai-coverage",
+        "AI Coverage",
+        "Maintain 70%+ AI coverage",
+        currentAICoverage,
+        70,
+        "weekly",
+        "engagement"
+      ),
+      createGoal(
+        "student-engagement",
+        "Student Engagement",
+        "60%+ students actively participating",
+        55, // Mock current
+        60,
+        "weekly",
+        "engagement"
+      ),
+    ];
 
     return {
       managedCourses,
@@ -716,6 +849,7 @@ export const api = {
       recentActivity,
       insights,
       stats,
+      goals,
     };
   },
 };
