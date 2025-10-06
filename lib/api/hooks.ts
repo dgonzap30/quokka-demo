@@ -7,6 +7,7 @@ import type {
   CreatePostInput,
   GenerateAIAnswerInput,
   EndorseAIAnswerInput,
+  AIAnswer,
 } from "@/lib/models/types";
 import { api } from "./client";
 import { isAuthSuccess } from "@/lib/models/types";
@@ -433,24 +434,25 @@ export function useEndorseAIAnswer() {
       const previousThread = queryClient.getQueryData(queryKey);
 
       // Optimistically update cache
-      queryClient.setQueryData(queryKey, (old: any) => {
+      queryClient.setQueryData(queryKey, (old: { thread: unknown; posts: unknown[]; aiAnswer?: AIAnswer } | undefined) => {
         if (!old?.aiAnswer) return old;
 
         const endorsementDelta = isInstructor ? 3 : 1;
+        const currentAIAnswer = old.aiAnswer;
 
         return {
           ...old,
           aiAnswer: {
-            ...old.aiAnswer,
+            ...currentAIAnswer,
             studentEndorsements: !isInstructor
-              ? old.aiAnswer.studentEndorsements + 1
-              : old.aiAnswer.studentEndorsements,
+              ? currentAIAnswer.studentEndorsements + 1
+              : currentAIAnswer.studentEndorsements,
             instructorEndorsements: isInstructor
-              ? old.aiAnswer.instructorEndorsements + 1
-              : old.aiAnswer.instructorEndorsements,
-            totalEndorsements: old.aiAnswer.totalEndorsements + endorsementDelta,
-            endorsedBy: [...(old.aiAnswer.endorsedBy || []), userId],
-            instructorEndorsed: isInstructor ? true : old.aiAnswer.instructorEndorsed,
+              ? currentAIAnswer.instructorEndorsements + 1
+              : currentAIAnswer.instructorEndorsements,
+            totalEndorsements: currentAIAnswer.totalEndorsements + endorsementDelta,
+            endorsedBy: [...(currentAIAnswer.endorsedBy || []), userId],
+            instructorEndorsed: isInstructor ? true : currentAIAnswer.instructorEndorsed,
           },
         };
       });
@@ -477,7 +479,7 @@ export function useEndorseAIAnswer() {
       queryClient.invalidateQueries({ queryKey: queryKeys.thread(context.threadId) });
 
       // Invalidate course threads (endorsement count visible in list)
-      const thread = queryClient.getQueryData<any>(queryKeys.thread(context.threadId));
+      const thread = queryClient.getQueryData<{ thread?: { courseId?: string } }>(queryKeys.thread(context.threadId));
       if (thread?.thread?.courseId) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.courseThreads(thread.thread.courseId)

@@ -1,6 +1,6 @@
 "use client";
 
-import type { AIAnswer } from "@/lib/models/types";
+import type { AIAnswer, Citation } from "@/lib/models/types";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { AIBadge } from "@/components/ui/ai-badge";
 import { ConfidenceMeter } from "./confidence-meter";
@@ -13,7 +13,7 @@ export interface AIAnswerCardProps {
   currentUserEndorsed: boolean;
   currentUserRole?: "student" | "instructor" | "ta";
   onEndorse?: () => void;
-  onCitationClick?: (citation: any) => void;
+  onCitationClick?: (citation: Citation) => void;
   variant?: "hero" | "compact";
   isEndorsing?: boolean;
   className?: string;
@@ -22,7 +22,6 @@ export interface AIAnswerCardProps {
 export function AIAnswerCard({
   answer,
   currentUserEndorsed,
-  currentUserRole,
   onEndorse,
   onCitationClick,
   variant = "hero",
