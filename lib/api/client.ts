@@ -86,6 +86,309 @@ function generateId(prefix: string): string {
 }
 
 // ============================================
+// AI Generation Helper Functions
+// ============================================
+
+/**
+ * Extract keywords from text (lowercase, >2 chars, common words removed)
+ */
+function extractKeywords(text: string): string[] {
+  const commonWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'can', 'this', 'that', 'these', 'those', 'what', 'which', 'who', 'when', 'where', 'why', 'how']);
+
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !commonWords.has(word));
+}
+
+/**
+ * Calculate keyword match ratio between question and template
+ */
+function calculateMatchRatio(questionKeywords: string[], templateKeywords: string[]): number {
+  const matches = questionKeywords.filter(k => templateKeywords.includes(k)).length;
+  return questionKeywords.length > 0 ? matches / questionKeywords.length : 0;
+}
+
+/**
+ * Get confidence level from score
+ */
+function getConfidenceLevel(score: number): ConfidenceLevel {
+  if (score >= 70) return 'high';
+  if (score >= 40) return 'medium';
+  return 'low';
+}
+
+/**
+ * Generate citations for AI answer
+ */
+function generateCitations(courseCode: string, keywords: string[]): Citation[] {
+  const courseMaterials: Record<string, Array<{ source: string; type: "lecture" | "textbook" | "slides" | "lab" | "assignment" | "reading"; keywords: string[] }>> = {
+    CS: [
+      { source: "Lecture 5: Binary Search & Sorting Algorithms", type: "lecture", keywords: ['binary', 'search', 'sorting', 'algorithm', 'complexity', 'divide', 'conquer'] },
+      { source: "Introduction to Algorithms (CLRS) - Chapter 3", type: "textbook", keywords: ['algorithm', 'analysis', 'notation', 'complexity', 'runtime'] },
+      { source: "Lecture 8: Data Structures Overview", type: "lecture", keywords: ['array', 'linked', 'list', 'stack', 'queue', 'tree', 'graph', 'hash'] },
+      { source: "Lab 3: Implementing Search Algorithms", type: "lab", keywords: ['binary', 'search', 'linear', 'implementation', 'practice'] },
+      { source: "Slides: Big O Notation and Complexity", type: "slides", keywords: ['big', 'notation', 'complexity', 'time', 'space', 'analysis'] },
+    ],
+    MATH: [
+      { source: "Lecture 10: Integration Techniques", type: "lecture", keywords: ['integration', 'integral', 'substitution', 'parts', 'partial', 'fractions'] },
+      { source: "Calculus: Early Transcendentals - Chapter 5", type: "textbook", keywords: ['derivative', 'differentiation', 'chain', 'rule', 'product', 'quotient'] },
+      { source: "Lecture 12: Derivatives and Applications", type: "lecture", keywords: ['derivative', 'rate', 'change', 'tangent', 'slope', 'optimization'] },
+      { source: "Practice Problems: Integration by Parts", type: "assignment", keywords: ['integration', 'parts', 'practice', 'liate', 'rule'] },
+      { source: "Reading: Fundamental Theorem of Calculus", type: "reading", keywords: ['fundamental', 'theorem', 'calculus', 'antiderivative', 'definite'] },
+    ],
+  };
+
+  const materials = courseMaterials[courseCode.substring(0, 2)] || [];
+
+  // Score materials by keyword match
+  const scoredMaterials = materials.map(material => {
+    const matches = keywords.filter(k => material.keywords.includes(k)).length;
+    const relevance = Math.min(95, 60 + (matches * 10));
+    return { ...material, relevance, matches };
+  });
+
+  // Sort by relevance and take top 3-5
+  const topMaterials = scoredMaterials
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, 3 + Math.floor(Math.random() * 3)); // 3-5 citations
+
+  // Generate citations
+  return topMaterials.map((material, idx) => ({
+    id: generateId('cite'),
+    sourceType: material.type,
+    source: material.source,
+    excerpt: `Covers ${keywords.slice(0, 3).join(', ')} concepts in detail...`,
+    relevance: material.relevance,
+    link: undefined, // Mock - would link to actual course material
+  }));
+}
+
+/**
+ * CS course templates
+ */
+const CS_TEMPLATES = [
+  {
+    keywords: ['binary', 'search', 'algorithm', 'sorted', 'array'],
+    content: `Binary search is an efficient algorithm for finding a target value in a **sorted array**. It uses the divide-and-conquer strategy:
+
+**How it works:**
+1. Start with the middle element of the array
+2. If the target equals the middle element, you're done
+3. If the target is less than the middle element, search the left half
+4. If the target is greater, search the right half
+5. Repeat until found or the search space is empty
+
+**Time Complexity:** O(log n) - much faster than linear search O(n) for large datasets
+
+**Key Requirement:** The array MUST be sorted first. If unsorted, you need to sort it first (O(n log n)) or use linear search.
+
+**Example:**
+\`\`\`python
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return -1  # Not found
+\`\`\``,
+  },
+  {
+    keywords: ['linked', 'list', 'array', 'data', 'structure', 'difference'],
+    content: `**Arrays vs Linked Lists** - Both are fundamental data structures with different trade-offs:
+
+**Arrays:**
+- Fixed size (in most languages)
+- **O(1) random access** - can access any element instantly by index
+- O(n) insertion/deletion (need to shift elements)
+- Contiguous memory (cache-friendly)
+- Better for: Frequent lookups, known size
+
+**Linked Lists:**
+- Dynamic size (grows/shrinks easily)
+- O(n) access by index (must traverse from head)
+- **O(1) insertion/deletion** at known position
+- Non-contiguous memory
+- Better for: Frequent insertions/deletions, unknown size
+
+**When to use which:**
+- Use **arrays** when you need fast lookups and know the size
+- Use **linked lists** when you need frequent insertions/deletions at the beginning/middle
+
+**Memory:**
+- Arrays: Compact, better cache locality
+- Linked Lists: Extra memory for pointers/references`,
+  },
+  {
+    keywords: ['big', 'notation', 'complexity', 'time', 'space', 'analysis'],
+    content: `**Big O Notation** measures algorithm efficiency by describing how runtime/space grows as input size increases.
+
+**Common Complexities (best to worst):**
+- **O(1)** - Constant: Array access, hash table lookup
+- **O(log n)** - Logarithmic: Binary search, balanced tree operations
+- **O(n)** - Linear: Simple loops, linear search
+- **O(n log n)** - Linearithmic: Efficient sorting (merge sort, quicksort average)
+- **O(n²)** - Quadratic: Nested loops, bubble sort
+- **O(2ⁿ)** - Exponential: Recursive Fibonacci (avoid!)
+
+**Key Rules:**
+1. Drop constants: O(2n) → O(n)
+2. Drop lower terms: O(n² + n) → O(n²)
+3. Focus on worst-case unless specified otherwise
+
+**Example:**
+\`\`\`python
+for i in range(n):      # O(n)
+    for j in range(n):  # O(n)
+        print(i, j)     # O(1)
+# Total: O(n²)
+\`\`\``,
+  },
+];
+
+/**
+ * MATH course templates
+ */
+const MATH_TEMPLATES = [
+  {
+    keywords: ['integration', 'integral', 'techniques', 'substitution', 'parts'],
+    content: `**Integration Techniques** - Essential methods for solving integrals:
+
+**1. U-Substitution:**
+Best for: Composite functions where the derivative of inner function appears
+\`\`\`
+∫ 2x·e^(x²) dx
+Let u = x², then du = 2x dx
+= ∫ e^u du = e^u + C = e^(x²) + C
+\`\`\`
+
+**2. Integration by Parts:** ∫u dv = uv - ∫v du
+Use **LIATE** to choose u:
+- **L**ogarithmic (ln x)
+- **I**nverse trig (arcsin x)
+- **A**lgebraic (x², x³)
+- **T**rigonometric (sin x, cos x)
+- **E**xponential (e^x)
+
+**3. Partial Fractions:**
+For rational functions: decompose into simpler fractions
+
+**4. Trigonometric Substitution:**
+For expressions with √(a² - x²), √(a² + x²), or √(x² - a²)
+
+**Common Mistake:** Forgetting the constant of integration (+C)!`,
+  },
+  {
+    keywords: ['derivative', 'differentiation', 'chain', 'rule', 'product', 'quotient'],
+    content: `**Derivatives and Differentiation Rules:**
+
+**Power Rule:** d/dx[x^n] = nx^(n-1)
+- Example: d/dx[x³] = 3x²
+
+**Product Rule:** d/dx[f(x)·g(x)] = f'(x)·g(x) + f(x)·g'(x)
+- Example: d/dx[x²·sin(x)] = 2x·sin(x) + x²·cos(x)
+
+**Quotient Rule:** d/dx[f(x)/g(x)] = [f'(x)·g(x) - f(x)·g'(x)] / [g(x)]²
+
+**Chain Rule:** d/dx[f(g(x))] = f'(g(x))·g'(x)
+- Example: d/dx[sin(x²)] = cos(x²)·2x
+
+**Common Derivatives:**
+- d/dx[e^x] = e^x
+- d/dx[ln x] = 1/x
+- d/dx[sin x] = cos x
+- d/dx[cos x] = -sin x
+- d/dx[tan x] = sec²x
+
+**Tip:** For complex functions, apply chain rule repeatedly (outside to inside)`,
+  },
+];
+
+/**
+ * General fallback template
+ */
+const GENERAL_TEMPLATE = {
+  keywords: [],
+  content: `I understand your question, and I'd be happy to help guide you through this concept.
+
+**Approach:**
+1. Review the relevant course materials (lectures, textbook sections)
+2. Break down the problem into smaller steps
+3. Identify the key concepts or formulas needed
+4. Work through examples to build understanding
+5. Practice with similar problems
+
+**Next Steps:**
+- Check the course materials cited below for detailed explanations
+- Attend office hours if you need personalized help
+- Work through practice problems to reinforce the concepts
+- Post follow-up questions if specific parts are unclear
+
+Remember: Understanding takes time and practice. Don't hesitate to ask for clarification on specific steps!`,
+};
+
+/**
+ * Generate AI response using template system
+ */
+function generateAIResponse(
+  courseCode: string,
+  title: string,
+  content: string,
+  tags: string[]
+): { content: string; confidence: { level: ConfidenceLevel; score: number }; citations: Citation[] } {
+  const questionText = `${title} ${content} ${tags.join(' ')}`;
+  const keywords = extractKeywords(questionText);
+
+  // Select template based on course type
+  type Template = { keywords: string[]; content: string };
+  let templateList: Template[] = [];
+
+  if (courseCode.startsWith('CS')) {
+    templateList = CS_TEMPLATES;
+  } else if (courseCode.startsWith('MATH')) {
+    templateList = MATH_TEMPLATES;
+  }
+
+  // Find best matching template
+  let bestMatch: Template = GENERAL_TEMPLATE;
+  let bestMatchRatio = 0;
+
+  if (templateList.length > 0) {
+    for (const template of templateList) {
+      const ratio = calculateMatchRatio(keywords, template.keywords);
+      if (ratio > bestMatchRatio) {
+        bestMatchRatio = ratio;
+        bestMatch = template;
+      }
+    }
+  }
+
+  // Calculate confidence (55% base + up to 40% from match ratio)
+  const confidenceScore = Math.round(55 + (bestMatchRatio * 40));
+  const confidenceLevel = getConfidenceLevel(confidenceScore);
+
+  // Generate citations
+  const citations = generateCitations(courseCode, keywords);
+
+  return {
+    content: bestMatch.content,
+    confidence: {
+      level: confidenceLevel,
+      score: confidenceScore,
+    },
+    citations,
+  };
+}
+
+// ============================================
 // API Client
 // ============================================
 
@@ -445,7 +748,7 @@ export const api = {
   },
 
   /**
-   * Create new thread
+   * Create new thread with auto-generated AI answer
    */
   async createThread(input: CreateThreadInput, authorId: string): Promise<Thread> {
     await delay(400 + Math.random() * 200); // 400-600ms
@@ -465,7 +768,25 @@ export const api = {
     };
 
     addThread(newThread);
-    return newThread;
+
+    // Auto-generate AI answer for the new thread
+    try {
+      await this.generateAIAnswer({
+        threadId: newThread.id,
+        courseId: input.courseId,
+        title: input.title,
+        content: input.content,
+        tags: input.tags,
+      });
+
+      // Fetch updated thread with AI answer flags
+      const updatedThread = getThreadById(newThread.id);
+      return updatedThread || newThread;
+    } catch (error) {
+      console.error("Failed to generate AI answer:", error);
+      // Return thread without AI answer if generation fails (graceful degradation)
+      return newThread;
+    }
   },
 
   /**
@@ -862,5 +1183,121 @@ export const api = {
       stats,
       goals,
     };
+  },
+
+  // ============================================
+  // AI Answer API Methods
+  // ============================================
+
+  /**
+   * Generate AI answer for a thread
+   */
+  async generateAIAnswer(input: GenerateAIAnswerInput): Promise<AIAnswer> {
+    await delay(800 + Math.random() * 400); // 800-1200ms
+    seedData();
+
+    const thread = getThreadById(input.threadId);
+    if (!thread) {
+      throw new Error(`Thread not found: ${input.threadId}`);
+    }
+
+    const course = getCourseById(input.courseId);
+    if (!course) {
+      throw new Error(`Course not found: ${input.courseId}`);
+    }
+
+    // Generate AI response using template system
+    const { content, confidence, citations } = generateAIResponse(
+      course.code,
+      input.title,
+      input.content,
+      input.tags || []
+    );
+
+    const aiAnswer: AIAnswer = {
+      id: generateId("ai"),
+      threadId: input.threadId,
+      courseId: input.courseId,
+      content,
+      confidenceLevel: confidence.level,
+      confidenceScore: confidence.score,
+      citations,
+      studentEndorsements: 0,
+      instructorEndorsements: 0,
+      totalEndorsements: 0,
+      endorsedBy: [],
+      instructorEndorsed: false,
+      generatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    addAIAnswer(aiAnswer);
+    updateThread(input.threadId, {
+      hasAIAnswer: true,
+      aiAnswerId: aiAnswer.id,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return aiAnswer;
+  },
+
+  /**
+   * Get AI answer for a thread
+   */
+  async getAIAnswer(threadId: string): Promise<AIAnswer | null> {
+    await delay(200 + Math.random() * 200); // 200-400ms
+    seedData();
+
+    const thread = getThreadById(threadId);
+    if (!thread || !thread.hasAIAnswer || !thread.aiAnswerId) {
+      return null;
+    }
+
+    return getAIAnswerByThread(threadId);
+  },
+
+  /**
+   * Endorse an AI answer
+   */
+  async endorseAIAnswer(input: EndorseAIAnswerInput): Promise<AIAnswer> {
+    await delay(100); // Quick action
+    seedData();
+
+    const aiAnswer = getAIAnswerById(input.aiAnswerId);
+    if (!aiAnswer) {
+      throw new Error(`AI answer not found: ${input.aiAnswerId}`);
+    }
+
+    // Check if user already endorsed
+    if (aiAnswer.endorsedBy.includes(input.userId)) {
+      throw new Error("User has already endorsed this answer");
+    }
+
+    // Calculate endorsement weight (instructor = 3x)
+    const weight = input.isInstructor ? 3 : 1;
+
+    // Update endorsement counts
+    const updates: Partial<AIAnswer> = {
+      endorsedBy: [...aiAnswer.endorsedBy, input.userId],
+      totalEndorsements: aiAnswer.totalEndorsements + weight,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (input.isInstructor) {
+      updates.instructorEndorsements = aiAnswer.instructorEndorsements + 1;
+      updates.instructorEndorsed = true;
+    } else {
+      updates.studentEndorsements = aiAnswer.studentEndorsements + 1;
+    }
+
+    updateAIAnswer(input.aiAnswerId, updates);
+
+    // Return updated answer
+    const updatedAnswer = getAIAnswerById(input.aiAnswerId);
+    if (!updatedAnswer) {
+      throw new Error("Failed to retrieve updated AI answer");
+    }
+
+    return updatedAnswer;
   },
 };
