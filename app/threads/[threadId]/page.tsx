@@ -3,7 +3,7 @@
 import { use, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useThread, useCurrentUser, useCreatePost } from "@/lib/api/hooks";
+import { useThread, useCurrentUser, useCreatePost, useEndorseAIAnswer } from "@/lib/api/hooks";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { AIAnswerCard } from "@/components/course/ai-answer-card";
 import { GraduationCap, MessageSquare } from "lucide-react";
 
 export default function ThreadDetailPage({ params }: { params: Promise<{ threadId: string }> }) {
@@ -19,6 +20,7 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const { data: threadData, isLoading: threadLoading } = useThread(threadId);
   const createPostMutation = useCreatePost();
+  const endorseAIAnswerMutation = useEndorseAIAnswer();
 
   const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,7 +94,21 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
     );
   }
 
-  const { thread, posts } = threadData;
+  const { thread, posts, aiAnswer } = threadData;
+
+  const handleEndorseAIAnswer = async () => {
+    if (!user || !aiAnswer) return;
+
+    try {
+      await endorseAIAnswerMutation.mutateAsync({
+        aiAnswerId: aiAnswer.id,
+        userId: user.id,
+        isInstructor: user.role === "instructor",
+      });
+    } catch (error) {
+      console.error("Failed to endorse AI answer:", error);
+    }
+  };
 
   const getStatusClass = (status: typeof thread.status) => {
     const variants = {
@@ -150,10 +166,27 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
           </CardContent>
         </Card>
 
-        {/* Replies */}
-        <div className="space-y-6">
-          <h2 className="heading-3 glass-text">
-            {posts.length} {posts.length === 1 ? "Reply" : "Replies"}
+        {/* AI Answer Section */}
+        {aiAnswer && (
+          <section className="space-y-4" aria-labelledby="ai-answer-heading">
+            <h2 id="ai-answer-heading" className="heading-3 glass-text">
+              AI-Generated Answer
+            </h2>
+            <AIAnswerCard
+              answer={aiAnswer}
+              currentUserEndorsed={aiAnswer.endorsedBy.includes(user?.id || "")}
+              currentUserRole={user?.role}
+              onEndorse={handleEndorseAIAnswer}
+              isEndorsing={endorseAIAnswerMutation.isPending}
+              variant="hero"
+            />
+          </section>
+        )}
+
+        {/* Replies Section */}
+        <section className="space-y-6" aria-labelledby="replies-heading">
+          <h2 id="replies-heading" className="heading-3 glass-text">
+            {posts.length} Human {posts.length === 1 ? "Reply" : "Replies"}
           </h2>
           {posts.length > 0 ? (
             <div className="space-y-6">
@@ -206,7 +239,7 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
               </div>
             </Card>
           )}
-        </div>
+        </section>
 
         {/* Reply Form */}
         <Card variant="glass-strong">
