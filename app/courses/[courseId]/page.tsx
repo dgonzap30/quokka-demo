@@ -7,6 +7,7 @@ import { useCourse, useCourseThreads, useCurrentUser, useCreateThread } from "@/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AIBadge } from "@/components/ui/ai-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -276,6 +277,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
                     </CardHeader>
                     <CardContent className="p-8 pt-0">
                       <div className="flex flex-wrap items-center gap-4 text-xs text-subtle glass-text">
+                        {thread.hasAIAnswer && (
+                          <>
+                            <AIBadge variant="compact" aria-label="Has AI-generated answer" />
+                            <span>•</span>
+                          </>
+                        )}
                         <span>{thread.views} views</span>
                         <span>•</span>
                         <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
