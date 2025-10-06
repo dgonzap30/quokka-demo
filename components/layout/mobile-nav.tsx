@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, type NavItem } from "@/lib/utils/nav-config";
 
@@ -33,9 +33,16 @@ export interface MobileNavProps {
 
   /** Optional navigation items - if not provided or empty, only shows user profile */
   items?: NavItem[];
+
+  /** Optional course context for specialized course navigation */
+  courseContext?: {
+    courseId: string;
+    courseCode: string;
+    courseName: string;
+  };
 }
 
-export function MobileNav({ currentPath, user, onLogout, items }: MobileNavProps) {
+export function MobileNav({ currentPath, user, onLogout, items, courseContext }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -63,6 +70,31 @@ export function MobileNav({ currentPath, user, onLogout, items }: MobileNavProps
               <span className="text-2xl font-bold text-primary">Q</span>
             </SheetTitle>
           </SheetHeader>
+
+          {/* Course Back Button - only render if in course context */}
+          {courseContext && (
+            <>
+              <div className="mt-6 px-2">
+                <SheetClose asChild>
+                  <Link
+                    href="/dashboard"
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors min-h-[44px]",
+                      "bg-primary/5 border border-primary/20",
+                      "text-primary hover:bg-primary/10"
+                    )}
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold">Back to Dashboard</span>
+                      <span className="text-xs text-muted-foreground">{courseContext.courseCode} - {courseContext.courseName}</span>
+                    </div>
+                  </Link>
+                </SheetClose>
+              </div>
+              <Separator className="my-4" />
+            </>
+          )}
 
           {/* Navigation Links - only render if items provided */}
           {items && items.length > 0 && (

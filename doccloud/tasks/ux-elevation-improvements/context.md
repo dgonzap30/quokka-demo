@@ -287,4 +287,13 @@
 - `2025-10-05` | [Navigation - Phase 3] | Integrated navigation into nav-header.tsx, added breadcrumbs to course and thread pages
 - `2025-10-05` | [Navigation - Verification] | TypeScript and lint pass, all navigation components working
 - `2025-10-05` | [Commit] | Committed navigation enhancements with detailed conventional commit (commit 22d9472)
+- `2025-10-06` | [AI Prominence - Planning] | Created comprehensive AI prominence plan in plans/ai-prominence-plan.md
+- `2025-10-06` | [AI Prominence - Design Tokens] | Added AI gradient, glow, and text utilities to globals.css
+- `2025-10-06` | [AI Prominence - Components] | Created AIBadge (62 lines) and AICoverageCard (63 lines) components
+- `2025-10-06` | [AI Prominence - FloatingQuokka] | Enhanced with Sparkles icon, ai-gradient, ai-glow, and AI badge
+- `2025-10-06` | [AI Prominence - AI Page] | Added gradient text, Sparkles icons, AI badges to /quokka page
+- `2025-10-06` | [AI Prominence - Dashboard] | Integrated AICoverageCard into instructor dashboard sidebar
+- `2025-10-06` | [AI Prominence - Indicators] | Added AI badges to course cards (>30% coverage) and "AI Available" indicator to course pages
+- `2025-10-06` | [AI Prominence - Verification] | TypeScript and lint pass, dev server starting
+- `2025-10-06` | [Commit] | Committed AI prominence enhancements with comprehensive message (commit 34ecb62)
 

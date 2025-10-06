@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { LayoutDashboard, MessageSquarePlus, MessagesSquare } from "lucide-react";
 
 /**
  * Navigation context types
@@ -59,30 +58,14 @@ export function getNavContext(pathname: string): NavContextInfo {
     };
   }
 
-  // Course pages - full course nav with contextual actions
+  // Course pages - specialized course nav (no tabs, uses back button instead)
   const courseMatch = pathname.match(/^\/courses\/([^\/]+)/);
   if (courseMatch) {
     const courseId = courseMatch[1];
     return {
       context: 'course',
       courseId,
-      items: [
-        {
-          label: "Dashboard",
-          href: "/dashboard",
-          icon: <LayoutDashboard className="h-4 w-4" />,
-        },
-        {
-          label: "Ask Question",
-          href: `/ask?courseId=${courseId}`,
-          icon: <MessageSquarePlus className="h-4 w-4" />,
-        },
-        {
-          label: "Browse Threads",
-          href: `/courses/${courseId}`,
-          icon: <MessagesSquare className="h-4 w-4" />,
-        },
-      ]
+      items: []  // Empty array = use CourseNav component instead of tabs
     };
   }
 

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useCurrentUser, useLogout } from "@/lib/api/hooks";
+import { useCurrentUser, useLogout, useCourse } from "@/lib/api/hooks";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { GlobalSearch } from "@/components/ui/global-search";
 import { DesktopNav } from "@/components/layout/desktop-nav";
+import { CourseNav } from "@/components/layout/course-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { getNavContext } from "@/lib/utils/nav-config";
 import {
@@ -24,6 +25,12 @@ export function NavHeader() {
   const { data: user } = useCurrentUser();
   const logoutMutation = useLogout();
 
+  // Detect navigation context (must be before early returns for hook)
+  const navContext = getNavContext(pathname || '');
+
+  // Fetch course data (hook must be called unconditionally, before early returns)
+  const { data: course } = useCourse(navContext.courseId);
+
   // Don't show nav on auth pages
   if (pathname?.startsWith("/login") || pathname?.startsWith("/signup")) {
     return null;
@@ -38,9 +45,6 @@ export function NavHeader() {
     return null;
   }
 
-  // Detect navigation context and get appropriate items
-  const { items } = getNavContext(pathname || '');
-
   return (
     <header className="sticky top-0 z-50 w-full glass-panel-strong border-b border-[var(--border-glass)]">
       <div className="container-wide flex h-14 items-center gap-4 px-6 md:px-8">
@@ -49,7 +53,12 @@ export function NavHeader() {
           currentPath={pathname || ""}
           user={user}
           onLogout={handleLogout}
-          items={items}
+          items={navContext.items}
+          courseContext={navContext.context === 'course' && course ? {
+            courseId: course.id,
+            courseCode: course.code,
+            courseName: course.name,
+          } : undefined}
         />
 
         {/* Logo */}
@@ -60,12 +69,20 @@ export function NavHeader() {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <DesktopNav
-          currentPath={pathname || ""}
-          className="flex-shrink-0"
-          items={items}
-        />
+        {/* Desktop Navigation - Conditional rendering based on context */}
+        {navContext.context === 'course' && course ? (
+          <CourseNav
+            courseCode={course.code}
+            courseName={course.name}
+            className="flex-shrink-0"
+          />
+        ) : (
+          <DesktopNav
+            currentPath={pathname || ""}
+            className="flex-shrink-0"
+            items={navContext.items}
+          />
+        )}
 
         {/* Global Search */}
         <div className="hidden md:block flex-1 max-w-md">
