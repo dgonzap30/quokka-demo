@@ -1,4 +1,4 @@
-import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post } from "@/lib/models/types";
+import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer } from "@/lib/models/types";
 
 import usersData from "@/mocks/users.json";
 import coursesData from "@/mocks/courses.json";
@@ -14,6 +14,7 @@ const KEYS = {
   threads: "quokkaq.threads",
   posts: "quokkaq.posts",
   notifications: "quokkaq.notifications",
+  aiAnswers: "quokkaq.aiAnswers",
   initialized: "quokkaq.initialized",
 } as const;
 
@@ -43,6 +44,7 @@ export function seedData(): void {
     localStorage.setItem(KEYS.threads, JSON.stringify(threads));
     localStorage.setItem(KEYS.posts, JSON.stringify(posts));
     localStorage.setItem(KEYS.notifications, JSON.stringify([])); // Empty notifications initially
+    localStorage.setItem(KEYS.aiAnswers, JSON.stringify([])); // Empty AI answers initially
     localStorage.setItem(KEYS.initialized, "true");
   } catch (error) {
     console.error("Failed to seed data:", error);
@@ -377,5 +379,67 @@ export function markAllNotificationsRead(userId: string, courseId?: string): voi
     localStorage.setItem(KEYS.notifications, JSON.stringify(notifications));
   } catch (error) {
     console.error("Failed to mark notifications as read:", error);
+  }
+}
+
+// ============================================
+// AI Answer Data Access
+// ============================================
+
+/**
+ * Get all AI answers from localStorage
+ */
+export function getAIAnswers(): AIAnswer[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.aiAnswers);
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data) as AIAnswer[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get AI answer by thread ID
+ */
+export function getAIAnswerByThread(threadId: string): AIAnswer | null {
+  const aiAnswers = getAIAnswers();
+  return aiAnswers.find((a) => a.threadId === threadId) ?? null;
+}
+
+/**
+ * Get AI answer by ID
+ */
+export function getAIAnswerById(aiAnswerId: string): AIAnswer | null {
+  const aiAnswers = getAIAnswers();
+  return aiAnswers.find((a) => a.id === aiAnswerId) ?? null;
+}
+
+/**
+ * Add new AI answer to localStorage
+ */
+export function addAIAnswer(aiAnswer: AIAnswer): void {
+  if (typeof window === "undefined") return;
+
+  const aiAnswers = getAIAnswers();
+  aiAnswers.push(aiAnswer);
+  localStorage.setItem(KEYS.aiAnswers, JSON.stringify(aiAnswers));
+}
+
+/**
+ * Update existing AI answer in localStorage
+ */
+export function updateAIAnswer(aiAnswerId: string, updates: Partial<AIAnswer>): void {
+  if (typeof window === "undefined") return;
+
+  const aiAnswers = getAIAnswers();
+  const index = aiAnswers.findIndex((a) => a.id === aiAnswerId);
+
+  if (index !== -1) {
+    aiAnswers[index] = { ...aiAnswers[index], ...updates };
+    localStorage.setItem(KEYS.aiAnswers, JSON.stringify(aiAnswers));
   }
 }

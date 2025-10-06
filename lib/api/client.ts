@@ -18,6 +18,11 @@ import type {
   ActivityItem,
   CourseWithActivity,
   CourseWithMetrics,
+  AIAnswer,
+  Citation,
+  ConfidenceLevel,
+  GenerateAIAnswerInput,
+  EndorseAIAnswerInput,
 } from "@/lib/models/types";
 
 import {
@@ -53,6 +58,12 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   getUsers,
+  getAIAnswers,
+  getAIAnswerById,
+  getAIAnswerByThread,
+  addAIAnswer,
+  updateAIAnswer,
+  getUserById,
 } from "@/lib/store/localStore";
 
 // ============================================

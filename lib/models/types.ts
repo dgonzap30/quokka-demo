@@ -137,7 +137,9 @@ export type NotificationType =
   | 'new_post'
   | 'endorsed'
   | 'resolved'
-  | 'flagged';
+  | 'flagged'
+  | 'ai_answer_ready'
+  | 'ai_answer_endorsed';
 
 /**
  * Represents an activity notification for a user
@@ -200,6 +202,8 @@ export interface Thread {
   views: number;
   createdAt: string;
   updatedAt: string;
+  hasAIAnswer?: boolean;
+  aiAnswerId?: string;
 }
 
 export interface Post {
@@ -211,6 +215,142 @@ export interface Post {
   flagged: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// ============================================
+// AI Answer Types
+// ============================================
+
+/**
+ * Confidence level for AI-generated answers
+ */
+export type ConfidenceLevel = 'high' | 'medium' | 'low';
+
+/**
+ * Source types for AI answer citations
+ */
+export type CitationSourceType =
+  | 'lecture'
+  | 'textbook'
+  | 'slides'
+  | 'lab'
+  | 'assignment'
+  | 'reading';
+
+/**
+ * Citation reference to course material
+ */
+export interface Citation {
+  /** Unique identifier for the citation */
+  id: string;
+
+  /** Type of course material */
+  sourceType: CitationSourceType;
+
+  /** Name/title of the source (e.g., "Lecture 5: Binary Search") */
+  source: string;
+
+  /** Relevant excerpt from the source material */
+  excerpt: string;
+
+  /** Relevance score 0-100 (how well it supports the answer) */
+  relevance: number;
+
+  /** Optional link to course material (mock for demo) */
+  link?: string;
+}
+
+/**
+ * AI-generated answer for a thread question
+ *
+ * Generated automatically when a thread is created.
+ * Includes confidence scoring, citations to course materials,
+ * and instructor/peer endorsement tracking.
+ */
+export interface AIAnswer {
+  /** Unique identifier for the AI answer */
+  id: string;
+
+  /** ID of the thread this answer belongs to */
+  threadId: string;
+
+  /** Course ID (for context-aware generation) */
+  courseId: string;
+
+  /** AI-generated answer content (rich text/markdown) */
+  content: string;
+
+  /** Confidence level (categorical) */
+  confidenceLevel: ConfidenceLevel;
+
+  /** Confidence score (0-100 numeric) */
+  confidenceScore: number;
+
+  /** Array of citations to course materials */
+  citations: Citation[];
+
+  /** Number of student endorsements */
+  studentEndorsements: number;
+
+  /** Number of instructor endorsements */
+  instructorEndorsements: number;
+
+  /** Total endorsement count (for sorting) */
+  totalEndorsements: number;
+
+  /** Array of user IDs who have endorsed (prevent double-endorsement) */
+  endorsedBy: string[];
+
+  /** Whether any instructor has endorsed */
+  instructorEndorsed: boolean;
+
+  /** ISO 8601 timestamp when generated */
+  generatedAt: string;
+
+  /** ISO 8601 timestamp when last updated */
+  updatedAt: string;
+}
+
+/**
+ * Input for generating an AI answer
+ */
+export interface GenerateAIAnswerInput {
+  /** Thread to generate answer for */
+  threadId: string;
+
+  /** Course context for answer generation */
+  courseId: string;
+
+  /** Question title */
+  title: string;
+
+  /** Question content/details */
+  content: string;
+
+  /** Optional tags for context */
+  tags?: string[];
+}
+
+/**
+ * Input for endorsing an AI answer
+ */
+export interface EndorseAIAnswerInput {
+  /** AI answer ID to endorse */
+  aiAnswerId: string;
+
+  /** User ID of the endorser */
+  userId: string;
+
+  /** Whether the endorser is an instructor */
+  isInstructor: boolean;
+}
+
+/**
+ * Thread enriched with AI answer data
+ */
+export interface ThreadWithAIAnswer extends Thread {
+  /** The associated AI answer */
+  aiAnswer: AIAnswer;
 }
 
 /**
@@ -243,7 +383,9 @@ export type ActivityType =
   | 'post_created'
   | 'thread_resolved'
   | 'post_endorsed'
-  | 'thread_answered';
+  | 'thread_answered'
+  | 'ai_answer_generated'
+  | 'ai_answer_endorsed';
 
 /**
  * Activity feed item for student/instructor dashboards
@@ -398,5 +540,30 @@ export function isInstructorDashboard(data: DashboardData): data is InstructorDa
  * Type guard for activity type checking
  */
 export function isActivityType(type: string): type is ActivityType {
-  return ['thread_created', 'post_created', 'thread_resolved', 'post_endorsed', 'thread_answered'].includes(type);
+  return ['thread_created', 'post_created', 'thread_resolved', 'post_endorsed', 'thread_answered', 'ai_answer_generated', 'ai_answer_endorsed'].includes(type);
+}
+
+// ============================================
+// AI Answer Type Guards
+// ============================================
+
+/**
+ * Type guard to check if AI answer has high confidence
+ */
+export function isHighConfidence(answer: AIAnswer): boolean {
+  return answer.confidenceLevel === 'high' && answer.confidenceScore >= 70;
+}
+
+/**
+ * Type guard to check if AI answer has valid citations
+ */
+export function hasValidCitations(answer: AIAnswer, minCount: number = 3): boolean {
+  return answer.citations.length >= minCount && answer.citations.every((c) => c.relevance >= 50);
+}
+
+/**
+ * Type guard to check if thread has AI answer
+ */
+export function hasAIAnswer(thread: Thread): thread is Required<Pick<Thread, 'hasAIAnswer' | 'aiAnswerId'>> & Thread {
+  return thread.hasAIAnswer === true && thread.aiAnswerId !== undefined;
 }
