@@ -60,6 +60,24 @@ export function GlobalSearch({
 
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  // Global keyboard shortcut: "/" to focus search
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if "/" is pressed and not inside an input/textarea
+      if (
+        e.key === '/' &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   // Debounced search function
   const debouncedSearch = React.useMemo(
     () =>
@@ -259,14 +277,24 @@ export function GlobalSearch({
             }
           }}
           onBlur={handleBlur}
-          className="pl-10 pr-10 glass-panel border-neutral-300 focus:shadow-[var(--glow-primary)]"
+          className="h-9 pl-10 pr-20 rounded-full border border-neutral-200 bg-neutral-50 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-shadow"
         />
 
         {/* Search icon - decorative */}
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-500 pointer-events-none"
           aria-hidden="true"
         />
+
+        {/* Keyboard hint - "/" key */}
+        {!query && (
+          <kbd
+            className="absolute right-10 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-xs font-medium text-neutral-500 bg-neutral-200 border border-neutral-300 rounded pointer-events-none"
+            aria-hidden="true"
+          >
+            /
+          </kbd>
+        )}
 
         {/* Clear button - appears when input has value */}
         {query && (
@@ -274,9 +302,9 @@ export function GlobalSearch({
             type="button"
             aria-label="Clear search"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-accent/10 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-neutral-200 transition-colors"
           >
-            <X className="size-4" aria-hidden="true" />
+            <X className="size-4 text-neutral-600" aria-hidden="true" />
           </button>
         )}
       </div>

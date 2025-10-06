@@ -1,23 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useCurrentUser, useLogout, useCourse } from "@/lib/api/hooks";
-import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { GlobalSearch } from "@/components/ui/global-search";
-import { DesktopNav } from "@/components/layout/desktop-nav";
-import { CourseNav } from "@/components/layout/course-nav";
+import { GlobalNavBar } from "@/components/layout/global-nav-bar";
+import { CourseContextBar } from "@/components/layout/course-context-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { getNavContext } from "@/lib/utils/nav-config";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export function NavHeader() {
   const router = useRouter();
@@ -30,6 +19,22 @@ export function NavHeader() {
 
   // Fetch course data (hook must be called unconditionally, before early returns)
   const { data: course } = useCourse(navContext.courseId);
+
+  // Scroll state for shadow effect
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  // Ask modal state for course context
+  const [showAskModal, setShowAskModal] = useState(false);
+
+  // Track scroll position for shadow effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 2);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Don't show nav on auth pages
   if (pathname?.startsWith("/login") || pathname?.startsWith("/signup")) {
@@ -45,89 +50,66 @@ export function NavHeader() {
     return null;
   }
 
+  // Determine if we're in a course context
+  const inCourseContext = navContext.context === 'course' && course;
+
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel-strong border-b border-[var(--border-glass)]">
-      <div className="container-wide flex h-14 items-center gap-4 px-6 md:px-8">
-        {/* Mobile Navigation */}
-        <MobileNav
-          currentPath={pathname || ""}
-          user={user}
-          onLogout={handleLogout}
-          items={navContext.items}
-          courseContext={navContext.context === 'course' && course ? {
-            courseId: course.id,
-            courseCode: course.code,
-            courseName: course.name,
-          } : undefined}
+    <>
+      {/* Global Navigation Bar (Row 1) */}
+      <GlobalNavBar
+        user={user}
+        onLogout={handleLogout}
+        breadcrumb={inCourseContext ? {
+          label: course.code,
+          href: `/courses/${course.id}`,
+        } : undefined}
+        onAskQuestion={inCourseContext ? () => setShowAskModal(true) : undefined}
+        hasScrolled={hasScrolled}
+      />
+
+      {/* Course Context Bar (Row 2) - Only in course pages */}
+      {inCourseContext && (
+        <CourseContextBar
+          courseId={course.id}
+          courseCode={course.code}
+          courseName={course.name}
+          term={course.term}
+          studentCount={course.enrollmentCount}
+          hasAiCoverage={false}
         />
+      )}
 
-        {/* Logo */}
-        <Link href="/dashboard" className="flex items-center space-x-2 min-h-[44px] min-w-[44px]">
-          <div className="flex items-center">
-            <span className="text-2xl font-bold text-primary glass-text">Quokka</span>
-            <span className="text-2xl font-bold text-primary glass-text">Q</span>
+      {/* Mobile Navigation - Hamburger Menu */}
+      <MobileNav
+        currentPath={pathname || ""}
+        user={user}
+        onLogout={handleLogout}
+        items={navContext.items}
+        courseContext={inCourseContext ? {
+          courseId: course.id,
+          courseCode: course.code,
+          courseName: course.name,
+        } : undefined}
+      />
+
+      {/* Ask Question Modal - Course Context Only */}
+      {/* TODO: Implement modal component */}
+      {showAskModal && inCourseContext && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <h2 className="text-xl font-semibold mb-4">Ask a Question</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              This will integrate with the existing Ask Question form from the course page.
+            </p>
+            <button
+              onClick={() => setShowAskModal(false)}
+              className="px-4 py-2 bg-neutral-200 rounded-md hover:bg-neutral-300"
+            >
+              Close
+            </button>
           </div>
-        </Link>
-
-        {/* Desktop Navigation - Conditional rendering based on context */}
-        {navContext.context === 'course' && course ? (
-          <CourseNav
-            courseCode={course.code}
-            courseName={course.name}
-            className="flex-shrink-0"
-          />
-        ) : (
-          <DesktopNav
-            currentPath={pathname || ""}
-            className="flex-shrink-0"
-            items={navContext.items}
-          />
-        )}
-
-        {/* Global Search */}
-        <div className="hidden md:block flex-1 max-w-md">
-          <GlobalSearch placeholder="Search threads..." />
         </div>
-
-        {/* User Menu */}
-        <div className="flex items-center gap-4 ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-11 w-11 rounded-full" aria-label="User menu">
-                <Avatar className="h-11 w-11 avatar-placeholder">
-                  <span className="text-sm font-semibold">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user.email}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground capitalize">
-                    {user.role}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="text-danger cursor-pointer"
-              >
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 }
