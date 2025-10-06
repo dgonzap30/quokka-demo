@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 export interface AIBadgeProps {
   /** Visual variant of the badge */
-  variant?: "default" | "compact" | "icon-only";
+  variant?: "default" | "compact" | "large" | "icon-only";
 
   /** Optional custom className for styling overrides */
   className?: string;
@@ -46,6 +46,7 @@ export function AIBadge({
   const sizeClasses = {
     default: "px-3 py-1 text-xs",
     compact: "px-2 py-0.5 text-[10px]",
+    large: "px-4 py-2 text-sm",
     "icon-only": "p-1.5",
   }[variant];
 
@@ -59,6 +60,7 @@ export function AIBadge({
         className={cn(
           variant === "default" && "h-3 w-3",
           variant === "compact" && "h-2.5 w-2.5",
+          variant === "large" && "h-4 w-4",
           variant === "icon-only" && "h-3 w-3"
         )}
         aria-hidden="true"
