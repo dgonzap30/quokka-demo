@@ -724,9 +724,9 @@ export const api = {
   // ============================================
 
   /**
-   * Get thread by ID with posts
+   * Get thread by ID with posts AND AI ANSWER
    */
-  async getThread(threadId: string): Promise<{ thread: Thread; posts: Post[] } | null> {
+  async getThread(threadId: string): Promise<{ thread: Thread; posts: Post[]; aiAnswer: AIAnswer | null } | null> {
     await delay();
     seedData();
 
@@ -734,6 +734,7 @@ export const api = {
     if (!thread) return null;
 
     const posts = getPostsByThread(threadId);
+    const aiAnswer = thread.aiAnswerId ? getAIAnswerById(thread.aiAnswerId) : null;
 
     // Increment view count
     updateThread(threadId, { views: thread.views + 1 });
@@ -744,13 +745,15 @@ export const api = {
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       ),
+      aiAnswer, // NEW: Include AI answer
     };
   },
 
   /**
    * Create new thread with auto-generated AI answer
+   * Returns both thread and aiAnswer for React Query cache pre-population
    */
-  async createThread(input: CreateThreadInput, authorId: string): Promise<Thread> {
+  async createThread(input: CreateThreadInput, authorId: string): Promise<{ thread: Thread; aiAnswer: AIAnswer | null }> {
     await delay(400 + Math.random() * 200); // 400-600ms
     seedData();
 
@@ -770,8 +773,9 @@ export const api = {
     addThread(newThread);
 
     // Auto-generate AI answer for the new thread
+    let aiAnswer: AIAnswer | null = null;
     try {
-      await this.generateAIAnswer({
+      aiAnswer = await this.generateAIAnswer({
         threadId: newThread.id,
         courseId: input.courseId,
         title: input.title,
@@ -781,11 +785,11 @@ export const api = {
 
       // Fetch updated thread with AI answer flags
       const updatedThread = getThreadById(newThread.id);
-      return updatedThread || newThread;
+      return { thread: updatedThread || newThread, aiAnswer };
     } catch (error) {
       console.error("Failed to generate AI answer:", error);
       // Return thread without AI answer if generation fails (graceful degradation)
-      return newThread;
+      return { thread: newThread, aiAnswer: null };
     }
   },
 
@@ -1239,6 +1243,47 @@ export const api = {
     });
 
     return aiAnswer;
+  },
+
+  /**
+   * Generate AI answer preview (ask page only)
+   * Does NOT save to database
+   */
+  async generateAIPreview(input: GenerateAIAnswerInput): Promise<AIAnswer> {
+    await delay(800 + Math.random() * 400); // 800-1200ms (AI simulation)
+    seedData();
+
+    const course = getCourseById(input.courseId);
+    if (!course) {
+      throw new Error(`Course not found: ${input.courseId}`);
+    }
+
+    // Generate AI response using template system (same as generateAIAnswer)
+    const { content, confidence, citations } = generateAIResponse(
+      course.code,
+      input.title,
+      input.content,
+      input.tags || []
+    );
+
+    const preview: AIAnswer = {
+      id: `preview-${Date.now()}`,
+      threadId: input.threadId,
+      courseId: input.courseId,
+      content,
+      confidenceLevel: confidence.level,
+      confidenceScore: confidence.score,
+      citations,
+      studentEndorsements: 0,
+      instructorEndorsements: 0,
+      totalEndorsements: 0,
+      endorsedBy: [],
+      instructorEndorsed: false,
+      generatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    return preview;
   },
 
   /**

@@ -60,7 +60,7 @@ function AskQuestionForm() {
       });
 
       // Redirect to the new thread
-      router.push(`/threads/${newThread.id}`);
+      router.push(`/threads/${newThread.thread.id}`);
     } catch (error) {
       console.error("Failed to create thread:", error);
       setIsSubmitting(false);

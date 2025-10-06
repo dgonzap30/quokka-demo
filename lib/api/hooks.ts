@@ -5,6 +5,8 @@ import type {
   AuthResult,
   CreateThreadInput,
   CreatePostInput,
+  GenerateAIAnswerInput,
+  EndorseAIAnswerInput,
 } from "@/lib/models/types";
 import { api } from "./client";
 import { isAuthSuccess } from "@/lib/models/types";
@@ -27,7 +29,27 @@ const queryKeys = {
     courseId ? ["notifications", userId, courseId] as const : ["notifications", userId] as const,
   studentDashboard: (userId: string) => ["studentDashboard", userId] as const,
   instructorDashboard: (userId: string) => ["instructorDashboard", userId] as const,
+  aiAnswer: (threadId: string) => ["aiAnswer", threadId] as const,
+  aiPreview: (questionHash: string) => ["aiPreview", questionHash] as const,
 };
+
+// ============================================
+// Helper Functions
+// ============================================
+
+/**
+ * Simple hash function for question content
+ * Used to cache AI previews by question
+ */
+function hashQuestion(text: string): string {
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    const char = text.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return hash.toString(36);
+}
 
 // ============================================
 // Authentication Hooks
@@ -264,6 +286,9 @@ export function useThread(threadId: string | undefined) {
 
 /**
  * Create new thread mutation
+ *
+ * AUTO-GENERATES AI ANSWER on success.
+ * AI answer is embedded in createThread response.
  */
 export function useCreateThread() {
   const queryClient = useQueryClient();
@@ -271,12 +296,25 @@ export function useCreateThread() {
   return useMutation({
     mutationFn: ({ input, authorId }: { input: CreateThreadInput; authorId: string }) =>
       api.createThread(input, authorId),
-    onSuccess: (newThread) => {
+    onSuccess: (result) => {
+      const { thread, aiAnswer } = result; // Destructure response
+
       // Invalidate course threads query
-      queryClient.invalidateQueries({ queryKey: queryKeys.courseThreads(newThread.courseId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.courseThreads(thread.courseId) });
+
       // Invalidate dashboards (activity feeds need update)
       queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
       queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+
+      // OPTIONAL: Pre-populate thread cache with AI answer
+      // This prevents useThread from refetching when user navigates to thread
+      if (aiAnswer) {
+        queryClient.setQueryData(queryKeys.thread(thread.id), {
+          thread,
+          posts: [],
+          aiAnswer,
+        });
+      }
     },
   });
 }
@@ -327,5 +365,127 @@ export function useInstructorDashboard(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 3 * 60 * 1000, // 3 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// ============================================
+// AI Answer Hooks
+// ============================================
+
+/**
+ * Get AI answer for a thread
+ *
+ * NOTE: This hook is OPTIONAL. AI answer is already embedded
+ * in useThread() response. Use this only for specific scenarios
+ * like ask page preview where you need AI answer without thread.
+ */
+export function useAIAnswer(threadId: string | undefined) {
+  return useQuery({
+    queryKey: threadId ? queryKeys.aiAnswer(threadId) : ["aiAnswer"],
+    queryFn: () => (threadId ? api.getAIAnswer(threadId) : Promise.resolve(null)),
+    enabled: !!threadId,
+    staleTime: 10 * 60 * 1000, // 10 minutes (AI content is immutable)
+    gcTime: 15 * 60 * 1000,     // 15 minutes (keep in cache longer)
+  });
+}
+
+/**
+ * Generate AI answer preview for ask page
+ *
+ * This mutation generates an AI answer WITHOUT saving it.
+ * Used to show users what the AI response would look like
+ * before they commit to creating the thread.
+ */
+export function useGenerateAIPreview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: GenerateAIAnswerInput) => api.generateAIPreview(input),
+    onSuccess: (preview, input) => {
+      // Cache preview with short expiry (30 seconds)
+      const questionHash = hashQuestion(input.title + input.content);
+      queryClient.setQueryData(queryKeys.aiPreview(questionHash), preview);
+    },
+  });
+}
+
+/**
+ * Endorse an AI answer (student or instructor)
+ *
+ * Uses optimistic updates to provide instant UI feedback.
+ * Automatically calculates weighted endorsement (student=1, instructor=3).
+ */
+export function useEndorseAIAnswer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: EndorseAIAnswerInput) => api.endorseAIAnswer(input),
+
+    // Optimistic update: update cache immediately
+    onMutate: async ({ aiAnswerId, userId, isInstructor }) => {
+      const threadId = aiAnswerId.split('-')[0]; // Extract threadId from aiAnswerId
+      const queryKey = queryKeys.thread(threadId);
+
+      // Cancel outgoing refetches (don't overwrite optimistic update)
+      await queryClient.cancelQueries({ queryKey });
+
+      // Get current cached data
+      const previousThread = queryClient.getQueryData(queryKey);
+
+      // Optimistically update cache
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old?.aiAnswer) return old;
+
+        const endorsementDelta = isInstructor ? 3 : 1;
+
+        return {
+          ...old,
+          aiAnswer: {
+            ...old.aiAnswer,
+            studentEndorsements: !isInstructor
+              ? old.aiAnswer.studentEndorsements + 1
+              : old.aiAnswer.studentEndorsements,
+            instructorEndorsements: isInstructor
+              ? old.aiAnswer.instructorEndorsements + 1
+              : old.aiAnswer.instructorEndorsements,
+            totalEndorsements: old.aiAnswer.totalEndorsements + endorsementDelta,
+            endorsedBy: [...(old.aiAnswer.endorsedBy || []), userId],
+            instructorEndorsed: isInstructor ? true : old.aiAnswer.instructorEndorsed,
+          },
+        };
+      });
+
+      // Return context for rollback
+      return { previousThread, threadId };
+    },
+
+    // On error: rollback optimistic update
+    onError: (err, variables, context) => {
+      if (context?.previousThread && context?.threadId) {
+        queryClient.setQueryData(
+          queryKeys.thread(context.threadId),
+          context.previousThread
+        );
+      }
+    },
+
+    // On success: invalidate related queries
+    onSuccess: (data, variables, context) => {
+      if (!context?.threadId) return;
+
+      // Invalidate thread query (refetch to get server truth)
+      queryClient.invalidateQueries({ queryKey: queryKeys.thread(context.threadId) });
+
+      // Invalidate course threads (endorsement count visible in list)
+      const thread = queryClient.getQueryData<any>(queryKeys.thread(context.threadId));
+      if (thread?.thread?.courseId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.courseThreads(thread.thread.courseId)
+        });
+      }
+
+      // Invalidate instructor dashboard (AI coverage stats may change)
+      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+    },
   });
 }

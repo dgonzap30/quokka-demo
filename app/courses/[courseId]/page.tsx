@@ -60,7 +60,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       setContent("");
       setTags("");
       setShowAskForm(false);
-      router.push(`/threads/${newThread.id}`);
+      router.push(`/threads/${newThread.thread.id}`);
     } catch (error) {
       console.error("Failed to create thread:", error);
       setIsSubmitting(false);
