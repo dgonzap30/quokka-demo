@@ -67,7 +67,7 @@ export function GlobalNavBar({
 
       <nav
         className={cn(
-          "sticky top-0 z-50 w-full bg-white/70 backdrop-blur-lg border-b border-black/5 transition-shadow duration-200",
+          "sticky top-0 z-50 w-full bg-white/75 backdrop-blur-lg border-b border-black/10 transition-shadow duration-200",
           hasScrolled && "shadow-sm",
           className
         )}

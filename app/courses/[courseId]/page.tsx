@@ -11,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
-import { ChevronDown, ChevronUp, GraduationCap, Sparkles } from "lucide-react";
+import { FilterRow, type FilterType, type SortOrder } from "@/components/course/filter-row";
+import { GraduationCap } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import type { Thread } from "@/lib/models/types";
 
@@ -29,6 +30,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filter and sort state
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   // Handle Ask Question form submission
   const handleAskQuestion = async (e: FormEvent) => {
@@ -134,34 +139,26 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           />
 
           {/* Course Hero */}
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-            <div className="flex-1 space-y-4">
-              <h1 className="heading-2 glass-text">{course.name}</h1>
-              <p className="text-lg text-muted-foreground glass-text leading-relaxed max-w-3xl">
-                {course.description}
-              </p>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-                <div className="flex items-center gap-6 text-sm text-subtle glass-text">
-                  <span className="font-medium">{course.term}</span>
-                  <span>•</span>
-                  <span>{course.enrollmentCount} students enrolled</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground glass-text">
-                  <Sparkles className="h-4 w-4 ai-gradient-text" aria-hidden="true" />
-                  <span>AI Assistant Available</span>
-                </div>
-              </div>
+          <div className="space-y-4">
+            <h1 className="heading-2 glass-text">{course.name}</h1>
+            <p className="text-lg text-muted-foreground glass-text leading-relaxed max-w-3xl">
+              {course.description}
+            </p>
+            <div className="flex items-center gap-6 text-sm text-subtle glass-text">
+              <span className="font-medium">{course.term}</span>
+              <span>•</span>
+              <span>{course.enrollmentCount} students enrolled</span>
             </div>
-            <Button
-              variant="glass-primary"
-              size="lg"
-              onClick={() => setShowAskForm(!showAskForm)}
-            >
-              {showAskForm ? "Cancel" : "Ask Question"}
-              {showAskForm ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
-            </Button>
           </div>
         </div>
+
+        {/* Filter Row */}
+        <FilterRow
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+          sortOrder={sortOrder}
+          onSortChange={setSortOrder}
+        />
 
         {/* Ask Question Form (Collapsible) */}
         {showAskForm && (

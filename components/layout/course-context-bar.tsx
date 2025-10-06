@@ -53,34 +53,24 @@ export function CourseContextBar({
 }: CourseContextBarProps) {
   const pathname = usePathname();
 
-  // Define course tabs
+  // Define course tabs (Q&A-first: only Threads and Overview)
   const tabs: CourseTab[] = [
+    {
+      label: "Threads",
+      href: `/courses/${courseId}#threads`,
+      isActive: pathname?.includes(`/courses/${courseId}`),
+    },
     {
       label: "Overview",
       href: `/courses/${courseId}`,
       isActive: pathname === `/courses/${courseId}`,
-    },
-    {
-      label: "Threads",
-      href: `/courses/${courseId}#threads`,
-      isActive: pathname?.includes(`/courses/${courseId}`) && !pathname?.includes("/resources") && !pathname?.includes("/grades"),
-    },
-    {
-      label: "Resources",
-      href: `/courses/${courseId}/resources`,
-      isActive: pathname?.includes(`/courses/${courseId}/resources`),
-    },
-    {
-      label: "Grades",
-      href: `/courses/${courseId}/grades`,
-      isActive: pathname?.includes(`/courses/${courseId}/grades`),
     },
   ];
 
   return (
     <div
       className={cn(
-        "w-full bg-white/70 backdrop-blur-lg border-b border-black/5 transition-[height] duration-200",
+        "w-full bg-white/75 backdrop-blur-lg border-b border-black/10 transition-[height] duration-200",
         className
       )}
       style={{ height: isCompact ? '40px' : '48px' }}
@@ -134,7 +124,7 @@ export function CourseContextBar({
                       className={cn(
                         "absolute left-0 right-0 -bottom-0.5 h-[2px] transition-all duration-200",
                         tab.isActive
-                          ? "bg-amber-500 scale-x-100"
+                          ? "bg-amber-600 scale-x-100"
                           : "bg-transparent group-hover:bg-neutral-300 group-hover:scale-x-100 scale-x-0"
                       )}
                     />
@@ -143,6 +133,11 @@ export function CourseContextBar({
               ))}
             </ul>
           </nav>
+
+          {/* Purpose Microcopy */}
+          <p className="hidden lg:block ml-6 text-sm text-neutral-600 whitespace-nowrap">
+            Ask questions • AI drafts answers • peers & TAs refine
+          </p>
         </div>
       </div>
     </div>
