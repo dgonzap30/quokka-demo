@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
 import { AskQuestionModal } from "@/components/course/ask-question-modal";
@@ -126,6 +127,7 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
             selectedThreadId={selectedThreadId}
             onThreadSelect={handleThreadSelect}
             isLoading={threadsLoading}
+            currentUserId={user?.id}
           />
         }
       >

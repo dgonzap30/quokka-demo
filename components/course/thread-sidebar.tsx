@@ -2,6 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { SidebarThreadCard } from "@/components/course/sidebar-thread-card";
+import { SidebarSearchBar } from "@/components/course/sidebar-search-bar";
+import { SidebarFilterPanel, type FilterType } from "@/components/course/sidebar-filter-panel";
+import { TagCloud, type TagWithCount } from "@/components/course/tag-cloud";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Thread } from "@/lib/models/types";
 import { cn } from "@/lib/utils";
@@ -32,6 +35,11 @@ export interface ThreadSidebarProps {
    * Loading state
    */
   isLoading?: boolean;
+
+  /**
+   * Current user ID (for "My Posts" filter)
+   */
+  currentUserId?: string;
 
   /**
    * Optional className for composition
@@ -88,10 +96,16 @@ export function ThreadSidebar({
   selectedThreadId,
   onThreadSelect,
   isLoading = false,
+  currentUserId,
   className,
 }: ThreadSidebarProps) {
   // Track viewed thread IDs for unread indicators
   const [viewedThreadIds, setViewedThreadIds] = useState<Set<string>>(new Set());
+
+  // Filter and search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Handle thread click
   const handleThreadClick = (threadId: string) => {
@@ -99,12 +113,67 @@ export function ThreadSidebar({
     setViewedThreadIds((prev) => new Set([...prev, threadId]));
   };
 
-  // Memoize sorted threads (newest first)
-  const sortedThreads = useMemo(() => {
-    return [...threads].sort((a, b) => {
+  // Extract all unique tags with counts
+  const tagsWithCounts = useMemo<TagWithCount[]>(() => {
+    const tagCounts = new Map<string, number>();
+
+    threads.forEach((thread) => {
+      thread.tags?.forEach((tag) => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      });
+    });
+
+    return Array.from(tagCounts.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [threads]);
+
+  // Filter and sort threads
+  const filteredThreads = useMemo(() => {
+    let filtered = [...threads];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((thread) => {
+        return (
+          thread.title.toLowerCase().includes(query) ||
+          thread.content.toLowerCase().includes(query) ||
+          thread.tags?.some((tag) => tag.toLowerCase().includes(query))
+        );
+      });
+    }
+
+    // Apply status filter
+    if (activeFilter !== "all") {
+      switch (activeFilter) {
+        case "unanswered":
+          filtered = filtered.filter((thread) => thread.status === "open");
+          break;
+        case "my-posts":
+          // TODO: Filter by user participation (requires post data)
+          // For now, filter by thread author
+          filtered = filtered.filter((thread) => thread.authorId === currentUserId);
+          break;
+        case "needs-review":
+          // Threads that are answered but not resolved
+          filtered = filtered.filter((thread) => thread.status === "answered");
+          break;
+      }
+    }
+
+    // Apply tag filter
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((thread) => {
+        return selectedTags.every((selectedTag) => thread.tags?.includes(selectedTag));
+      });
+    }
+
+    // Sort by newest first
+    return filtered.sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [threads]);
+  }, [threads, searchQuery, activeFilter, selectedTags, currentUserId]);
 
   return (
     <div
@@ -118,18 +187,31 @@ export function ThreadSidebar({
       <div className="flex-shrink-0 border-b border-glass p-4">
         <h2 className="heading-4 glass-text">Threads</h2>
         <p className="text-xs text-muted-foreground glass-text mt-1">
-          {threads.length} {threads.length === 1 ? "thread" : "threads"}
+          {filteredThreads.length} of {threads.length} {threads.length === 1 ? "thread" : "threads"}
         </p>
       </div>
 
-      {/* Placeholder for Search Bar (Phase 3) */}
-      {/* TODO: Add SidebarSearchBar component */}
+      {/* Search Bar */}
+      <SidebarSearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search threads..."
+      />
 
-      {/* Placeholder for Filter Panel (Phase 3) */}
-      {/* TODO: Add SidebarFilterPanel component */}
+      {/* Filter Panel */}
+      <SidebarFilterPanel
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+      />
 
-      {/* Placeholder for Tag Cloud (Phase 3) */}
-      {/* TODO: Add TagCloud component */}
+      {/* Tag Cloud */}
+      {tagsWithCounts.length > 0 && (
+        <TagCloud
+          tags={tagsWithCounts}
+          selectedTags={selectedTags}
+          onTagsChange={setSelectedTags}
+        />
+      )}
 
       {/* Thread List */}
       <div
@@ -164,7 +246,7 @@ export function ThreadSidebar({
         )}
 
         {/* Thread Cards */}
-        {!isLoading && sortedThreads.map((thread) => (
+        {!isLoading && filteredThreads.map((thread) => (
           <div key={thread.id} role="listitem">
             <SidebarThreadCard
               thread={thread}
