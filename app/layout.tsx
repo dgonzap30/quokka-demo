@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { NavHeader } from "@/components/layout/nav-header";
@@ -61,7 +62,9 @@ export default function RootLayout({
           </div>
         </div>
         <Providers>
-          <NavHeader />
+          <Suspense fallback={null}>
+            <NavHeader />
+          </Suspense>
           {children}
         </Providers>
       </body>
