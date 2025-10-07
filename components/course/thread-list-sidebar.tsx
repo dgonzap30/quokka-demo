@@ -150,7 +150,7 @@ export function ThreadListSidebar({
               {threads.length} {threads.length === 1 ? "thread" : "threads"}
             </p>
           </div>
-          {onCollapse && (
+          {onCollapse && !selectedThreadId && (
             <Button
               variant="ghost"
               size="icon"
@@ -173,7 +173,7 @@ export function ThreadListSidebar({
       >
         {/* Loading State */}
         {isLoading && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+          <div className="space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="p-3 md:p-4 rounded-lg glass-panel">
                 <Skeleton className="h-4 w-full mb-2 bg-glass-medium" />
@@ -197,9 +197,9 @@ export function ThreadListSidebar({
           </div>
         )}
 
-        {/* Thread Cards with responsive grid */}
+        {/* Thread Cards - Vertical Stack */}
         {!isLoading && threads.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+          <div className="space-y-2">
             {threads.map((thread) => (
               <div key={thread.id} role="listitem">
                 <SidebarThreadCard

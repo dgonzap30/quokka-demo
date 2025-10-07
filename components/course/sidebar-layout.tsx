@@ -116,17 +116,20 @@ export function SidebarLayout({
           e.preventDefault();
           setIsFilterSidebarOpen((prev) => !prev);
         }
-        // Cmd/Ctrl + ] → Toggle thread list
+        // Cmd/Ctrl + ] → Toggle thread list (only if no thread selected)
         else if (e.key === "]") {
           e.preventDefault();
-          setIsThreadListOpen((prev) => !prev);
+          // Only toggle if no thread is selected
+          if (!selectedThreadId) {
+            setIsThreadListOpen((prev) => !prev);
+          }
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFilterSidebarOpen, isThreadListOpen]);
+  }, [isFilterSidebarOpen, isThreadListOpen, selectedThreadId]);
 
   // Toggle sidebar handlers
   const toggleFilterSidebar = () => setIsFilterSidebarOpen((prev) => !prev);
