@@ -271,6 +271,22 @@ If issues arise:
 
 ## Changelog
 
+- `2025-10-07` | [Phase 3] | **COMPLETED** - Filters, search, and tags
+  - Created SidebarSearchBar with 300ms debounce
+  - Created SidebarFilterPanel with vertical filters
+  - Created TagCloud with multi-select and usage sizing
+  - Integrated all filters with combined filtering logic
+  - Search across title, content, and tags
+  - Tag extraction and counting
+  - Filter count display (X of Y threads)
+  - TypeScript ✓, Lint ✓, Committed (a4453e7)
+- `2025-10-07` | [Phase 1-2] | **COMPLETED** - Gmail-style sidebar interface foundation
+  - Created SidebarLayout component with split-pane architecture
+  - Created SidebarThreadCard for compact thread display
+  - Created ThreadSidebar with thread list
+  - Created ThreadDetailPanel for inline viewing
+  - Integrated into course page with URL sync
+  - TypeScript ✓, Lint ✓, Committed (177ac5f)
 - `2025-10-07` | [Planning] | Created task context and detailed implementation plan
 - `2025-10-07` | [Planning] | Generated comprehensive plan with 6 implementation phases
 

@@ -17,9 +17,14 @@ export interface SidebarLayoutProps {
   initialThreadId?: string | null;
 
   /**
-   * Sidebar content (filters, search, thread list)
+   * Filter sidebar content (left - search, filters, tags)
    */
-  sidebar: ReactNode;
+  filterSidebar: ReactNode;
+
+  /**
+   * Thread list sidebar content (middle - thread list)
+   */
+  threadListSidebar: ReactNode;
 
   /**
    * Main content (thread detail view)
@@ -69,7 +74,8 @@ export interface SidebarLayoutProps {
 export function SidebarLayout({
   courseId,
   initialThreadId,
-  sidebar,
+  filterSidebar,
+  threadListSidebar,
   children,
   className,
 }: SidebarLayoutProps) {
@@ -91,7 +97,6 @@ export function SidebarLayout({
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keyboard shortcut: Cmd/Ctrl + \ to toggle sidebar
@@ -133,32 +138,44 @@ export function SidebarLayout({
       <div
         className={cn(
           "grid h-full transition-all duration-300 ease-in-out",
-          // Desktop: Grid with sidebar | divider | content
+          // Desktop: Grid with filter sidebar | thread list sidebar | content
           isSidebarOpen
-            ? "lg:grid-cols-[320px_auto]"
-            : "lg:grid-cols-[0px_auto]"
+            ? "lg:grid-cols-[220px_300px_auto]"
+            : "lg:grid-cols-[0px_0px_auto]"
         )}
       >
-        {/* Sidebar */}
+        {/* Filter Sidebar (Left - 220px) */}
         <aside
           className={cn(
             "relative h-screen overflow-hidden transition-all duration-300 ease-in-out",
             // Mobile: Fixed overlay drawer
-            "fixed left-0 top-0 z-50 w-[280px] lg:relative lg:z-0 lg:w-full",
+            "fixed left-0 top-0 z-50 w-[220px] lg:relative lg:z-0 lg:w-full",
             // Transform for mobile drawer
             isSidebarOpen
               ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0",
-            // Glass background
-            "glass-panel-strong border-r border-glass backdrop-blur-lg"
+              : "-translate-x-full lg:translate-x-0"
           )}
-          aria-label="Thread sidebar"
+          aria-label="Filter sidebar"
           aria-hidden={!isSidebarOpen}
         >
-          {/* Sidebar Content */}
-          <div className="flex h-full flex-col overflow-hidden">
-            {sidebar}
-          </div>
+          {filterSidebar}
+        </aside>
+
+        {/* Thread List Sidebar (Middle - 300px) */}
+        <aside
+          className={cn(
+            "relative h-screen overflow-hidden transition-all duration-300 ease-in-out",
+            // Mobile: Fixed overlay drawer (offset by filter sidebar width)
+            "fixed left-[220px] top-0 z-50 w-[300px] lg:relative lg:left-0 lg:z-0 lg:w-full",
+            // Transform for mobile drawer
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          )}
+          aria-label="Thread list sidebar"
+          aria-hidden={!isSidebarOpen}
+        >
+          {threadListSidebar}
 
           {/* Mobile Close Button */}
           {isMobile && (

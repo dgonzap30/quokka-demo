@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect, Suspense } from "react";
+import { use, useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
@@ -10,8 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
 import { AskQuestionModal } from "@/components/course/ask-question-modal";
 import { SidebarLayout } from "@/components/course/sidebar-layout";
-import { ThreadSidebar } from "@/components/course/thread-sidebar";
+import { FilterSidebar } from "@/components/course/filter-sidebar";
+import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
+import type { FilterType } from "@/components/course/sidebar-filter-panel";
+import type { TagWithCount } from "@/components/course/tag-cloud";
 
 function CourseDetailContent({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = use(params);
@@ -26,6 +29,65 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
 
   // Selected thread state (from URL param)
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+
+  // Filter state (lifted from sidebars)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // Extract tags with counts from all threads
+  const tagsWithCounts = useMemo<TagWithCount[]>(() => {
+    if (!threads) return [];
+
+    const tagMap = new Map<string, number>();
+    threads.forEach((thread) => {
+      thread.tags?.forEach((tag) => {
+        tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+      });
+    });
+
+    return Array.from(tagMap.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [threads]);
+
+  // Apply all filters to get filtered threads
+  const filteredThreads = useMemo(() => {
+    if (!threads) return [];
+
+    let filtered = [...threads];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((thread) =>
+        thread.title.toLowerCase().includes(query) ||
+        thread.content.toLowerCase().includes(query) ||
+        thread.tags?.some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply status filter
+    if (activeFilter === "unanswered") {
+      filtered = filtered.filter((thread) => thread.status === "open");
+    } else if (activeFilter === "my-posts") {
+      filtered = filtered.filter((thread) => thread.authorId === user?.id);
+    } else if (activeFilter === "needs-review") {
+      filtered = filtered.filter((thread) => thread.status === "answered");
+    }
+
+    // Apply tag filter (AND logic - thread must have ALL selected tags)
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((thread) =>
+        selectedTags.every((tag) => thread.tags?.includes(tag))
+      );
+    }
+
+    // Sort by newest first
+    return filtered.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [threads, searchQuery, activeFilter, selectedTags, user?.id]);
 
   // Detect modal and thread query parameters
   useEffect(() => {
@@ -116,14 +178,26 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
 
   return (
     <>
-      {/* Gmail-Style Sidebar Layout */}
+      {/* Gmail-Style Double Sidebar Layout */}
       <SidebarLayout
         courseId={courseId}
         initialThreadId={selectedThreadId}
-        sidebar={
-          <ThreadSidebar
-            courseId={courseId}
-            threads={threads || []}
+        filterSidebar={
+          <FilterSidebar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            tags={tagsWithCounts}
+            selectedTags={selectedTags}
+            onTagsChange={setSelectedTags}
+            totalThreads={threads?.length || 0}
+            filteredThreads={filteredThreads.length}
+          />
+        }
+        threadListSidebar={
+          <ThreadListSidebar
+            threads={filteredThreads}
             selectedThreadId={selectedThreadId}
             onThreadSelect={handleThreadSelect}
             isLoading={threadsLoading}
