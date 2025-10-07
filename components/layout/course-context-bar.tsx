@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export interface CourseTab {
@@ -37,33 +35,39 @@ export interface CourseContextBarProps {
   /** Whether to show compact mode (reduces height) */
   isCompact?: boolean;
 
+  /** Active tab state */
+  activeTab?: "threads" | "overview";
+
+  /** Tab change handler */
+  onTabChange?: (tab: "threads" | "overview") => void;
+
   /** Optional className for composition */
   className?: string;
 }
 
 export function CourseContextBar({
-  courseId,
+  courseId: _courseId, // eslint-disable-line @typescript-eslint/no-unused-vars
   courseCode,
   courseName,
   term,
   studentCount,
   hasAiCoverage = false,
   isCompact = false,
+  activeTab = "threads",
+  onTabChange,
   className,
 }: CourseContextBarProps) {
-  const pathname = usePathname();
-
   // Define course tabs (Q&A-first: only Threads and Overview)
-  const tabs: CourseTab[] = [
+  const tabs = [
     {
+      id: "threads" as const,
       label: "Threads",
-      href: `/courses/${courseId}#threads`,
-      isActive: pathname?.includes(`/courses/${courseId}`),
+      isActive: activeTab === "threads",
     },
     {
+      id: "overview" as const,
       label: "Overview",
-      href: `/courses/${courseId}`,
-      isActive: pathname === `/courses/${courseId}`,
+      isActive: activeTab === "overview",
     },
   ];
 
@@ -108,12 +112,12 @@ export function CourseContextBar({
           <nav className="ml-auto text-sm" aria-label="Course sections">
             <ul className="flex gap-6">
               {tabs.map((tab) => (
-                <li key={tab.href}>
-                  <Link
-                    href={tab.href}
+                <li key={tab.id}>
+                  <button
+                    onClick={() => onTabChange?.(tab.id)}
                     aria-current={tab.isActive ? "page" : undefined}
                     className={cn(
-                      "group relative py-2 transition-colors duration-200",
+                      "group relative py-2 transition-colors duration-200 cursor-pointer bg-transparent border-none",
                       tab.isActive
                         ? "text-neutral-900 font-medium"
                         : "text-neutral-600 hover:text-neutral-900"
@@ -128,7 +132,7 @@ export function CourseContextBar({
                           : "bg-transparent group-hover:bg-neutral-300 group-hover:scale-x-100 scale-x-0"
                       )}
                     />
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>

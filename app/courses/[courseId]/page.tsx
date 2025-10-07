@@ -13,6 +13,7 @@ import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
 import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
+import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
 
@@ -26,6 +27,9 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
 
   // Ask Question modal state
   const [showAskModal, setShowAskModal] = useState(false);
+
+  // Active tab state: read from URL, default to "threads"
+  const activeTab = (searchParams.get('tab') === 'overview' ? 'overview' : 'threads') as "threads" | "overview";
 
   // Selected thread state (from URL param)
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
@@ -193,58 +197,78 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
 
   return (
     <>
-      {/* Gmail-Style Double Sidebar Layout */}
-      <SidebarLayout
-        courseId={courseId}
-        initialThreadId={selectedThreadId}
-        selectedThreadId={selectedThreadId}
-        filterSidebar={
-          <FilterSidebar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            tags={tagsWithCounts}
-            selectedTags={selectedTags}
-            onTagsChange={setSelectedTags}
-            totalThreads={threads?.length || 0}
-            filteredThreads={filteredThreads.length}
-          />
-        }
-        threadListSidebar={
-          <ThreadListSidebar
-            threads={filteredThreads}
-            selectedThreadId={selectedThreadId}
-            onThreadSelect={handleThreadSelect}
-            isLoading={threadsLoading}
-            currentUserId={user?.id}
-          />
-        }
-      >
-        {/* Main Content: Only render when thread selected */}
-        {selectedThreadId ? (
-          <ThreadDetailPanel
-            threadId={selectedThreadId}
-            onClose={() => {
-              setSelectedThreadId(null);
-              // Remove thread param from URL
-              const params = new URLSearchParams(searchParams.toString());
-              params.delete('thread');
-              const newUrl = params.toString()
-                ? `/courses/${courseId}?${params.toString()}`
-                : `/courses/${courseId}`;
-              window.history.replaceState(null, '', newUrl);
-            }}
-          />
-        ) : null}
+      {/* Conditional Rendering: Threads View or Overview */}
+      {activeTab === "threads" ? (
+        /* Gmail-Style Double Sidebar Layout */
+        <SidebarLayout
+          courseId={courseId}
+          initialThreadId={selectedThreadId}
+          selectedThreadId={selectedThreadId}
+          filterSidebar={
+            <FilterSidebar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              tags={tagsWithCounts}
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              totalThreads={threads?.length || 0}
+              filteredThreads={filteredThreads.length}
+            />
+          }
+          threadListSidebar={
+            <ThreadListSidebar
+              threads={filteredThreads}
+              selectedThreadId={selectedThreadId}
+              onThreadSelect={handleThreadSelect}
+              isLoading={threadsLoading}
+              currentUserId={user?.id}
+            />
+          }
+        >
+          {/* Main Content: Only render when thread selected */}
+          {selectedThreadId ? (
+            <ThreadDetailPanel
+              threadId={selectedThreadId}
+              onClose={() => {
+                setSelectedThreadId(null);
+                // Remove thread param from URL
+                const params = new URLSearchParams(searchParams.toString());
+                params.delete('thread');
+                const newUrl = params.toString()
+                  ? `/courses/${courseId}?${params.toString()}`
+                  : `/courses/${courseId}`;
+                window.history.replaceState(null, '', newUrl);
+              }}
+            />
+          ) : null}
 
-        {/* Floating Quokka AI Agent */}
-        <FloatingQuokka
-          courseId={course.id}
-          courseName={course.name}
-          courseCode={course.code}
-        />
-      </SidebarLayout>
+          {/* Floating Quokka AI Agent */}
+          <FloatingQuokka
+            courseId={course.id}
+            courseName={course.name}
+            courseCode={course.code}
+          />
+        </SidebarLayout>
+      ) : (
+        /* Overview Tab: Course stats, resources, activity */
+        <div className="min-h-screen">
+          <CourseOverviewPanel
+            courseId={courseId}
+            courseName={course.name}
+            threads={threads || []}
+            user={user || undefined}
+          />
+
+          {/* Floating Quokka AI Agent (also in overview) */}
+          <FloatingQuokka
+            courseId={course.id}
+            courseName={course.name}
+            courseCode={course.code}
+          />
+        </div>
+      )}
 
       {/* Ask Question Modal */}
       <AskQuestionModal

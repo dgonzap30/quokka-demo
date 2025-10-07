@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCurrentUser, useLogout, useCourse } from "@/lib/api/hooks";
 import { GlobalNavBar } from "@/components/layout/global-nav-bar";
 import { CourseContextBar } from "@/components/layout/course-context-bar";
@@ -11,6 +11,7 @@ import { getNavContext } from "@/lib/utils/nav-config";
 export function NavHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: user } = useCurrentUser();
   const logoutMutation = useLogout();
 
@@ -58,6 +59,28 @@ export function NavHeader() {
   // Determine if we're in a course context
   const inCourseContext = navContext.context === 'course' && course;
 
+  // Read active tab from URL (default to "threads")
+  const activeTab = (searchParams.get('tab') === 'overview' ? 'overview' : 'threads') as "threads" | "overview";
+
+  // Handle tab change - update URL
+  const handleTabChange = (tab: "threads" | "overview") => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (tab === 'overview') {
+      params.set('tab', 'overview');
+      // Clear thread selection when switching to overview
+      params.delete('thread');
+    } else {
+      params.delete('tab'); // 'threads' is default
+    }
+
+    const newUrl = params.toString()
+      ? `/courses/${navContext.courseId}?${params.toString()}`
+      : `/courses/${navContext.courseId}`;
+
+    router.push(newUrl);
+  };
+
   return (
     <>
       {/* Global Navigation Bar (Row 1) */}
@@ -83,6 +106,8 @@ export function NavHeader() {
           studentCount={course.enrollmentCount}
           hasAiCoverage={false}
           isCompact={hasScrolled}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
         />
       )}
 
