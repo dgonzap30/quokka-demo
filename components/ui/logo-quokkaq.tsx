@@ -127,48 +127,44 @@ export default function LogoQuokkAQ({
           </>
         )}
 
-        {/* "A" - refined with smooth curves */}
+        {/* "A" - clean geometric letter */}
         <g filter={monochrome ? undefined : "url(#qa-letter-glow)"}>
-          {/* Left leg */}
+          {/* Unified A shape */}
           <path
-            d="M17 18 C17 18 17.5 16.5 18.5 13.5 C19 12 19.5 9 20 6 C20 6 20 6 20.2 6 C20.4 6 20.4 6 20.4 6 C20.4 6 21.5 10.5 22 12.5 L17 18 Z"
+            d="M20 6.5 L24.5 18 L22.5 18 L21.5 15 L18.5 15 L17.5 18 L15.5 18 L20 6.5 Z"
             fill="#fff"
           />
-          {/* Right leg */}
-          <path
-            d="M20.4 6 C20.4 6 21.5 10.5 22 12.5 C22.5 14 23 16 23 18 L20.4 6 Z"
-            fill="#fff"
-          />
-          {/* Crossbar with rounded ends */}
-          <ellipse
-            cx="20.2"
-            cy="12.8"
-            rx="2.2"
-            ry="1.1"
-            fill="#fff"
+          {/* Crossbar cutout for readability */}
+          <rect
+            x="18.8"
+            y="13.2"
+            width="2.4"
+            height="1.3"
+            fill="url(#qa-grad)"
+            rx="0.3"
           />
         </g>
 
-        {/* "Q" - refined with curved tail */}
+        {/* "Q" - clean circle with diagonal tail */}
         <g filter={monochrome ? undefined : "url(#qa-letter-glow)"}>
-          {/* Circle */}
+          {/* Main circle - thicker stroke for visibility */}
           <circle
             cx="36"
             cy="12"
-            r="5.5"
+            r="5"
             fill="none"
             stroke="#fff"
-            strokeWidth="2.2"
-            strokeLinecap="round"
+            strokeWidth="2.5"
           />
-          {/* Curved tail flowing from circle */}
-          <path
-            d="M39.5 15.5 Q41 17 42.5 18.5 Q43.5 19.5 44 19.5"
-            fill="none"
+          {/* Diagonal tail extending from bottom-right */}
+          <line
+            x1="39.5"
+            y1="15.5"
+            x2="43"
+            y2="19"
             stroke="#fff"
-            strokeWidth="2.2"
+            strokeWidth="2.5"
             strokeLinecap="round"
-            strokeLinejoin="round"
           />
         </g>
       </svg>
