@@ -39,20 +39,28 @@ export interface ThreadCardProps {
  */
 export function ThreadCard({ thread, className }: ThreadCardProps) {
   return (
-    <Link href={`/threads/${thread.id}`} className={className}>
-      <Card variant="glass-hover">
-        <CardHeader className="p-6">
-          {/* Header Row: Title + Status */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-            <div className="flex-1 space-y-3">
-              <CardTitle className="text-lg font-semibold leading-snug line-clamp-2 glass-text">
-                {thread.title}
-              </CardTitle>
+    <Link
+      href={`/threads/${thread.id}`}
+      className={cn(
+        "group rounded-xl focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all",
+        className
+      )}
+      aria-label={`View thread: ${thread.title}, ${thread.status}, ${thread.views} views`}
+    >
+      <Card variant="glass-hover" className="transition-all duration-250 group-focus-visible:shadow-[var(--shadow-glass-lg)]">
+        <article>
+          <CardHeader className="p-6">
+            {/* Header Row: Title + Status */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="flex-1 space-y-3">
+                <h2 className="text-lg font-semibold leading-snug line-clamp-2 glass-text">
+                  {thread.title}
+                </h2>
               <CardDescription className="text-sm leading-relaxed line-clamp-2 glass-text">
                 {thread.content}
               </CardDescription>
             </div>
-            <StatusBadge status={thread.status} />
+            <StatusBadge status={thread.status} aria-label={`Thread status: ${thread.status}`} />
           </div>
         </CardHeader>
 
@@ -62,38 +70,40 @@ export function ThreadCard({ thread, className }: ThreadCardProps) {
             {/* AI Badge */}
             {thread.hasAIAnswer && (
               <>
-                <AIBadge variant="compact" aria-label="Has AI-generated answer" />
-                <span className="text-border">•</span>
+                <AIBadge variant="compact" aria-label="This thread has an AI-generated answer" />
+                <span className="text-muted-foreground opacity-50" aria-hidden="true">•</span>
               </>
             )}
 
             {/* Views */}
             <div className="flex items-center gap-1.5">
-              <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+              <Eye className="size-4" aria-hidden="true" />
               <span>{thread.views} views</span>
             </div>
 
-            <span className="text-border">•</span>
+            <span className="text-muted-foreground opacity-50" aria-hidden="true">•</span>
 
             {/* Date */}
             <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
+              <Calendar className="size-4" aria-hidden="true" />
+              <time dateTime={thread.createdAt}>
+                {new Date(thread.createdAt).toLocaleDateString()}
+              </time>
             </div>
 
             {/* Tags */}
             {thread.tags && thread.tags.length > 0 && (
               <>
-                <span className="text-border">•</span>
+                <span className="text-muted-foreground opacity-50" aria-hidden="true">•</span>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Tag className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Tag className="size-4" aria-hidden="true" />
                   {thread.tags.slice(0, 3).map((tag) => (
                     <Badge key={tag} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
                   {thread.tags.length > 3 && (
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground" aria-label={`${thread.tags.length - 3} more tags`}>
                       +{thread.tags.length - 3}
                     </span>
                   )}
@@ -102,6 +112,7 @@ export function ThreadCard({ thread, className }: ThreadCardProps) {
             )}
           </div>
         </CardContent>
+        </article>
       </Card>
     </Link>
   );
