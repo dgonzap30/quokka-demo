@@ -126,15 +126,15 @@ export function SidebarThreadCard({
         </p>
       )}
 
-      {/* Metadata Row */}
+      {/* Metadata Row - AI-first ordering */}
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground glass-text">
+        {/* AI Badge - PROMINENT (first position, larger) */}
+        {thread.hasAIAnswer && (
+          <AIBadge variant="default" />
+        )}
+
         {/* Status Badge */}
         <StatusBadge status={thread.status} />
-
-        {/* AI Badge */}
-        {thread.hasAIAnswer && (
-          <AIBadge variant="compact" />
-        )}
 
         {/* Reply Count */}
         {replyCount > 0 && (

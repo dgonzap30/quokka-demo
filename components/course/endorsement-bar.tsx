@@ -36,7 +36,7 @@ export function EndorsementBar({
 
   return (
     <div className={cn("flex items-center gap-4 flex-wrap", className)}>
-      {/* Endorsement Count */}
+      {/* Endorsement Count with Visual Breakdown */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -50,27 +50,64 @@ export function EndorsementBar({
               </span>
             </div>
           </TooltipTrigger>
-          <TooltipContent>
-            <div className="space-y-1 text-xs">
-              <p>
-                <strong>{byRole.student}</strong> from students
-              </p>
-              <p>
-                <strong>{byRole.instructor}</strong> from instructors (3x weight)
-              </p>
-              <p>
-                <strong>{byRole.ta}</strong> from TAs
-              </p>
+          <TooltipContent className="max-w-xs">
+            <div className="space-y-2 text-xs">
+              <p className="font-semibold border-b border-border pb-1 mb-2">Endorsement Breakdown</p>
+
+              {/* Instructor Endorsements (Gold) */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-amber-500" />
+                  <span>Instructors</span>
+                </div>
+                <span className="font-semibold text-amber-600">{byRole.instructor} (3x weight)</span>
+              </div>
+
+              {/* TA Endorsements (Blue) */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-blue-500" />
+                  <span>TAs</span>
+                </div>
+                <span className="font-semibold text-blue-600">{byRole.ta}</span>
+              </div>
+
+              {/* Student Endorsements (Gray) */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-neutral-400" />
+                  <span>Students</span>
+                </div>
+                <span className="font-semibold text-neutral-600">{byRole.student}</span>
+              </div>
+
+              <div className="border-t border-border pt-2 mt-2 text-muted-foreground">
+                <p className="text-xs italic">Weighted total: {total}</p>
+              </div>
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
-      {/* Instructor Badge */}
+      {/* Instructor Endorsement Badge (Gold/Amber) */}
       {hasInstructorEndorsement && (
-        <Badge variant="outline" className="gap-1.5">
+        <Badge
+          variant="outline"
+          className="gap-1.5 border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-400"
+        >
           <Award className="size-3" aria-hidden="true" />
           Instructor Endorsed
+        </Badge>
+      )}
+
+      {/* TA Endorsement Badge (Blue) - if we have TAs and no instructor */}
+      {!hasInstructorEndorsement && byRole.ta > 0 && (
+        <Badge
+          variant="outline"
+          className="gap-1.5 border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-400"
+        >
+          <Award className="size-3" aria-hidden="true" />
+          TA Endorsed
         </Badge>
       )}
 
