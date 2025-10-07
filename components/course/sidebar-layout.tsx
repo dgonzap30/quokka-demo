@@ -2,7 +2,7 @@
 
 import { type ReactNode, type ReactElement, useState, useEffect, cloneElement, isValidElement } from "react";
 import { cn } from "@/lib/utils";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface SidebarLayoutProps {
@@ -15,6 +15,11 @@ export interface SidebarLayoutProps {
    * Initial thread ID to display (from URL param)
    */
   initialThreadId?: string | null;
+
+  /**
+   * Selected thread ID (determines grid layout)
+   */
+  selectedThreadId?: string | null;
 
   /**
    * Filter sidebar content (left - search, filters, tags)
@@ -72,8 +77,9 @@ export interface SidebarLayoutProps {
  * ```
  */
 export function SidebarLayout({
-  courseId,
-  initialThreadId,
+  courseId: _courseId, // eslint-disable-line @typescript-eslint/no-unused-vars
+  initialThreadId: _initialThreadId, // eslint-disable-line @typescript-eslint/no-unused-vars
+  selectedThreadId,
   filterSidebar,
   threadListSidebar,
   children,
@@ -126,9 +132,24 @@ export function SidebarLayout({
   const toggleFilterSidebar = () => setIsFilterSidebarOpen((prev) => !prev);
   const toggleThreadList = () => setIsThreadListOpen((prev) => !prev);
 
-  // Calculate grid columns based on sidebar states
-  // Compact sidebars are 56px (icon-only), not hidden
+  // Calculate grid columns based on sidebar states and thread selection
+  // When no thread selected: 2-column grid, thread list fills space
+  // When thread selected: 3-column grid, thread list fixed width
   const gridCols = (() => {
+    // No thread selected: 2-column grid, thread list expands
+    if (!selectedThreadId) {
+      if (isFilterSidebarOpen && isThreadListOpen) {
+        return "lg:grid-cols-[220px_1fr]"; // Both open, threads expand
+      } else if (isFilterSidebarOpen && !isThreadListOpen) {
+        return "lg:grid-cols-[220px_56px]"; // Filter open, threads compact
+      } else if (!isFilterSidebarOpen && isThreadListOpen) {
+        return "lg:grid-cols-[56px_1fr]"; // Filter compact, threads expand
+      } else {
+        return "lg:grid-cols-[56px_56px]"; // Both compact
+      }
+    }
+
+    // Thread selected: 3-column grid, thread list fixed width
     if (isFilterSidebarOpen && isThreadListOpen) {
       return "lg:grid-cols-[220px_300px_auto]"; // Both open
     } else if (isFilterSidebarOpen && !isThreadListOpen) {
@@ -228,75 +249,21 @@ export function SidebarLayout({
           )}
         </aside>
 
-        {/* Main Content Area */}
-        <main
-          className={cn(
-            "relative h-screen overflow-y-auto",
-            "transition-all duration-300 ease-in-out"
-          )}
-          aria-label="Thread content"
-        >
-          {/* Sidebar Toggle Button */}
-          <div
+        {/* Main Content Area - Only render when thread is selected */}
+        {selectedThreadId && (
+          <main
             className={cn(
-              "sticky top-0 z-30 flex items-center gap-2 border-b border-glass glass-panel-strong backdrop-blur-lg px-4 py-3",
-              "transition-all duration-300"
+              "relative h-screen overflow-y-auto",
+              "transition-all duration-300 ease-in-out"
             )}
+            aria-label="Thread content"
           >
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleFilterSidebar}
-              aria-label={isFilterSidebarOpen ? "Close filter sidebar" : "Open filter sidebar"}
-              aria-expanded={isFilterSidebarOpen}
-              className="hover:glass-panel transition-all"
-            >
-              {isFilterSidebarOpen ? (
-                <PanelLeftClose className="h-5 w-5" />
-              ) : (
-                <PanelLeftOpen className="h-5 w-5" />
-              )}
-            </Button>
-
-            {/* Breadcrumb hint */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground glass-text">
-              <span className="hidden sm:inline">Course: {courseId}</span>
-              {initialThreadId && (
-                <>
-                  <span className="hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">Thread selected</span>
-                </>
-              )}
+            {/* Main Content */}
+            <div className="p-4 md:p-6 lg:p-8">
+              {children}
             </div>
-
-            {/* Keyboard Shortcut Hints */}
-            <div className="ml-auto hidden xl:flex items-center gap-4 text-xs text-subtle glass-text">
-              <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                  {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
-                </kbd>
-                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                  [
-                </kbd>
-                <span className="text-[10px]">Filters</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                  {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
-                </kbd>
-                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                  ]
-                </kbd>
-                <span className="text-[10px]">Threads</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="p-4 md:p-6 lg:p-8">
-            {children}
-          </div>
-        </main>
+          </main>
+        )}
       </div>
     </div>
   );

@@ -13,7 +13,6 @@ import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
 import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
-import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
 
@@ -198,6 +197,7 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
       <SidebarLayout
         courseId={courseId}
         initialThreadId={selectedThreadId}
+        selectedThreadId={selectedThreadId}
         filterSidebar={
           <FilterSidebar
             searchQuery={searchQuery}
@@ -221,7 +221,7 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
           />
         }
       >
-        {/* Main Content: Conditional Rendering */}
+        {/* Main Content: Only render when thread selected */}
         {selectedThreadId ? (
           <ThreadDetailPanel
             threadId={selectedThreadId}
@@ -236,14 +236,7 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
               window.history.replaceState(null, '', newUrl);
             }}
           />
-        ) : (
-          <CourseOverviewPanel
-            courseId={courseId}
-            courseName={course?.name}
-            threads={threads || []}
-            user={user || undefined}
-          />
-        )}
+        ) : null}
 
         {/* Floating Quokka AI Agent */}
         <FloatingQuokka
