@@ -216,6 +216,8 @@ See `research/a11y-audit.md` for complete findings and `plans/a11y-fixes.md` for
 
 ## Changelog
 
+- `2025-10-07` | [Course Dashboard] | Streamlined thread list view: added compact ThreadCard variant, collapsible course description, reduced spacing, simplified empty states and loading skeletons. Result: 2x more threads visible per screen (4-5 → 8-9), 36% reduction in card height
+- `2025-10-07` | [ThreadCard] | Added compact variant prop for list views (hides description, p-6 → p-4 padding), maintains full variant for detail views. Implemented conditional rendering based on variant prop
 - `2025-10-07` | [ThreadCard] | Added semantic structure (article, h2), QDS compliance fixes (separator contrast, focus indicator, icon grid), and accessibility improvements (aria-labels, time elements)
 - `2025-10-07` | [ThreadDetail] | Added critical accessibility: main landmark, h1 heading, form labels, error handling, StatusBadge aria-labels, border-glass utility
 - `2025-10-07` | [Globals CSS] | Added sr-only utility class, focus:not-sr-only for skip links, border-glass utility for semantic styling
