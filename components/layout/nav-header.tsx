@@ -24,9 +24,6 @@ export function NavHeader() {
   const [hasScrolled, setHasScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Ask modal state for course context
-  const [showAskModal, setShowAskModal] = useState(false);
-
   // Track scroll position for shadow effect and progress calculation
   useEffect(() => {
     const handleScroll = () => {
@@ -71,7 +68,7 @@ export function NavHeader() {
           label: course.code,
           href: `/courses/${course.id}`,
         } : undefined}
-        onAskQuestion={inCourseContext ? () => setShowAskModal(true) : undefined}
+        onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
         hasScrolled={hasScrolled}
         scrollProgress={scrollProgress}
       />
@@ -101,25 +98,6 @@ export function NavHeader() {
           courseName: course.name,
         } : undefined}
       />
-
-      {/* Ask Question Modal - Course Context Only */}
-      {/* TODO: Implement modal component */}
-      {showAskModal && inCourseContext && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
-            <h2 className="text-xl font-semibold mb-4">Ask a Question</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              This will integrate with the existing Ask Question form from the course page.
-            </p>
-            <button
-              onClick={() => setShowAskModal(false)}
-              className="px-4 py-2 bg-neutral-200 rounded-md hover:bg-neutral-300"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }

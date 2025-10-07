@@ -229,8 +229,9 @@ export function GlobalSearch({
 
   // Handle blur (delayed to allow click on suggestion)
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const currentTarget = e.currentTarget;
     setTimeout(() => {
-      if (!e.currentTarget.contains(document.activeElement)) {
+      if (currentTarget && !currentTarget.contains(document.activeElement)) {
         setShowSuggestions(false);
         setActiveIndex(-1);
       }
@@ -277,22 +278,22 @@ export function GlobalSearch({
             }
           }}
           onBlur={handleBlur}
-          className="h-9 pl-10 pr-20 rounded-full border border-neutral-200 bg-neutral-50 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-shadow"
+          className="h-10 pl-10 pr-20 rounded-lg glass-panel border-glass focus:ring-2 focus:ring-primary/50 focus:border-primary focus:shadow-[var(--glow-primary)] transition-all"
         />
 
         {/* Search icon - decorative */}
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-500 pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
           aria-hidden="true"
         />
 
         {/* Keyboard hint - "/" key */}
         {!query && (
           <kbd
-            className="absolute right-10 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-xs font-medium text-neutral-500 bg-neutral-200 border border-neutral-300 rounded pointer-events-none"
+            className="hidden md:inline-flex absolute right-10 top-1/2 -translate-y-1/2 items-center gap-1 rounded border border-border bg-glass-subtle px-1.5 py-0.5 text-xs text-muted-foreground pointer-events-none"
             aria-hidden="true"
           >
-            /
+            <span>/</span>
           </kbd>
         )}
 
@@ -302,9 +303,9 @@ export function GlobalSearch({
             type="button"
             aria-label="Clear search"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-neutral-200 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-glass-strong transition-colors"
           >
-            <X className="size-4 text-neutral-600" aria-hidden="true" />
+            <X className="size-4 text-muted-foreground" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -335,8 +336,8 @@ export function GlobalSearch({
                 onClick={() => handleSelect(item)}
                 onMouseEnter={() => setActiveIndex(index)}
                 className={cn(
-                  "suggestion-item px-4 py-3 cursor-pointer border-b border-neutral-300 last:border-0 transition-colors",
-                  index === activeIndex && "bg-primary/20"
+                  "suggestion-item px-4 py-3 cursor-pointer border-b border-glass last:border-0 transition-colors hover:bg-glass-strong",
+                  index === activeIndex && "bg-glass-strong"
                 )}
               >
                 <div className="flex items-start justify-between gap-2">

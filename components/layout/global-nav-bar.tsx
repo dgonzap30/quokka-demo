@@ -67,8 +67,8 @@ export function GlobalNavBar({
 
       <nav
         className={cn(
-          "sticky top-0 z-50 w-full bg-white/75 backdrop-blur-lg border-b border-black/10 transition-shadow duration-200",
-          hasScrolled && "shadow-sm",
+          "sticky top-0 z-50 w-full glass-panel-strong border-b border-glass transition-shadow duration-200",
+          hasScrolled && "shadow-[var(--shadow-glass-md)]",
           className
         )}
         role="navigation"
@@ -81,12 +81,10 @@ export function GlobalNavBar({
             {/* Logo */}
             <Link
               href="/dashboard"
-              className="flex items-center shrink-0"
-              aria-label="QuokkaQ Home"
+              className="flex items-center shrink-0 text-xl font-bold tracking-tight"
+              aria-label="QuokkAQ Home"
             >
-              <span className="text-xl font-bold text-neutral-900">
-                Quokka<span className="text-amber-500">Q</span>
-              </span>
+              QuokkAQ
             </Link>
 
             {/* Breadcrumb (Desktop) */}

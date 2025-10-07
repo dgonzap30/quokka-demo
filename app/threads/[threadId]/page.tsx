@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { AIAnswerCard } from "@/components/course/ai-answer-card";
+import { StatusBadge } from "@/components/course/status-badge";
 import { GraduationCap, MessageSquare } from "lucide-react";
 
 export default function ThreadDetailPage({ params }: { params: Promise<{ threadId: string }> }) {
@@ -24,6 +25,7 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
 
   const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Redirect to login if not authenticated
   if (!userLoading && !user) {
@@ -36,6 +38,8 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
     if (!replyContent.trim() || !user) return;
 
     setIsSubmitting(true);
+    setFormError(null); // Clear any previous errors
+
     try {
       await createPostMutation.mutateAsync({
         input: {
@@ -45,8 +49,10 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
         authorId: user.id,
       });
       setReplyContent("");
+      setFormError(null);
     } catch (error) {
       console.error("Failed to create post:", error);
+      setFormError("Failed to post reply. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -110,17 +116,9 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
     }
   };
 
-  const getStatusClass = (status: typeof thread.status) => {
-    const variants = {
-      open: "status-open",
-      answered: "status-answered",
-      resolved: "status-resolved",
-    };
-    return variants[status] || variants.open;
-  };
 
   return (
-    <div className="min-h-screen p-8 md:p-12">
+    <main role="main" className="min-h-screen p-8 md:p-12">
       <div className="container-narrow space-y-12">
         {/* Breadcrumb */}
         <Breadcrumb
@@ -136,18 +134,21 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
           <CardHeader className="p-8">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="flex-1 space-y-3">
-                <CardTitle className="heading-3 glass-text leading-snug">
+                <h1 className="text-2xl md:text-3xl font-bold leading-snug glass-text">
                   {thread.title}
-                </CardTitle>
+                </h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-subtle glass-text">
-                  <span>{thread.views} views</span>
-                  <span>•</span>
-                  <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
+                  <span><span className="sr-only">View count:</span> {thread.views} views</span>
+                  <span aria-hidden="true">•</span>
+                  <span>
+                    <span className="sr-only">Posted on</span>
+                    <time dateTime={thread.createdAt}>
+                      {new Date(thread.createdAt).toLocaleDateString()}
+                    </time>
+                  </span>
                 </div>
               </div>
-              <Badge className={getStatusClass(thread.status)}>
-                {thread.status}
-              </Badge>
+              <StatusBadge status={thread.status} aria-label={`Thread status: ${thread.status}`} />
             </div>
           </CardHeader>
           <CardContent className="p-8 pt-0">
@@ -253,23 +254,48 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
           </CardHeader>
           <CardContent className="p-8 pt-0">
             <form onSubmit={handleSubmitReply} className="space-y-6">
-              <div className="space-y-3">
-                <Textarea
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="Write your reply..."
-                  rows={8}
-                  className="min-h-[200px] text-base"
-                  required
-                  aria-required="true"
-                />
-              </div>
-              <div className="flex justify-end pt-6 border-t border-[var(--border-glass)]">
+              <fieldset className="space-y-3 border-0 p-0 m-0">
+                <legend className="sr-only">Post a reply to this thread</legend>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="reply-content"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Your reply
+                    <span className="text-danger ml-1" aria-label="required">*</span>
+                  </label>
+                  <Textarea
+                    id="reply-content"
+                    name="reply-content"
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="Write your reply..."
+                    rows={8}
+                    className="min-h-[200px] text-base"
+                    required
+                    aria-required="true"
+                    aria-describedby={formError ? "reply-error" : undefined}
+                    aria-invalid={!!formError}
+                  />
+                  {formError && (
+                    <p
+                      id="reply-error"
+                      className="text-sm text-danger mt-2"
+                      role="alert"
+                    >
+                      {formError}
+                    </p>
+                  )}
+                </div>
+              </fieldset>
+
+              <div className="flex justify-end pt-6 border-t border-glass">
                 <Button
                   type="submit"
                   variant="glass-primary"
                   size="lg"
                   disabled={isSubmitting || !replyContent.trim()}
+                  aria-label={isSubmitting ? "Posting reply" : "Post reply"}
                 >
                   {isSubmitting ? "Posting..." : "Post Reply"}
                 </Button>
@@ -278,6 +304,6 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ threadI
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }

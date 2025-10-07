@@ -65,9 +65,8 @@ export function MobileNav({ currentPath, user, onLogout, items, courseContext }:
           className="w-[280px] glass-panel-strong backdrop-blur-xl"
         >
           <SheetHeader className="text-left">
-            <SheetTitle className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-primary">Quokka</span>
-              <span className="text-2xl font-bold text-primary">Q</span>
+            <SheetTitle className="flex items-center text-2xl font-bold tracking-tight">
+              QuokkAQ
             </SheetTitle>
           </SheetHeader>
 

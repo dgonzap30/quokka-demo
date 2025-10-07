@@ -640,6 +640,46 @@
   .ai-glow:hover {
     box-shadow: var(--shadow-ai-lg);
   }
+
+  /* ===== Accessibility Utilities ===== */
+
+  /* Screen Reader Only - Visually Hidden but Accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Focus-visible override for skip links */
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Glass Border Utility */
+  .border-glass {
+    border-color: var(--border-glass);
+  }
+
+  .hover\:border-glass:hover {
+    border-color: var(--border-glass);
+  }
+
+  .focus\:border-glass:focus {
+    border-color: var(--border-glass);
+  }
 }
 
 /* ===== AI-First Animation System ===== */

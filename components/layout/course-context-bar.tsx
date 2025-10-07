@@ -70,7 +70,7 @@ export function CourseContextBar({
   return (
     <div
       className={cn(
-        "w-full bg-white/75 backdrop-blur-lg border-b border-black/10 transition-[height] duration-200",
+        "w-full glass-panel-strong border-b border-glass transition-[height] duration-200",
         className
       )}
       style={{ height: isCompact ? '40px' : '48px' }}

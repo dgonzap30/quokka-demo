@@ -1,71 +1,52 @@
 "use client";
 
-import { use, useState, FormEvent } from "react";
+import { use, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCourse, useCourseThreads, useCurrentUser, useCreateThread } from "@/lib/api/hooks";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { AIBadge } from "@/components/ui/ai-badge";
+import { ThreadCard } from "@/components/course/thread-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
+import { AskQuestionModal } from "@/components/course/ask-question-modal";
 import { FilterRow, type FilterType, type SortOrder } from "@/components/course/filter-row";
 import { GraduationCap } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import type { Thread } from "@/lib/models/types";
 
-export default function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
+function CourseDetailContent({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const { data: course, isLoading: courseLoading } = useCourse(courseId);
   const { data: threads, isLoading: threadsLoading } = useCourseThreads(courseId);
-  const createThreadMutation = useCreateThread();
 
-  // Ask Question form state
-  const [showAskForm, setShowAskForm] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tags, setTags] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Ask Question modal state
+  const [showAskModal, setShowAskModal] = useState(false);
 
   // Filter and sort state
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
-  // Handle Ask Question form submission
-  const handleAskQuestion = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim() || !user || !course) return;
-
-    setIsSubmitting(true);
-    try {
-      const newThread = await createThreadMutation.mutateAsync({
-        input: {
-          courseId: course.id,
-          title: title.trim(),
-          content: content.trim(),
-          tags: tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t.length > 0),
-        },
-        authorId: user.id,
-      });
-
-      // Reset form and navigate to new thread
-      setTitle("");
-      setContent("");
-      setTags("");
-      setShowAskForm(false);
-      router.push(`/threads/${newThread.thread.id}`);
-    } catch (error) {
-      console.error("Failed to create thread:", error);
-      setIsSubmitting(false);
+  // Detect modal query parameter
+  useEffect(() => {
+    const modalParam = searchParams.get('modal');
+    if (modalParam === 'ask') {
+      setShowAskModal(true);
     }
+  }, [searchParams]);
+
+  // Handle modal close - clean up URL
+  const handleModalClose = () => {
+    setShowAskModal(false);
+    // Remove modal param from URL
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('modal');
+    const newUrl = params.toString()
+      ? `/courses/${courseId}?${params.toString()}`
+      : `/courses/${courseId}`;
+    router.replace(newUrl);
   };
 
   // Redirect to login if not authenticated
@@ -118,14 +99,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
     );
   }
 
-  const getStatusClass = (status: Thread["status"]) => {
-    const variants = {
-      open: "status-open",
-      answered: "status-answered",
-      resolved: "status-resolved",
-    };
-    return variants[status] || variants.open;
-  };
 
   return (
     <div className="min-h-screen p-8 md:p-12">
@@ -161,96 +134,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           onSortChange={setSortOrder}
         />
 
-        {/* Ask Question Form (Collapsible) */}
-        {showAskForm && (
-          <Card variant="glass-strong">
-            <CardHeader className="p-6 md:p-8">
-              <CardTitle className="text-xl glass-text">Ask a Question</CardTitle>
-              <CardDescription className="text-base glass-text">
-                Post your question to get help from classmates and instructors
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 md:p-8 pt-0">
-              <form onSubmit={handleAskQuestion} className="space-y-6">
-                {/* Title */}
-                <div className="space-y-2">
-                  <label htmlFor="title" className="text-sm font-semibold">
-                    Question Title *
-                  </label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., How does binary search work?"
-                    className="h-12 text-base"
-                    required
-                    aria-required="true"
-                    maxLength={200}
-                  />
-                  <p className="text-xs text-muted-foreground glass-text">
-                    {title.length}/200 characters
-                  </p>
-                </div>
-
-                {/* Content */}
-                <div className="space-y-2">
-                  <label htmlFor="content" className="text-sm font-semibold">
-                    Question Details *
-                  </label>
-                  <Textarea
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Provide a detailed description of your question. Include any relevant code, error messages, or context."
-                    rows={10}
-                    className="min-h-48 text-base"
-                    required
-                    aria-required="true"
-                  />
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-2">
-                  <label htmlFor="tags" className="text-sm font-semibold">
-                    Tags (optional)
-                  </label>
-                  <Input
-                    id="tags"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    placeholder="e.g., algorithms, binary-search, homework"
-                    className="h-12 text-base"
-                  />
-                  <p className="text-xs text-muted-foreground glass-text">
-                    Separate tags with commas
-                  </p>
-                </div>
-
-                {/* Submit */}
-                <div className="flex gap-3 pt-4 border-t border-[var(--border-glass)]">
-                  <Button
-                    type="submit"
-                    variant="glass-primary"
-                    size="lg"
-                    disabled={isSubmitting || !title.trim() || !content.trim()}
-                  >
-                    {isSubmitting ? "Posting..." : "Post Question"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    onClick={() => setShowAskForm(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Threads Section */}
         <div className="space-y-6">
           <h2 className="heading-3 glass-text">Discussion Threads</h2>
@@ -258,50 +141,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           {threads && threads.length > 0 ? (
             <div className="space-y-6">
               {threads.map((thread) => (
-                <Link key={thread.id} href={`/threads/${thread.id}`}>
-                  <Card variant="glass-hover">
-                    <CardHeader className="p-8">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="flex-1 space-y-3">
-                          <CardTitle className="text-xl md:text-2xl glass-text leading-snug">
-                            {thread.title}
-                          </CardTitle>
-                          <CardDescription className="text-base leading-relaxed line-clamp-2 glass-text">
-                            {thread.content}
-                          </CardDescription>
-                        </div>
-                        <Badge className={getStatusClass(thread.status)}>
-                          {thread.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-8 pt-0">
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-subtle glass-text">
-                        {thread.hasAIAnswer && (
-                          <>
-                            <AIBadge variant="compact" aria-label="Has AI-generated answer" />
-                            <span>•</span>
-                          </>
-                        )}
-                        <span>{thread.views} views</span>
-                        <span>•</span>
-                        <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
-                        {thread.tags && thread.tags.length > 0 && (
-                          <>
-                            <span>•</span>
-                            <div className="flex gap-2 flex-wrap">
-                              {thread.tags.slice(0, 3).map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <ThreadCard key={thread.id} thread={thread} />
               ))}
             </div>
           ) : (
@@ -333,6 +173,41 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
           courseCode={course.code}
         />
       </div>
+
+      {/* Ask Question Modal */}
+      <AskQuestionModal
+        courseId={course.id}
+        courseName={course.name}
+        isOpen={showAskModal}
+        onClose={handleModalClose}
+        onSuccess={(threadId) => {
+          handleModalClose();
+          router.push(`/threads/${threadId}`);
+        }}
+      />
     </div>
+  );
+}
+
+export default function CourseDetailPage({ params }: { params: Promise<{ courseId: string }> }) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen p-8">
+        <div className="container-wide space-y-12">
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32 bg-glass-medium rounded-lg" />
+            <Skeleton className="h-16 w-96 bg-glass-medium rounded-lg" />
+            <Skeleton className="h-8 w-full max-w-2xl bg-glass-medium rounded-lg" />
+          </div>
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-40 bg-glass-medium rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <CourseDetailContent params={params} />
+    </Suspense>
   );
 }

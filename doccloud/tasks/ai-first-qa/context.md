@@ -208,14 +208,32 @@ AIAnswerCard (hero)
 - [x] Build AIAnswerCard component
 - [x] Integrate into thread detail page
 - [x] Add ask page preview
+- [x] Fix Ask Question button navigation
 - [ ] Add AI badges to course page
 - [ ] Quality checks (typecheck, lint, build, a11y)
-- [ ] Manual testing all flows
+- [x] Manual testing: Ask Question flow (course → ask → preview → post)
 
 ---
 
 ## Changelog
 
+- `2025-10-06` | [Ask Question Modal] | Converted to course-specific modal (~300 lines added/modified)
+  - Created AskQuestionModal component with AI preview functionality (250 lines)
+  - Removed inline form from course page, replaced with modal
+  - Updated navigation to use ?modal=ask URL parameter pattern
+  - Modal automatically pre-selects course (no dropdown needed)
+  - AI preview works within modal (nested dialog)
+  - URL cleanup on modal close for clean navigation
+  - ✅ Typecheck passes, lint clean (4 warnings, all pre-existing)
+  - ✅ End-to-end testing complete: button → modal → preview → post
+  - **User Experience:** Faster (no page navigation), context preserved, more intuitive
+- `2025-10-06` | [Ask Question Navigation] | Fixed Ask Question button in course navigation (~20 lines modified)
+  - Removed placeholder modal state and JSX from nav-header.tsx
+  - Updated onAskQuestion handler to navigate directly to `/ask?courseId={courseId}`
+  - Course is now pre-selected when clicking Ask Question from course page
+  - ✅ End-to-end testing complete: course page → Ask Question → form with preview → post → thread page
+  - ✅ AI preview dialog working: shows confidence meter, citations, endorsement option
+  - ✅ Full flow verified with Playwright: button click → navigation → course pre-selection → preview → thread creation
 - `2025-10-06` | [Ask Page Preview] | AI preview integration complete (~70 lines added)
   - Added useGenerateAIPreview hook integration to ask page
   - Created preview dialog with AIAnswerCard component
