@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState, useEffect } from "react";
+import { type ReactNode, type ReactElement, useState, useEffect, cloneElement, isValidElement } from "react";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,8 +79,9 @@ export function SidebarLayout({
   children,
   className,
 }: SidebarLayoutProps) {
-  // Sidebar open/close state (default open on desktop, closed on mobile)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // Independent sidebar open/close states (default open on desktop, closed on mobile)
+  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(true);
+  const [isThreadListOpen, setIsThreadListOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile viewport
@@ -88,9 +89,10 @@ export function SidebarLayout({
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024; // lg breakpoint
       setIsMobile(mobile);
-      // Auto-close sidebar on mobile initially
+      // Auto-close both sidebars on mobile initially
       if (mobile) {
-        setIsSidebarOpen(false);
+        setIsFilterSidebarOpen(false);
+        setIsThreadListOpen(false);
       }
     };
 
@@ -99,23 +101,55 @@ export function SidebarLayout({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Keyboard shortcut: Cmd/Ctrl + \ to toggle sidebar
+  // Keyboard shortcuts for sidebar control
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
-        e.preventDefault();
-        setIsSidebarOpen((prev) => !prev);
+      if (e.metaKey || e.ctrlKey) {
+        // Cmd/Ctrl + [ → Toggle filter sidebar
+        if (e.key === "[") {
+          e.preventDefault();
+          setIsFilterSidebarOpen((prev) => !prev);
+        }
+        // Cmd/Ctrl + ] → Toggle thread list
+        else if (e.key === "]") {
+          e.preventDefault();
+          setIsThreadListOpen((prev) => !prev);
+        }
+        // Cmd/Ctrl + \ → Toggle both sidebars
+        else if (e.key === "\\") {
+          e.preventDefault();
+          const anyOpen = isFilterSidebarOpen || isThreadListOpen;
+          setIsFilterSidebarOpen(!anyOpen);
+          setIsThreadListOpen(!anyOpen);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isFilterSidebarOpen, isThreadListOpen]);
 
-  // Toggle sidebar handler
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
+  // Toggle sidebar handlers
+  const toggleFilterSidebar = () => setIsFilterSidebarOpen((prev) => !prev);
+  const toggleThreadList = () => setIsThreadListOpen((prev) => !prev);
+  const toggleBothSidebars = () => {
+    const anyOpen = isFilterSidebarOpen || isThreadListOpen;
+    setIsFilterSidebarOpen(!anyOpen);
+    setIsThreadListOpen(!anyOpen);
   };
+
+  // Calculate grid columns based on sidebar states
+  const gridCols = (() => {
+    if (isFilterSidebarOpen && isThreadListOpen) {
+      return "lg:grid-cols-[220px_300px_auto]"; // Both open
+    } else if (isFilterSidebarOpen && !isThreadListOpen) {
+      return "lg:grid-cols-[220px_0px_auto]"; // Filter only
+    } else if (!isFilterSidebarOpen && isThreadListOpen) {
+      return "lg:grid-cols-[0px_300px_auto]"; // Thread list only
+    } else {
+      return "lg:grid-cols-[0px_0px_auto]"; // Both closed
+    }
+  })();
 
   return (
     <div
@@ -123,13 +157,14 @@ export function SidebarLayout({
         "relative min-h-screen w-full",
         className
       )}
-      data-sidebar-open={isSidebarOpen}
+      data-filter-sidebar-open={isFilterSidebarOpen}
+      data-thread-list-open={isThreadListOpen}
     >
-      {/* Mobile Overlay (when sidebar is open) */}
-      {isMobile && isSidebarOpen && (
+      {/* Mobile Overlay (when any sidebar is open) */}
+      {isMobile && (isFilterSidebarOpen || isThreadListOpen) && (
         <div
           className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm lg:hidden"
-          onClick={toggleSidebar}
+          onClick={toggleBothSidebars}
           aria-hidden="true"
         />
       )}
@@ -138,10 +173,7 @@ export function SidebarLayout({
       <div
         className={cn(
           "grid h-full transition-all duration-300 ease-in-out",
-          // Desktop: Grid with filter sidebar | thread list sidebar | content
-          isSidebarOpen
-            ? "lg:grid-cols-[220px_300px_auto]"
-            : "lg:grid-cols-[0px_0px_auto]"
+          gridCols
         )}
       >
         {/* Filter Sidebar (Left - 220px) */}
@@ -151,14 +183,18 @@ export function SidebarLayout({
             // Mobile: Fixed overlay drawer
             "fixed left-0 top-0 z-50 w-[220px] lg:relative lg:z-0 lg:w-full",
             // Transform for mobile drawer
-            isSidebarOpen
+            isFilterSidebarOpen
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
           )}
           aria-label="Filter sidebar"
-          aria-hidden={!isSidebarOpen}
+          aria-hidden={!isFilterSidebarOpen}
         >
-          {filterSidebar}
+          {isValidElement(filterSidebar)
+            ? cloneElement(filterSidebar as ReactElement<{ onCollapse?: () => void }>, {
+                onCollapse: toggleFilterSidebar
+              })
+            : filterSidebar}
         </aside>
 
         {/* Thread List Sidebar (Middle - 300px) */}
@@ -168,14 +204,18 @@ export function SidebarLayout({
             // Mobile: Fixed overlay drawer (offset by filter sidebar width)
             "fixed left-[220px] top-0 z-50 w-[300px] lg:relative lg:left-0 lg:z-0 lg:w-full",
             // Transform for mobile drawer
-            isSidebarOpen
+            isThreadListOpen
               ? "translate-x-0"
               : "-translate-x-full lg:translate-x-0"
           )}
           aria-label="Thread list sidebar"
-          aria-hidden={!isSidebarOpen}
+          aria-hidden={!isThreadListOpen}
         >
-          {threadListSidebar}
+          {isValidElement(threadListSidebar)
+            ? cloneElement(threadListSidebar as ReactElement<{ onCollapse?: () => void }>, {
+                onCollapse: toggleThreadList
+              })
+            : threadListSidebar}
 
           {/* Mobile Close Button */}
           {isMobile && (
@@ -183,8 +223,8 @@ export function SidebarLayout({
               variant="ghost"
               size="icon"
               className="absolute right-2 top-2 lg:hidden"
-              onClick={toggleSidebar}
-              aria-label="Close sidebar"
+              onClick={toggleBothSidebars}
+              aria-label="Close sidebars"
             >
               <PanelLeftClose className="h-5 w-5" />
             </Button>
@@ -209,12 +249,12 @@ export function SidebarLayout({
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleSidebar}
-              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-              aria-expanded={isSidebarOpen}
+              onClick={toggleBothSidebars}
+              aria-label={(isFilterSidebarOpen || isThreadListOpen) ? "Close sidebars" : "Open sidebars"}
+              aria-expanded={isFilterSidebarOpen || isThreadListOpen}
               className="hover:glass-panel transition-all"
             >
-              {isSidebarOpen ? (
+              {(isFilterSidebarOpen || isThreadListOpen) ? (
                 <PanelLeftClose className="h-5 w-5" />
               ) : (
                 <PanelLeftOpen className="h-5 w-5" />
@@ -232,15 +272,35 @@ export function SidebarLayout({
               )}
             </div>
 
-            {/* Keyboard Shortcut Hint */}
-            <div className="ml-auto hidden xl:flex items-center gap-2 text-xs text-subtle glass-text">
-              <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
-              </kbd>
-              <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                \
-              </kbd>
-              <span>Toggle sidebar</span>
+            {/* Keyboard Shortcut Hints */}
+            <div className="ml-auto hidden xl:flex items-center gap-4 text-xs text-subtle glass-text">
+              <div className="flex items-center gap-2">
+                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
+                  {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
+                </kbd>
+                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
+                  [
+                </kbd>
+                <span className="text-[10px]">Filters</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
+                  {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
+                </kbd>
+                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
+                  ]
+                </kbd>
+                <span className="text-[10px]">Threads</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
+                  {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
+                </kbd>
+                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
+                  \
+                </kbd>
+                <span className="text-[10px]">Both</span>
+              </div>
             </div>
           </div>
 

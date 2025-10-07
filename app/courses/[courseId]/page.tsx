@@ -13,6 +13,7 @@ import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
 import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
+import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
 
@@ -205,20 +206,29 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
           />
         }
       >
-        {/* Main Content: Thread Detail Panel */}
-        <ThreadDetailPanel
-          threadId={selectedThreadId}
-          onClose={() => {
-            setSelectedThreadId(null);
-            // Remove thread param from URL
-            const params = new URLSearchParams(searchParams.toString());
-            params.delete('thread');
-            const newUrl = params.toString()
-              ? `/courses/${courseId}?${params.toString()}`
-              : `/courses/${courseId}`;
-            window.history.replaceState(null, '', newUrl);
-          }}
-        />
+        {/* Main Content: Conditional Rendering */}
+        {selectedThreadId ? (
+          <ThreadDetailPanel
+            threadId={selectedThreadId}
+            onClose={() => {
+              setSelectedThreadId(null);
+              // Remove thread param from URL
+              const params = new URLSearchParams(searchParams.toString());
+              params.delete('thread');
+              const newUrl = params.toString()
+                ? `/courses/${courseId}?${params.toString()}`
+                : `/courses/${courseId}`;
+              window.history.replaceState(null, '', newUrl);
+            }}
+          />
+        ) : (
+          <CourseOverviewPanel
+            courseId={courseId}
+            courseName={course?.name}
+            threads={threads || []}
+            user={user || undefined}
+          />
+        )}
 
         {/* Floating Quokka AI Agent */}
         <FloatingQuokka

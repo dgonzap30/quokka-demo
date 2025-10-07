@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { AIAnswerCard } from "@/components/course/ai-answer-card";
 import { StatusBadge } from "@/components/course/status-badge";
-import { MessageSquare, X } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ThreadDetailPanelProps {
@@ -72,21 +72,9 @@ export function ThreadDetailPanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Empty state (no thread selected)
+  // Empty state (no thread selected) - handled by parent now
   if (!threadId) {
-    return (
-      <div className={cn("flex items-center justify-center h-full px-8", className)}>
-        <div className="text-center max-w-md">
-          <div className="flex items-center justify-center w-20 h-20 rounded-full glass-panel mb-6 mx-auto">
-            <MessageSquare className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
-          </div>
-          <h3 className="heading-3 glass-text mb-3">Select a thread</h3>
-          <p className="text-base text-muted-foreground glass-text leading-relaxed">
-            Choose a thread from the sidebar to view the full conversation and participate in the discussion.
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // Loading state

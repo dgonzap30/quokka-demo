@@ -4,6 +4,8 @@ import { SidebarSearchBar } from "@/components/course/sidebar-search-bar";
 import { SidebarFilterPanel, type FilterType } from "@/components/course/sidebar-filter-panel";
 import { TagCloud, type TagWithCount } from "@/components/course/tag-cloud";
 import { cn } from "@/lib/utils";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface FilterSidebarProps {
   /**
@@ -50,6 +52,11 @@ export interface FilterSidebarProps {
    * Number of threads after filtering
    */
   filteredThreads: number;
+
+  /**
+   * Collapse handler
+   */
+  onCollapse?: () => void;
 
   /**
    * Optional className for composition
@@ -107,26 +114,43 @@ export function FilterSidebar({
   onTagsChange,
   totalThreads,
   filteredThreads,
+  onCollapse,
   className,
 }: FilterSidebarProps) {
   return (
     <div
       className={cn(
-        "w-full h-screen flex flex-col glass-panel-strong border-r border-glass",
+        "w-full h-screen flex flex-col glass-panel-medium border-r border-glass border-l-2 border-l-primary/20",
         className
       )}
       aria-label="Filter controls"
     >
-      {/* Header with Result Count */}
+      {/* Header with Result Count and Collapse Button */}
       <div className="flex-shrink-0 border-b border-glass p-4">
-        <h2 className="heading-4 glass-text mb-1">Filters</h2>
-        <p className="text-xs text-muted-foreground glass-text">
-          {filteredThreads} of {totalThreads} threads
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="heading-4 glass-text mb-1">Filters</h2>
+            <p className="text-xs text-muted-foreground glass-text">
+              {filteredThreads} of {totalThreads} threads
+            </p>
+          </div>
+          {onCollapse && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hover:glass-panel -mt-1"
+              onClick={onCollapse}
+              aria-label="Collapse filter sidebar"
+              title="Collapse filters (Cmd/Ctrl + [)"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Scrollable Filter Controls */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto sidebar-scroll">
         {/* Search Bar */}
         <SidebarSearchBar
           value={searchQuery}
