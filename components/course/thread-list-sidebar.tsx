@@ -167,15 +167,15 @@ export function ThreadListSidebar({
 
       {/* Thread List (Scrollable) */}
       <div
-        className="flex-1 overflow-y-auto sidebar-scroll px-2 py-2 space-y-2"
+        className="flex-1 overflow-y-auto sidebar-scroll px-2 py-2"
         role="list"
         aria-label="Filtered threads"
       >
         {/* Loading State */}
         {isLoading && (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="p-3 rounded-lg glass-panel">
+              <div key={i} className="p-3 md:p-4 rounded-lg glass-panel">
                 <Skeleton className="h-4 w-full mb-2 bg-glass-medium" />
                 <Skeleton className="h-4 w-3/4 mb-2 bg-glass-medium" />
                 <Skeleton className="h-3 w-1/2 bg-glass-medium" />
@@ -191,23 +191,27 @@ export function ThreadListSidebar({
               <Inbox className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
             </div>
             <h3 className="heading-5 glass-text mb-2">No threads found</h3>
-            <p className="text-sm text-muted-foreground glass-text leading-relaxed max-w-[240px]">
+            <p className="text-sm text-muted-foreground glass-text leading-relaxed max-w-sm">
               Try adjusting your filters or search query.
             </p>
           </div>
         )}
 
-        {/* Thread Cards */}
-        {!isLoading && threads.map((thread) => (
-          <div key={thread.id} role="listitem">
-            <SidebarThreadCard
-              thread={thread}
-              isSelected={selectedThreadId === thread.id}
-              onClick={() => handleThreadClick(thread.id)}
-              isUnread={!viewedThreadIds.has(thread.id)}
-            />
+        {/* Thread Cards with responsive grid */}
+        {!isLoading && threads.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+            {threads.map((thread) => (
+              <div key={thread.id} role="listitem">
+                <SidebarThreadCard
+                  thread={thread}
+                  isSelected={selectedThreadId === thread.id}
+                  onClick={() => handleThreadClick(thread.id)}
+                  isUnread={!viewedThreadIds.has(thread.id)}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {/* Footer with Keyboard Hints */}

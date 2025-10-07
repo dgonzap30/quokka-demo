@@ -85,7 +85,7 @@ export function SidebarThreadCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group w-full text-left p-3 rounded-lg transition-all duration-200",
+        "group w-full text-left p-3 md:p-4 rounded-lg transition-all duration-200",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2",
         // Selected state
         isSelected
@@ -108,16 +108,23 @@ export function SidebarThreadCard({
           />
         )}
 
-        {/* Title */}
+        {/* Title with responsive truncation */}
         <h3
           className={cn(
-            "text-sm leading-snug line-clamp-2 glass-text flex-1",
+            "text-sm leading-snug line-clamp-2 sm:line-clamp-3 lg:line-clamp-4 glass-text flex-1",
             isSelected ? "font-semibold" : "font-medium"
           )}
         >
           {thread.title}
         </h3>
       </div>
+
+      {/* Content preview for wider views */}
+      {thread.content && (
+        <p className="hidden md:block text-xs text-muted-foreground glass-text mb-2 line-clamp-2 leading-relaxed">
+          {thread.content}
+        </p>
+      )}
 
       {/* Metadata Row */}
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground glass-text">
