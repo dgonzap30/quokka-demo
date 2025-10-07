@@ -116,8 +116,10 @@ export function CourseContextBar({
                   <button
                     onClick={() => onTabChange?.(tab.id)}
                     aria-current={tab.isActive ? "page" : undefined}
+                    aria-label={`Switch to ${tab.label} view`}
                     className={cn(
                       "group relative py-2 transition-colors duration-200 cursor-pointer bg-transparent border-none",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 rounded-sm",
                       tab.isActive
                         ? "text-neutral-900 font-medium"
                         : "text-neutral-600 hover:text-neutral-900"
@@ -131,6 +133,7 @@ export function CourseContextBar({
                           ? "bg-amber-600 scale-x-100"
                           : "bg-transparent group-hover:bg-neutral-300 group-hover:scale-x-100 scale-x-0"
                       )}
+                      aria-hidden="true"
                     />
                   </button>
                 </li>

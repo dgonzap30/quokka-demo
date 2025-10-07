@@ -140,9 +140,10 @@ export function FilterSidebar({
             className="h-8 w-8 hover:glass-panel"
             onClick={onCollapse}
             aria-label="Expand filter sidebar"
+            aria-expanded="false"
             title="Expand filters (Cmd/Ctrl + [)"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Button>
         )}
       </div>
@@ -174,16 +175,18 @@ export function FilterSidebar({
               className="h-8 w-8 hover:glass-panel -mt-1"
               onClick={onCollapse}
               aria-label="Collapse filter sidebar"
+              aria-expanded="true"
+              aria-controls="filter-controls"
               title="Collapse filters (Cmd/Ctrl + [)"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
           )}
         </div>
       </div>
 
       {/* Scrollable Filter Controls */}
-      <div className="flex-1 overflow-y-auto sidebar-scroll">
+      <div id="filter-controls" className="flex-1 overflow-y-auto sidebar-scroll">
         {/* Search Bar */}
         <SidebarSearchBar
           value={searchQuery}
