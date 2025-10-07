@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
 import { StatusBadge } from "@/components/course/status-badge";
 import { Eye, Calendar, Tag } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Thread } from "@/lib/models/types";
 
 export interface ThreadCardProps {
