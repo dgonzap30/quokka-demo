@@ -202,7 +202,7 @@ export function SidebarLayout({
         {selectedThreadId && (
           <main
             className={cn(
-              "relative h-screen overflow-y-auto",
+              "relative h-screen overflow-y-auto sidebar-scroll",
               "transition-all duration-300 ease-in-out"
             )}
             aria-label="Thread content"
