@@ -117,7 +117,22 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
   };
 
   // Handle thread selection - sync with URL
+  // Toggle selection if clicking the same thread again
   const handleThreadSelect = (threadId: string) => {
+    // If clicking the already-selected thread, deselect it
+    if (threadId === selectedThreadId) {
+      setSelectedThreadId(null);
+      // Remove thread param from URL
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('thread');
+      const newUrl = params.toString()
+        ? `/courses/${courseId}?${params.toString()}`
+        : `/courses/${courseId}`;
+      window.history.replaceState(null, '', newUrl);
+      return;
+    }
+
+    // Otherwise, select the new thread
     setSelectedThreadId(threadId);
 
     // Update URL without navigation

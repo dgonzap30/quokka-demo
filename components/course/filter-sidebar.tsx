@@ -4,7 +4,7 @@ import { SidebarSearchBar } from "@/components/course/sidebar-search-bar";
 import { SidebarFilterPanel, type FilterType } from "@/components/course/sidebar-filter-panel";
 import { TagCloud, type TagWithCount } from "@/components/course/tag-cloud";
 import { cn } from "@/lib/utils";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface FilterSidebarProps {
@@ -57,6 +57,11 @@ export interface FilterSidebarProps {
    * Collapse handler
    */
   onCollapse?: () => void;
+
+  /**
+   * Whether the sidebar is open (expanded) or compact
+   */
+  isOpen?: boolean;
 
   /**
    * Optional className for composition
@@ -115,8 +120,36 @@ export function FilterSidebar({
   totalThreads,
   filteredThreads,
   onCollapse,
+  isOpen = true,
   className,
 }: FilterSidebarProps) {
+  // Compact view when sidebar is closed
+  if (!isOpen) {
+    return (
+      <div
+        className={cn(
+          "w-full h-screen flex flex-col items-center glass-panel-medium border-r border-glass border-l-2 border-l-primary/20 py-4",
+          className
+        )}
+        aria-label="Filter controls (compact)"
+      >
+        {onCollapse && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:glass-panel"
+            onClick={onCollapse}
+            aria-label="Expand filter sidebar"
+            title="Expand filters (Cmd/Ctrl + [)"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // Expanded view (default)
   return (
     <div
       className={cn(

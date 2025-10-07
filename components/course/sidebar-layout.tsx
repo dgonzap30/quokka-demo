@@ -115,13 +115,6 @@ export function SidebarLayout({
           e.preventDefault();
           setIsThreadListOpen((prev) => !prev);
         }
-        // Cmd/Ctrl + \ → Toggle both sidebars
-        else if (e.key === "\\") {
-          e.preventDefault();
-          const anyOpen = isFilterSidebarOpen || isThreadListOpen;
-          setIsFilterSidebarOpen(!anyOpen);
-          setIsThreadListOpen(!anyOpen);
-        }
       }
     };
 
@@ -132,22 +125,18 @@ export function SidebarLayout({
   // Toggle sidebar handlers
   const toggleFilterSidebar = () => setIsFilterSidebarOpen((prev) => !prev);
   const toggleThreadList = () => setIsThreadListOpen((prev) => !prev);
-  const toggleBothSidebars = () => {
-    const anyOpen = isFilterSidebarOpen || isThreadListOpen;
-    setIsFilterSidebarOpen(!anyOpen);
-    setIsThreadListOpen(!anyOpen);
-  };
 
   // Calculate grid columns based on sidebar states
+  // Compact sidebars are 56px (icon-only), not hidden
   const gridCols = (() => {
     if (isFilterSidebarOpen && isThreadListOpen) {
       return "lg:grid-cols-[220px_300px_auto]"; // Both open
     } else if (isFilterSidebarOpen && !isThreadListOpen) {
-      return "lg:grid-cols-[220px_0px_auto]"; // Filter only
+      return "lg:grid-cols-[220px_56px_auto]"; // Filter open, threads compact
     } else if (!isFilterSidebarOpen && isThreadListOpen) {
-      return "lg:grid-cols-[0px_300px_auto]"; // Thread list only
+      return "lg:grid-cols-[56px_300px_auto]"; // Filter compact, threads open
     } else {
-      return "lg:grid-cols-[0px_0px_auto]"; // Both closed
+      return "lg:grid-cols-[56px_56px_auto]"; // Both compact
     }
   })();
 
@@ -164,7 +153,10 @@ export function SidebarLayout({
       {isMobile && (isFilterSidebarOpen || isThreadListOpen) && (
         <div
           className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm lg:hidden"
-          onClick={toggleBothSidebars}
+          onClick={() => {
+            setIsFilterSidebarOpen(false);
+            setIsThreadListOpen(false);
+          }}
           aria-hidden="true"
         />
       )}
@@ -191,8 +183,9 @@ export function SidebarLayout({
           aria-hidden={!isFilterSidebarOpen}
         >
           {isValidElement(filterSidebar)
-            ? cloneElement(filterSidebar as ReactElement<{ onCollapse?: () => void }>, {
-                onCollapse: toggleFilterSidebar
+            ? cloneElement(filterSidebar as ReactElement<{ onCollapse?: () => void; isOpen?: boolean }>, {
+                onCollapse: toggleFilterSidebar,
+                isOpen: isFilterSidebarOpen
               })
             : filterSidebar}
         </aside>
@@ -212,8 +205,9 @@ export function SidebarLayout({
           aria-hidden={!isThreadListOpen}
         >
           {isValidElement(threadListSidebar)
-            ? cloneElement(threadListSidebar as ReactElement<{ onCollapse?: () => void }>, {
-                onCollapse: toggleThreadList
+            ? cloneElement(threadListSidebar as ReactElement<{ onCollapse?: () => void; isOpen?: boolean }>, {
+                onCollapse: toggleThreadList,
+                isOpen: isThreadListOpen
               })
             : threadListSidebar}
 
@@ -223,7 +217,10 @@ export function SidebarLayout({
               variant="ghost"
               size="icon"
               className="absolute right-2 top-2 lg:hidden"
-              onClick={toggleBothSidebars}
+              onClick={() => {
+                setIsFilterSidebarOpen(false);
+                setIsThreadListOpen(false);
+              }}
               aria-label="Close sidebars"
             >
               <PanelLeftClose className="h-5 w-5" />
@@ -249,12 +246,12 @@ export function SidebarLayout({
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleBothSidebars}
-              aria-label={(isFilterSidebarOpen || isThreadListOpen) ? "Close sidebars" : "Open sidebars"}
-              aria-expanded={isFilterSidebarOpen || isThreadListOpen}
+              onClick={toggleFilterSidebar}
+              aria-label={isFilterSidebarOpen ? "Close filter sidebar" : "Open filter sidebar"}
+              aria-expanded={isFilterSidebarOpen}
               className="hover:glass-panel transition-all"
             >
-              {(isFilterSidebarOpen || isThreadListOpen) ? (
+              {isFilterSidebarOpen ? (
                 <PanelLeftClose className="h-5 w-5" />
               ) : (
                 <PanelLeftOpen className="h-5 w-5" />
@@ -291,15 +288,6 @@ export function SidebarLayout({
                   ]
                 </kbd>
                 <span className="text-[10px]">Threads</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                  {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
-                </kbd>
-                <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono">
-                  \
-                </kbd>
-                <span className="text-[10px]">Both</span>
               </div>
             </div>
           </div>
