@@ -216,6 +216,10 @@ See `research/a11y-audit.md` for complete findings and `plans/a11y-fixes.md` for
 
 ## Changelog
 
+- `2025-10-07` | [ThreadCard] | Added semantic structure (article, h2), QDS compliance fixes (separator contrast, focus indicator, icon grid), and accessibility improvements (aria-labels, time elements)
+- `2025-10-07` | [ThreadDetail] | Added critical accessibility: main landmark, h1 heading, form labels, error handling, StatusBadge aria-labels, border-glass utility
+- `2025-10-07` | [Globals CSS] | Added sr-only utility class, focus:not-sr-only for skip links, border-glass utility for semantic styling
+- `2025-10-07` | [StatusBadge] | Added aria-label prop support, role="status", descriptive labels for screen readers
 - `2025-10-07` | [A11y Audit] | Completed WCAG 2.2 AA accessibility audit, found 67% compliance with 8 critical violations, documented semantic HTML and ARIA fixes
 - `2025-10-07` | [QDS Audit] | Completed QDS v1.0 compliance audit, found 8.5/10 compliance score, documented 2 critical AA fixes needed
 - `2025-10-07` | [Task] | Created thread-redesign task context
