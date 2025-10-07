@@ -152,9 +152,28 @@ quokka-demo/
 ## 🔄 Data & State
 
 - **Seed Data**: Pre-loaded from `/mocks/*.json`
-- **In-Memory State**: Changes persist during session
-- **Reset**: Refresh page to reset to initial state
-- **No Persistence**: localStorage/backend not implemented
+- **localStorage Persistence**: Data persists across sessions in browser storage
+- **Reset**: Clear localStorage to reseed with latest data
+- **Version-Based Seeding**: Automatically reseeds when mock data version changes
+
+### Viewing New Mock Data
+
+When new mock data is added or updated, you may need to clear your browser's localStorage to see the changes:
+
+**Method 1: Browser Console**
+```javascript
+localStorage.clear()
+// Then refresh the page
+```
+
+**Method 2: DevTools**
+1. Open DevTools (F12 or Cmd+Option+I)
+2. Go to Application tab
+3. Select "Local Storage" → `http://localhost:3000`
+4. Right-click and select "Clear"
+5. Refresh the page
+
+The app will automatically reseed with the latest data from `/mocks/*.json` files.
 
 ### Mock AI Responses
 

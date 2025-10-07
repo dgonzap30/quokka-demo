@@ -6,7 +6,7 @@
     "term": "Fall 2025",
     "description": "Fundamental concepts of computer science including algorithms, data structures, and programming.",
     "instructorIds": ["user-instructor-1"],
-    "enrollmentCount": 45,
+    "enrollmentCount": 52,
     "status": "active",
     "createdAt": "2025-08-15T09:00:00Z"
   },
@@ -17,7 +17,7 @@
     "term": "Fall 2025",
     "description": "Advanced data structures, algorithm design, and complexity analysis.",
     "instructorIds": ["user-instructor-1"],
-    "enrollmentCount": 38,
+    "enrollmentCount": 45,
     "status": "active",
     "createdAt": "2025-08-15T09:00:00Z"
   },
@@ -27,8 +27,41 @@
     "name": "Calculus II",
     "term": "Fall 2025",
     "description": "Integration techniques, sequences, series, and differential equations.",
-    "instructorIds": ["user-instructor-1"],
-    "enrollmentCount": 52,
+    "instructorIds": ["user-instructor-2"],
+    "enrollmentCount": 48,
+    "status": "active",
+    "createdAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "course-cs301",
+    "code": "CS 301",
+    "name": "Advanced Algorithms",
+    "term": "Fall 2025",
+    "description": "Graph algorithms, dynamic programming, NP-completeness, and approximation algorithms.",
+    "instructorIds": ["user-instructor-1", "user-instructor-2"],
+    "enrollmentCount": 32,
+    "status": "active",
+    "createdAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "course-phys201",
+    "code": "PHYS 201",
+    "name": "Physics II: Electricity & Magnetism",
+    "term": "Fall 2025",
+    "description": "Electric fields, magnetic fields, circuits, and electromagnetic waves.",
+    "instructorIds": ["user-instructor-3"],
+    "enrollmentCount": 38,
+    "status": "active",
+    "createdAt": "2025-08-15T09:00:00Z"
+  },
+  {
+    "id": "course-eng101",
+    "code": "ENG 101",
+    "name": "Academic Writing",
+    "term": "Fall 2025",
+    "description": "Principles of effective academic writing, research methods, and critical thinking.",
+    "instructorIds": ["user-instructor-3"],
+    "enrollmentCount": 42,
     "status": "active",
     "createdAt": "2025-08-15T09:00:00Z"
   }

@@ -1,0 +1,832 @@
+[
+  {
+    "id": "ai-answer-1",
+    "threadId": "thread-1",
+    "courseId": "course-cs101",
+    "content": "This is a comprehensive AI-generated answer for thread 1. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 89,
+    "citations": [
+      {
+        "id": "cite-1-1",
+        "sourceType": "lecture",
+        "source": "Lecture 3: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 93,
+        "link": null
+      },
+      {
+        "id": "cite-1-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 2",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 81,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 4,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 7,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-17T17:12:26.011Z",
+    "updatedAt": "2025-09-17T18:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-2",
+    "threadId": "thread-2",
+    "courseId": "course-cs101",
+    "content": "This is a comprehensive AI-generated answer for thread 2. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 90,
+    "citations": [
+      {
+        "id": "cite-2-1",
+        "sourceType": "lecture",
+        "source": "Lecture 4: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 89,
+        "link": null
+      },
+      {
+        "id": "cite-2-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 3",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 83,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 7,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-18T18:12:26.012Z",
+    "updatedAt": "2025-09-18T19:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-3",
+    "threadId": "thread-3",
+    "courseId": "course-cs101",
+    "content": "This is a comprehensive AI-generated answer for thread 3. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 90,
+    "citations": [
+      {
+        "id": "cite-3-1",
+        "sourceType": "lecture",
+        "source": "Lecture 5: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 94,
+        "link": null
+      },
+      {
+        "id": "cite-3-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 4",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 88,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-19T19:12:26.012Z",
+    "updatedAt": "2025-09-19T20:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-4",
+    "threadId": "thread-4",
+    "courseId": "course-cs101",
+    "content": "This is a comprehensive AI-generated answer for thread 4. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 86,
+    "citations": [
+      {
+        "id": "cite-4-1",
+        "sourceType": "lecture",
+        "source": "Lecture 6: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 91,
+        "link": null
+      },
+      {
+        "id": "cite-4-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 5",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 83,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 2,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-20T20:12:26.012Z",
+    "updatedAt": "2025-09-20T21:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-5",
+    "threadId": "thread-5",
+    "courseId": "course-cs101",
+    "content": "This is a comprehensive AI-generated answer for thread 5. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 91,
+    "citations": [
+      {
+        "id": "cite-5-1",
+        "sourceType": "lecture",
+        "source": "Lecture 7: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 90,
+        "link": null
+      },
+      {
+        "id": "cite-5-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 6",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 88,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-21T21:12:26.012Z",
+    "updatedAt": "2025-09-21T22:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-6",
+    "threadId": "thread-6",
+    "courseId": "course-cs201",
+    "content": "This is a comprehensive AI-generated answer for thread 6. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 87,
+    "citations": [
+      {
+        "id": "cite-6-1",
+        "sourceType": "lecture",
+        "source": "Lecture 8: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 92,
+        "link": null
+      },
+      {
+        "id": "cite-6-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 7",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 83,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 4,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-22T22:12:26.012Z",
+    "updatedAt": "2025-09-22T23:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-7",
+    "threadId": "thread-7",
+    "courseId": "course-cs201",
+    "content": "This is a comprehensive AI-generated answer for thread 7. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 91,
+    "citations": [
+      {
+        "id": "cite-7-1",
+        "sourceType": "lecture",
+        "source": "Lecture 9: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 92,
+        "link": null
+      },
+      {
+        "id": "cite-7-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 8",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 83,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 4,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-23T23:12:26.012Z",
+    "updatedAt": "2025-09-24T00:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-8",
+    "threadId": "thread-8",
+    "courseId": "course-cs201",
+    "content": "This is a comprehensive AI-generated answer for thread 8. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 87,
+    "citations": [
+      {
+        "id": "cite-8-1",
+        "sourceType": "lecture",
+        "source": "Lecture 10: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 97,
+        "link": null
+      },
+      {
+        "id": "cite-8-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 9",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 90,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-25T00:12:26.012Z",
+    "updatedAt": "2025-09-25T01:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-9",
+    "threadId": "thread-9",
+    "courseId": "course-cs201",
+    "content": "This is a comprehensive AI-generated answer for thread 9. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 90,
+    "citations": [
+      {
+        "id": "cite-9-1",
+        "sourceType": "lecture",
+        "source": "Lecture 11: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 94,
+        "link": null
+      },
+      {
+        "id": "cite-9-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 10",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 86,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 4,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-26T01:12:26.012Z",
+    "updatedAt": "2025-09-26T02:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-10",
+    "threadId": "thread-10",
+    "courseId": "course-cs201",
+    "content": "This is a comprehensive AI-generated answer for thread 10. The answer provides detailed explanations with code examples and references to course materials.",
+    "confidenceLevel": "high",
+    "confidenceScore": 86,
+    "citations": [
+      {
+        "id": "cite-10-1",
+        "sourceType": "lecture",
+        "source": "Lecture 12: Key Concepts",
+        "excerpt": "Relevant excerpt from lecture materials...",
+        "relevance": 96,
+        "link": null
+      },
+      {
+        "id": "cite-10-2",
+        "sourceType": "textbook",
+        "source": "Course Textbook - Chapter 11",
+        "excerpt": "Supporting material from textbook...",
+        "relevance": 80,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 6,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-27T02:12:26.012Z",
+    "updatedAt": "2025-09-27T03:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-11",
+    "threadId": "thread-11",
+    "courseId": "course-math221",
+    "content": "This answer provides a good starting point for thread 11. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 66,
+    "citations": [
+      {
+        "id": "cite-11-1",
+        "sourceType": "slides",
+        "source": "Slides: Topic 1",
+        "excerpt": "Related content from course materials...",
+        "relevance": 79,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-22T17:12:26.012Z",
+    "updatedAt": "2025-09-22T18:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-12",
+    "threadId": "thread-12",
+    "courseId": "course-cs301",
+    "content": "This answer provides a good starting point for thread 12. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 61,
+    "citations": [
+      {
+        "id": "cite-12-1",
+        "sourceType": "reading",
+        "source": "Reading 2",
+        "excerpt": "Related content from course materials...",
+        "relevance": 73,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 2,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-22T18:12:26.012Z",
+    "updatedAt": "2025-09-22T19:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-13",
+    "threadId": "thread-13",
+    "courseId": "course-phys201",
+    "content": "This answer provides a good starting point for thread 13. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 60,
+    "citations": [
+      {
+        "id": "cite-13-1",
+        "sourceType": "slides",
+        "source": "Slides: Topic 3",
+        "excerpt": "Related content from course materials...",
+        "relevance": 71,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-23T19:12:26.012Z",
+    "updatedAt": "2025-09-23T20:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-14",
+    "threadId": "thread-14",
+    "courseId": "course-math221",
+    "content": "This answer provides a good starting point for thread 14. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 59,
+    "citations": [
+      {
+        "id": "cite-14-1",
+        "sourceType": "reading",
+        "source": "Reading 4",
+        "excerpt": "Related content from course materials...",
+        "relevance": 73,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-23T20:12:26.012Z",
+    "updatedAt": "2025-09-23T21:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-15",
+    "threadId": "thread-15",
+    "courseId": "course-cs301",
+    "content": "This answer provides a good starting point for thread 15. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 64,
+    "citations": [
+      {
+        "id": "cite-15-1",
+        "sourceType": "slides",
+        "source": "Slides: Topic 5",
+        "excerpt": "Related content from course materials...",
+        "relevance": 74,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-24T21:12:26.012Z",
+    "updatedAt": "2025-09-24T22:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-16",
+    "threadId": "thread-16",
+    "courseId": "course-phys201",
+    "content": "This answer provides a good starting point for thread 16. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 67,
+    "citations": [
+      {
+        "id": "cite-16-1",
+        "sourceType": "reading",
+        "source": "Reading 6",
+        "excerpt": "Related content from course materials...",
+        "relevance": 79,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-24T22:12:26.012Z",
+    "updatedAt": "2025-09-24T23:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-17",
+    "threadId": "thread-17",
+    "courseId": "course-math221",
+    "content": "This answer provides a good starting point for thread 17. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 64,
+    "citations": [
+      {
+        "id": "cite-17-1",
+        "sourceType": "slides",
+        "source": "Slides: Topic 7",
+        "excerpt": "Related content from course materials...",
+        "relevance": 70,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 2,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-25T23:12:26.012Z",
+    "updatedAt": "2025-09-26T00:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-18",
+    "threadId": "thread-18",
+    "courseId": "course-cs301",
+    "content": "This answer provides a good starting point for thread 18. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 66,
+    "citations": [
+      {
+        "id": "cite-18-1",
+        "sourceType": "reading",
+        "source": "Reading 8",
+        "excerpt": "Related content from course materials...",
+        "relevance": 69,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-26T00:12:26.012Z",
+    "updatedAt": "2025-09-26T01:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-19",
+    "threadId": "thread-19",
+    "courseId": "course-phys201",
+    "content": "This answer provides a good starting point for thread 19. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 67,
+    "citations": [
+      {
+        "id": "cite-19-1",
+        "sourceType": "slides",
+        "source": "Slides: Topic 9",
+        "excerpt": "Related content from course materials...",
+        "relevance": 71,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-27T01:12:26.012Z",
+    "updatedAt": "2025-09-27T02:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-20",
+    "threadId": "thread-20",
+    "courseId": "course-math221",
+    "content": "This answer provides a good starting point for thread 20. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 68,
+    "citations": [
+      {
+        "id": "cite-20-1",
+        "sourceType": "reading",
+        "source": "Reading 10",
+        "excerpt": "Related content from course materials...",
+        "relevance": 74,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-27T02:12:26.012Z",
+    "updatedAt": "2025-09-27T03:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-21",
+    "threadId": "thread-21",
+    "courseId": "course-cs301",
+    "content": "This answer provides a good starting point for thread 21. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 69,
+    "citations": [
+      {
+        "id": "cite-21-1",
+        "sourceType": "slides",
+        "source": "Slides: Topic 11",
+        "excerpt": "Related content from course materials...",
+        "relevance": 84,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 2,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-28T03:12:26.012Z",
+    "updatedAt": "2025-09-28T04:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-22",
+    "threadId": "thread-22",
+    "courseId": "course-phys201",
+    "content": "This answer provides a good starting point for thread 22. Additional clarification may be needed for specific details.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 62,
+    "citations": [
+      {
+        "id": "cite-22-1",
+        "sourceType": "reading",
+        "source": "Reading 12",
+        "excerpt": "Related content from course materials...",
+        "relevance": 66,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-28T04:12:26.012Z",
+    "updatedAt": "2025-09-28T05:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-23",
+    "threadId": "thread-23",
+    "courseId": "course-eng101",
+    "content": "This is a preliminary answer for thread 23. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 43,
+    "citations": [
+      {
+        "id": "cite-23-1",
+        "sourceType": "assignment",
+        "source": "Assignment 1 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 53,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-27T17:12:26.012Z",
+    "updatedAt": "2025-09-27T17:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-24",
+    "threadId": "thread-24",
+    "courseId": "course-phys201",
+    "content": "This is a preliminary answer for thread 24. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 36,
+    "citations": [
+      {
+        "id": "cite-24-1",
+        "sourceType": "assignment",
+        "source": "Assignment 2 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 57,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-28T18:12:26.012Z",
+    "updatedAt": "2025-09-28T18:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-25",
+    "threadId": "thread-25",
+    "courseId": "course-eng101",
+    "content": "This is a preliminary answer for thread 25. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 37,
+    "citations": [
+      {
+        "id": "cite-25-1",
+        "sourceType": "assignment",
+        "source": "Assignment 3 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 60,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-29T19:12:26.012Z",
+    "updatedAt": "2025-09-29T19:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-26",
+    "threadId": "thread-26",
+    "courseId": "course-phys201",
+    "content": "This is a preliminary answer for thread 26. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 36,
+    "citations": [
+      {
+        "id": "cite-26-1",
+        "sourceType": "assignment",
+        "source": "Assignment 4 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 63,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-30T20:12:26.012Z",
+    "updatedAt": "2025-09-30T20:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-27",
+    "threadId": "thread-27",
+    "courseId": "course-eng101",
+    "content": "This is a preliminary answer for thread 27. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 38,
+    "citations": [
+      {
+        "id": "cite-27-1",
+        "sourceType": "assignment",
+        "source": "Assignment 5 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 57,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-10-01T21:12:26.012Z",
+    "updatedAt": "2025-10-01T21:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-28",
+    "threadId": "thread-28",
+    "courseId": "course-phys201",
+    "content": "This is a preliminary answer for thread 28. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 35,
+    "citations": [
+      {
+        "id": "cite-28-1",
+        "sourceType": "assignment",
+        "source": "Assignment 6 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 56,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-10-02T22:12:26.012Z",
+    "updatedAt": "2025-10-02T22:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-29",
+    "threadId": "thread-29",
+    "courseId": "course-eng101",
+    "content": "This is a preliminary answer for thread 29. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 42,
+    "citations": [
+      {
+        "id": "cite-29-1",
+        "sourceType": "assignment",
+        "source": "Assignment 7 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 60,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-10-03T23:12:26.012Z",
+    "updatedAt": "2025-10-03T23:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-30",
+    "threadId": "thread-30",
+    "courseId": "course-phys201",
+    "content": "This is a preliminary answer for thread 30. More specific information from the instructor may be needed.",
+    "confidenceLevel": "low",
+    "confidenceScore": 44,
+    "citations": [
+      {
+        "id": "cite-30-1",
+        "sourceType": "assignment",
+        "source": "Assignment 8 Guidelines",
+        "excerpt": "Partially relevant information...",
+        "relevance": 63,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-10-05T00:12:26.012Z",
+    "updatedAt": "2025-10-05T00:12:26.012Z"
+  }
+]

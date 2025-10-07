@@ -1,0 +1,393 @@
+[
+  {
+    "id": "notification-1",
+    "userId": "user-student-1",
+    "courseId": "course-cs101",
+    "threadId": "thread-1",
+    "type": "new_thread",
+    "content": "Notification 1: new thread",
+    "read": true,
+    "createdAt": "2025-10-07T17:12:26.014Z"
+  },
+  {
+    "id": "notification-2",
+    "userId": "user-student-2",
+    "courseId": "course-cs201",
+    "threadId": "thread-2",
+    "type": "new_post",
+    "content": "Notification 2: new post",
+    "read": true,
+    "createdAt": "2025-10-07T18:12:26.014Z"
+  },
+  {
+    "id": "notification-3",
+    "userId": "user-student-3",
+    "courseId": "course-math221",
+    "threadId": "thread-3",
+    "type": "endorsed",
+    "content": "Notification 3: endorsed",
+    "read": true,
+    "createdAt": "2025-10-07T19:12:26.014Z"
+  },
+  {
+    "id": "notification-4",
+    "userId": "user-student-4",
+    "courseId": "course-cs301",
+    "threadId": "thread-4",
+    "type": "resolved",
+    "content": "Notification 4: resolved",
+    "read": true,
+    "createdAt": "2025-10-07T20:12:26.014Z"
+  },
+  {
+    "id": "notification-5",
+    "userId": "user-student-5",
+    "courseId": "course-phys201",
+    "threadId": "thread-5",
+    "type": "ai_answer_ready",
+    "content": "Notification 5: ai answer_ready",
+    "read": true,
+    "createdAt": "2025-10-06T17:12:26.014Z"
+  },
+  {
+    "id": "notification-6",
+    "userId": "user-student-6",
+    "courseId": "course-eng101",
+    "threadId": "thread-6",
+    "type": "ai_answer_endorsed",
+    "content": "Notification 6: ai answer_endorsed",
+    "read": true,
+    "createdAt": "2025-10-06T18:12:26.014Z"
+  },
+  {
+    "id": "notification-7",
+    "userId": "user-student-7",
+    "courseId": "course-cs101",
+    "threadId": "thread-7",
+    "type": "new_thread",
+    "content": "Notification 7: new thread",
+    "read": true,
+    "createdAt": "2025-10-06T19:12:26.014Z"
+  },
+  {
+    "id": "notification-8",
+    "userId": "user-student-8",
+    "courseId": "course-cs201",
+    "type": "new_post",
+    "content": "Notification 8: new post",
+    "read": true,
+    "createdAt": "2025-10-06T20:12:26.014Z"
+  },
+  {
+    "id": "notification-9",
+    "userId": "user-student-9",
+    "courseId": "course-math221",
+    "threadId": "thread-9",
+    "type": "endorsed",
+    "content": "Notification 9: endorsed",
+    "read": true,
+    "createdAt": "2025-10-05T17:12:26.014Z"
+  },
+  {
+    "id": "notification-10",
+    "userId": "user-student-10",
+    "courseId": "course-cs301",
+    "threadId": "thread-10",
+    "type": "resolved",
+    "content": "Notification 10: resolved",
+    "read": true,
+    "createdAt": "2025-10-05T18:12:26.014Z"
+  },
+  {
+    "id": "notification-11",
+    "userId": "user-student-11",
+    "courseId": "course-phys201",
+    "threadId": "thread-11",
+    "type": "ai_answer_ready",
+    "content": "Notification 11: ai answer_ready",
+    "read": true,
+    "createdAt": "2025-10-05T19:12:26.014Z"
+  },
+  {
+    "id": "notification-12",
+    "userId": "user-student-12",
+    "courseId": "course-eng101",
+    "threadId": "thread-12",
+    "type": "ai_answer_endorsed",
+    "content": "Notification 12: ai answer_endorsed",
+    "read": true,
+    "createdAt": "2025-10-05T20:12:26.014Z"
+  },
+  {
+    "id": "notification-13",
+    "userId": "user-student-13",
+    "courseId": "course-cs101",
+    "type": "new_thread",
+    "content": "Notification 13: new thread",
+    "read": true,
+    "createdAt": "2025-10-04T17:12:26.014Z"
+  },
+  {
+    "id": "notification-14",
+    "userId": "user-student-14",
+    "courseId": "course-cs201",
+    "threadId": "thread-14",
+    "type": "new_post",
+    "content": "Notification 14: new post",
+    "read": true,
+    "createdAt": "2025-10-04T18:12:26.014Z"
+  },
+  {
+    "id": "notification-15",
+    "userId": "user-student-1",
+    "courseId": "course-math221",
+    "threadId": "thread-15",
+    "type": "endorsed",
+    "content": "Notification 15: endorsed",
+    "read": true,
+    "createdAt": "2025-10-04T19:12:26.014Z"
+  },
+  {
+    "id": "notification-16",
+    "userId": "user-student-2",
+    "courseId": "course-cs301",
+    "threadId": "thread-16",
+    "type": "resolved",
+    "content": "Notification 16: resolved",
+    "read": true,
+    "createdAt": "2025-10-04T20:12:26.014Z"
+  },
+  {
+    "id": "notification-17",
+    "userId": "user-student-3",
+    "courseId": "course-phys201",
+    "threadId": "thread-17",
+    "type": "ai_answer_ready",
+    "content": "Notification 17: ai answer_ready",
+    "read": true,
+    "createdAt": "2025-10-03T17:12:26.014Z"
+  },
+  {
+    "id": "notification-18",
+    "userId": "user-student-4",
+    "courseId": "course-eng101",
+    "threadId": "thread-18",
+    "type": "ai_answer_endorsed",
+    "content": "Notification 18: ai answer_endorsed",
+    "read": true,
+    "createdAt": "2025-10-03T18:12:26.014Z"
+  },
+  {
+    "id": "notification-19",
+    "userId": "user-student-5",
+    "courseId": "course-cs101",
+    "type": "new_thread",
+    "content": "Notification 19: new thread",
+    "read": true,
+    "createdAt": "2025-10-03T19:12:26.014Z"
+  },
+  {
+    "id": "notification-20",
+    "userId": "user-student-6",
+    "courseId": "course-cs201",
+    "threadId": "thread-20",
+    "type": "new_post",
+    "content": "Notification 20: new post",
+    "read": true,
+    "createdAt": "2025-10-03T20:12:26.014Z"
+  },
+  {
+    "id": "notification-21",
+    "userId": "user-student-7",
+    "courseId": "course-math221",
+    "threadId": "thread-21",
+    "type": "endorsed",
+    "content": "Notification 21: endorsed",
+    "read": true,
+    "createdAt": "2025-10-02T17:12:26.014Z"
+  },
+  {
+    "id": "notification-22",
+    "userId": "user-student-8",
+    "courseId": "course-cs301",
+    "threadId": "thread-22",
+    "type": "resolved",
+    "content": "Notification 22: resolved",
+    "read": true,
+    "createdAt": "2025-10-02T18:12:26.014Z"
+  },
+  {
+    "id": "notification-23",
+    "userId": "user-student-9",
+    "courseId": "course-phys201",
+    "type": "ai_answer_ready",
+    "content": "Notification 23: ai answer_ready",
+    "read": true,
+    "createdAt": "2025-10-02T19:12:26.014Z"
+  },
+  {
+    "id": "notification-24",
+    "userId": "user-student-10",
+    "courseId": "course-eng101",
+    "threadId": "thread-24",
+    "type": "ai_answer_endorsed",
+    "content": "Notification 24: ai answer_endorsed",
+    "read": true,
+    "createdAt": "2025-10-02T20:12:26.014Z"
+  },
+  {
+    "id": "notification-25",
+    "userId": "user-student-11",
+    "courseId": "course-cs101",
+    "threadId": "thread-1",
+    "type": "new_thread",
+    "content": "Notification 25: new thread",
+    "read": true,
+    "createdAt": "2025-10-01T17:12:26.014Z"
+  },
+  {
+    "id": "notification-26",
+    "userId": "user-student-12",
+    "courseId": "course-cs201",
+    "threadId": "thread-2",
+    "type": "new_post",
+    "content": "Notification 26: new post",
+    "read": false,
+    "createdAt": "2025-10-01T18:12:26.014Z"
+  },
+  {
+    "id": "notification-27",
+    "userId": "user-student-13",
+    "courseId": "course-math221",
+    "type": "endorsed",
+    "content": "Notification 27: endorsed",
+    "read": false,
+    "createdAt": "2025-10-01T19:12:26.014Z"
+  },
+  {
+    "id": "notification-28",
+    "userId": "user-student-14",
+    "courseId": "course-cs301",
+    "threadId": "thread-4",
+    "type": "resolved",
+    "content": "Notification 28: resolved",
+    "read": false,
+    "createdAt": "2025-10-01T20:12:26.014Z"
+  },
+  {
+    "id": "notification-29",
+    "userId": "user-student-1",
+    "courseId": "course-phys201",
+    "threadId": "thread-5",
+    "type": "ai_answer_ready",
+    "content": "Notification 29: ai answer_ready",
+    "read": false,
+    "createdAt": "2025-09-30T17:12:26.014Z"
+  },
+  {
+    "id": "notification-30",
+    "userId": "user-student-2",
+    "courseId": "course-eng101",
+    "type": "ai_answer_endorsed",
+    "content": "Notification 30: ai answer_endorsed",
+    "read": false,
+    "createdAt": "2025-09-30T18:12:26.014Z"
+  },
+  {
+    "id": "notification-31",
+    "userId": "user-student-3",
+    "courseId": "course-cs101",
+    "type": "new_thread",
+    "content": "Notification 31: new thread",
+    "read": false,
+    "createdAt": "2025-09-30T19:12:26.014Z"
+  },
+  {
+    "id": "notification-32",
+    "userId": "user-student-4",
+    "courseId": "course-cs201",
+    "threadId": "thread-8",
+    "type": "new_post",
+    "content": "Notification 32: new post",
+    "read": false,
+    "createdAt": "2025-09-30T20:12:26.014Z"
+  },
+  {
+    "id": "notification-33",
+    "userId": "user-student-5",
+    "courseId": "course-math221",
+    "type": "endorsed",
+    "content": "Notification 33: endorsed",
+    "read": false,
+    "createdAt": "2025-09-29T17:12:26.014Z"
+  },
+  {
+    "id": "notification-34",
+    "userId": "user-student-6",
+    "courseId": "course-cs301",
+    "threadId": "thread-10",
+    "type": "resolved",
+    "content": "Notification 34: resolved",
+    "read": false,
+    "createdAt": "2025-09-29T18:12:26.014Z"
+  },
+  {
+    "id": "notification-35",
+    "userId": "user-student-7",
+    "courseId": "course-phys201",
+    "threadId": "thread-11",
+    "type": "ai_answer_ready",
+    "content": "Notification 35: ai answer_ready",
+    "read": false,
+    "createdAt": "2025-09-29T19:12:26.014Z"
+  },
+  {
+    "id": "notification-36",
+    "userId": "user-student-8",
+    "courseId": "course-eng101",
+    "threadId": "thread-12",
+    "type": "ai_answer_endorsed",
+    "content": "Notification 36: ai answer_endorsed",
+    "read": false,
+    "createdAt": "2025-09-29T20:12:26.014Z"
+  },
+  {
+    "id": "notification-37",
+    "userId": "user-student-9",
+    "courseId": "course-cs101",
+    "threadId": "thread-13",
+    "type": "new_thread",
+    "content": "Notification 37: new thread",
+    "read": false,
+    "createdAt": "2025-09-28T17:12:26.014Z"
+  },
+  {
+    "id": "notification-38",
+    "userId": "user-student-10",
+    "courseId": "course-cs201",
+    "threadId": "thread-14",
+    "type": "new_post",
+    "content": "Notification 38: new post",
+    "read": false,
+    "createdAt": "2025-09-28T18:12:26.014Z"
+  },
+  {
+    "id": "notification-39",
+    "userId": "user-student-11",
+    "courseId": "course-math221",
+    "type": "endorsed",
+    "content": "Notification 39: endorsed",
+    "read": false,
+    "createdAt": "2025-09-28T19:12:26.014Z"
+  },
+  {
+    "id": "notification-40",
+    "userId": "user-student-12",
+    "courseId": "course-cs301",
+    "threadId": "thread-16",
+    "type": "resolved",
+    "content": "Notification 40: resolved",
+    "read": false,
+    "createdAt": "2025-09-28T20:12:26.014Z"
+  }
+]

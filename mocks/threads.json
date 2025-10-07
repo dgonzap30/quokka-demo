@@ -3,48 +3,408 @@
     "id": "thread-1",
     "courseId": "course-cs101",
     "title": "How does binary search work?",
-    "content": "I'm having trouble understanding the binary search algorithm. Can someone explain how it works step by step?",
-    "authorId": "user-student-1",
-    "status": "answered",
-    "tags": ["algorithms", "binary-search"],
-    "views": 45,
-    "createdAt": "2025-10-01T10:30:00Z",
-    "updatedAt": "2025-10-01T14:20:00Z"
+    "content": "This is a detailed question about how does binary search work?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-2",
+    "status": "open",
+    "tags": [
+      "algorithms",
+      "binary-search"
+    ],
+    "views": 79,
+    "createdAt": "2025-09-13T17:12:26.013Z",
+    "updatedAt": "2025-09-14T19:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-1"
   },
   {
     "id": "thread-2",
     "courseId": "course-cs101",
-    "title": "What's the difference between arrays and linked lists?",
-    "content": "I understand both data structures but I'm confused about when to use which one. What are the main differences?",
-    "authorId": "user-student-2",
-    "status": "resolved",
-    "tags": ["data-structures", "arrays", "linked-lists"],
-    "views": 67,
-    "createdAt": "2025-09-28T09:15:00Z",
-    "updatedAt": "2025-09-29T11:30:00Z"
+    "title": "What is recursion?",
+    "content": "This is a detailed question about what is recursion?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-3",
+    "status": "open",
+    "tags": [
+      "recursion",
+      "functions"
+    ],
+    "views": 93,
+    "createdAt": "2025-09-14T18:12:26.013Z",
+    "updatedAt": "2025-09-15T20:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-2"
   },
   {
     "id": "thread-3",
-    "courseId": "course-cs201",
-    "title": "Understanding Big O notation",
-    "content": "Can someone explain what O(log n) means in practical terms?",
-    "authorId": "user-student-1",
+    "courseId": "course-cs101",
+    "title": "Understanding loops vs recursion",
+    "content": "This is a detailed question about understanding loops vs recursion. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-4",
     "status": "open",
-    "tags": ["algorithms", "complexity"],
-    "views": 23,
-    "createdAt": "2025-10-03T13:45:00Z",
-    "updatedAt": "2025-10-03T13:45:00Z"
+    "tags": [
+      "loops",
+      "recursion"
+    ],
+    "views": 74,
+    "createdAt": "2025-09-15T19:12:26.013Z",
+    "updatedAt": "2025-09-16T21:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-3"
   },
   {
     "id": "thread-4",
+    "courseId": "course-cs101",
+    "title": "How to debug segmentation faults?",
+    "content": "This is a detailed question about how to debug segmentation faults?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-5",
+    "status": "open",
+    "tags": [
+      "debugging",
+      "pointers"
+    ],
+    "views": 84,
+    "createdAt": "2025-09-16T20:12:26.013Z",
+    "updatedAt": "2025-09-17T22:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-4"
+  },
+  {
+    "id": "thread-5",
+    "courseId": "course-cs101",
+    "title": "Best practices for variable naming?",
+    "content": "This is a detailed question about best practices for variable naming?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-6",
+    "status": "open",
+    "tags": [
+      "style",
+      "best-practices"
+    ],
+    "views": 84,
+    "createdAt": "2025-09-17T21:12:26.013Z",
+    "updatedAt": "2025-09-18T23:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-5"
+  },
+  {
+    "id": "thread-6",
+    "courseId": "course-cs201",
+    "title": "Understanding Big O notation",
+    "content": "This is a detailed question about understanding big o notation. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-7",
+    "status": "open",
+    "tags": [
+      "algorithms",
+      "complexity"
+    ],
+    "views": 18,
+    "createdAt": "2025-09-18T17:12:26.013Z",
+    "updatedAt": "2025-09-19T19:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-6"
+  },
+  {
+    "id": "thread-7",
+    "courseId": "course-cs201",
+    "title": "When to use hash tables?",
+    "content": "This is a detailed question about when to use hash tables?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-8",
+    "status": "open",
+    "tags": [
+      "data-structures",
+      "hash-tables"
+    ],
+    "views": 87,
+    "createdAt": "2025-09-19T18:12:26.013Z",
+    "updatedAt": "2025-09-20T20:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-7"
+  },
+  {
+    "id": "thread-8",
+    "courseId": "course-cs201",
+    "title": "Graph traversal: DFS vs BFS",
+    "content": "This is a detailed question about graph traversal: dfs vs bfs. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-9",
+    "status": "open",
+    "tags": [
+      "graphs",
+      "algorithms"
+    ],
+    "views": 59,
+    "createdAt": "2025-09-20T19:12:26.013Z",
+    "updatedAt": "2025-09-21T21:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-8"
+  },
+  {
+    "id": "thread-9",
+    "courseId": "course-cs201",
+    "title": "Dynamic programming basics",
+    "content": "This is a detailed question about dynamic programming basics. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-10",
+    "status": "open",
+    "tags": [
+      "dynamic-programming",
+      "optimization"
+    ],
+    "views": 18,
+    "createdAt": "2025-09-21T20:12:26.013Z",
+    "updatedAt": "2025-09-22T22:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-9"
+  },
+  {
+    "id": "thread-10",
+    "courseId": "course-cs201",
+    "title": "Balancing binary search trees",
+    "content": "This is a detailed question about balancing binary search trees. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-11",
+    "status": "open",
+    "tags": [
+      "trees",
+      "data-structures"
+    ],
+    "views": 15,
+    "createdAt": "2025-09-22T21:12:26.013Z",
+    "updatedAt": "2025-09-23T23:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-10"
+  },
+  {
+    "id": "thread-11",
     "courseId": "course-math221",
     "title": "Integration by parts confusion",
-    "content": "I'm stuck on problem 3.4 from the textbook. How do I choose u and dv?",
+    "content": "This is a detailed question about integration by parts confusion. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-12",
+    "status": "answered",
+    "tags": [
+      "integration",
+      "calculus"
+    ],
+    "views": 76,
+    "createdAt": "2025-09-23T17:12:26.013Z",
+    "updatedAt": "2025-09-24T19:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-11"
+  },
+  {
+    "id": "thread-12",
+    "courseId": "course-math221",
+    "title": "When to use u-substitution?",
+    "content": "This is a detailed question about when to use u-substitution?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-13",
+    "status": "answered",
+    "tags": [
+      "integration",
+      "techniques"
+    ],
+    "views": 61,
+    "createdAt": "2025-09-24T18:12:26.013Z",
+    "updatedAt": "2025-09-25T20:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-12"
+  },
+  {
+    "id": "thread-13",
+    "courseId": "course-math221",
+    "title": "Understanding series convergence",
+    "content": "This is a detailed question about understanding series convergence. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-14",
+    "status": "answered",
+    "tags": [
+      "series",
+      "convergence"
+    ],
+    "views": 32,
+    "createdAt": "2025-09-25T19:12:26.013Z",
+    "updatedAt": "2025-09-26T21:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-13"
+  },
+  {
+    "id": "thread-14",
+    "courseId": "course-math221",
+    "title": "Partial fractions help",
+    "content": "This is a detailed question about partial fractions help. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-1",
+    "status": "answered",
+    "tags": [
+      "integration",
+      "partial-fractions"
+    ],
+    "views": 13,
+    "createdAt": "2025-09-26T20:12:26.013Z",
+    "updatedAt": "2025-09-27T22:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-14"
+  },
+  {
+    "id": "thread-15",
+    "courseId": "course-math221",
+    "title": "Limits at infinity",
+    "content": "This is a detailed question about limits at infinity. I've read the course materials but need clarification on specific aspects.",
     "authorId": "user-student-2",
     "status": "answered",
-    "tags": ["integration", "calculus"],
-    "views": 31,
-    "createdAt": "2025-10-02T16:00:00Z",
-    "updatedAt": "2025-10-02T18:30:00Z"
+    "tags": [
+      "limits",
+      "calculus"
+    ],
+    "views": 82,
+    "createdAt": "2025-09-27T21:12:26.013Z",
+    "updatedAt": "2025-09-28T23:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-15"
+  },
+  {
+    "id": "thread-16",
+    "courseId": "course-cs301",
+    "title": "NP-completeness proof strategies",
+    "content": "This is a detailed question about np-completeness proof strategies. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-3",
+    "status": "answered",
+    "tags": [
+      "complexity",
+      "np-complete"
+    ],
+    "views": 52,
+    "createdAt": "2025-09-28T17:12:26.013Z",
+    "updatedAt": "2025-09-29T19:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-16"
+  },
+  {
+    "id": "thread-17",
+    "courseId": "course-cs301",
+    "title": "Approximation algorithms",
+    "content": "This is a detailed question about approximation algorithms. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-4",
+    "status": "answered",
+    "tags": [
+      "algorithms",
+      "approximation"
+    ],
+    "views": 67,
+    "createdAt": "2025-09-29T18:12:26.013Z",
+    "updatedAt": "2025-09-30T20:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-17"
+  },
+  {
+    "id": "thread-18",
+    "courseId": "course-cs301",
+    "title": "Graph coloring problem",
+    "content": "This is a detailed question about graph coloring problem. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-5",
+    "status": "answered",
+    "tags": [
+      "graphs",
+      "optimization"
+    ],
+    "views": 48,
+    "createdAt": "2025-09-30T19:12:26.013Z",
+    "updatedAt": "2025-10-01T21:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-18"
+  },
+  {
+    "id": "thread-19",
+    "courseId": "course-phys201",
+    "title": "Electric field vs electric potential",
+    "content": "This is a detailed question about electric field vs electric potential. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-6",
+    "status": "answered",
+    "tags": [
+      "electricity",
+      "fields"
+    ],
+    "views": 27,
+    "createdAt": "2025-10-01T17:12:26.013Z",
+    "updatedAt": "2025-10-02T19:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-19"
+  },
+  {
+    "id": "thread-20",
+    "courseId": "course-phys201",
+    "title": "Understanding Kirchhoff's laws",
+    "content": "This is a detailed question about understanding kirchhoff's laws. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-7",
+    "status": "answered",
+    "tags": [
+      "circuits",
+      "laws"
+    ],
+    "views": 46,
+    "createdAt": "2025-10-02T18:12:26.013Z",
+    "updatedAt": "2025-10-03T20:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-20"
+  },
+  {
+    "id": "thread-21",
+    "courseId": "course-phys201",
+    "title": "Magnetic flux calculation",
+    "content": "This is a detailed question about magnetic flux calculation. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-8",
+    "status": "answered",
+    "tags": [
+      "magnetism",
+      "flux"
+    ],
+    "views": 51,
+    "createdAt": "2025-10-03T19:12:26.013Z",
+    "updatedAt": "2025-10-04T21:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-21"
+  },
+  {
+    "id": "thread-22",
+    "courseId": "course-eng101",
+    "title": "How to structure a research paper?",
+    "content": "This is a detailed question about how to structure a research paper?. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-9",
+    "status": "answered",
+    "tags": [
+      "writing",
+      "research"
+    ],
+    "views": 61,
+    "createdAt": "2025-10-04T17:12:26.013Z",
+    "updatedAt": "2025-10-05T19:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-22"
+  },
+  {
+    "id": "thread-23",
+    "courseId": "course-eng101",
+    "title": "Citing sources in MLA format",
+    "content": "This is a detailed question about citing sources in mla format. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-10",
+    "status": "answered",
+    "tags": [
+      "citations",
+      "mla"
+    ],
+    "views": 30,
+    "createdAt": "2025-10-05T18:12:26.013Z",
+    "updatedAt": "2025-10-06T20:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-23"
+  },
+  {
+    "id": "thread-24",
+    "courseId": "course-eng101",
+    "title": "Thesis statement tips",
+    "content": "This is a detailed question about thesis statement tips. I've read the course materials but need clarification on specific aspects.",
+    "authorId": "user-student-11",
+    "status": "answered",
+    "tags": [
+      "writing",
+      "thesis"
+    ],
+    "views": 108,
+    "createdAt": "2025-10-06T19:12:26.013Z",
+    "updatedAt": "2025-10-07T21:12:26.013Z",
+    "hasAIAnswer": true,
+    "aiAnswerId": "ai-answer-24"
   }
 ]

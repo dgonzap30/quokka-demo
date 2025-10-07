@@ -5,6 +5,14 @@ import coursesData from "@/mocks/courses.json";
 import enrollmentsData from "@/mocks/enrollments.json";
 import threadsData from "@/mocks/threads.json";
 import postsData from "@/mocks/posts.json";
+import notificationsData from "@/mocks/notifications.json";
+import aiAnswersData from "@/mocks/ai-answers.json";
+
+/**
+ * Mock data version - increment when mock data changes to force re-seed
+ * This allows localStorage to update when we add/modify mock data
+ */
+const SEED_VERSION = 'v2.0.0';
 
 const KEYS = {
   users: "quokkaq.users",
@@ -15,6 +23,7 @@ const KEYS = {
   posts: "quokkaq.posts",
   notifications: "quokkaq.notifications",
   aiAnswers: "quokkaq.aiAnswers",
+  seedVersion: "quokkaq.seedVersion",
   initialized: "quokkaq.initialized",
 } as const;
 
@@ -28,8 +37,8 @@ const KEYS = {
 export function seedData(): void {
   if (typeof window === "undefined") return; // SSR guard
 
-  const initialized = localStorage.getItem(KEYS.initialized);
-  if (initialized) return; // Already seeded
+  const currentVersion = localStorage.getItem(KEYS.seedVersion);
+  if (currentVersion === SEED_VERSION) return; // Same version, skip
 
   try {
     const users = usersData as User[];
@@ -37,14 +46,17 @@ export function seedData(): void {
     const enrollments = enrollmentsData as Enrollment[];
     const threads = threadsData as Thread[];
     const posts = postsData as Post[];
+    const notifications = notificationsData as Notification[];
+    const aiAnswers = aiAnswersData as unknown as AIAnswer[];
 
     localStorage.setItem(KEYS.users, JSON.stringify(users));
     localStorage.setItem(KEYS.courses, JSON.stringify(courses));
     localStorage.setItem(KEYS.enrollments, JSON.stringify(enrollments));
     localStorage.setItem(KEYS.threads, JSON.stringify(threads));
     localStorage.setItem(KEYS.posts, JSON.stringify(posts));
-    localStorage.setItem(KEYS.notifications, JSON.stringify([])); // Empty notifications initially
-    localStorage.setItem(KEYS.aiAnswers, JSON.stringify([])); // Empty AI answers initially
+    localStorage.setItem(KEYS.notifications, JSON.stringify(notifications));
+    localStorage.setItem(KEYS.aiAnswers, JSON.stringify(aiAnswers));
+    localStorage.setItem(KEYS.seedVersion, SEED_VERSION);
     localStorage.setItem(KEYS.initialized, "true");
   } catch (error) {
     console.error("Failed to seed data:", error);
