@@ -271,6 +271,14 @@ If issues arise:
 
 ## Changelog
 
+- `2025-10-07` | [UX Improvement] | **COMPLETED** - Double sidebar layout for thread accessibility
+  - Split ThreadSidebar into FilterSidebar (220px) + ThreadListSidebar (300px)
+  - Updated SidebarLayout to support 3-column grid architecture
+  - Lifted filter state to course page level for coordinated filtering
+  - Threads now immediately accessible with dedicated vertical space
+  - Resolved user feedback: "threads buried below filters"
+  - Maintained all filtering functionality (search, status, tags)
+  - TypeScript ✓, Lint ✓, Committed (0ee85ea)
 - `2025-10-07` | [Phase 3] | **COMPLETED** - Filters, search, and tags
   - Created SidebarSearchBar with 300ms debounce
   - Created SidebarFilterPanel with vertical filters
