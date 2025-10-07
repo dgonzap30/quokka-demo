@@ -5,14 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ThreadCard } from "@/components/course/thread-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FloatingQuokka } from "@/components/course/floating-quokka";
 import { AskQuestionModal } from "@/components/course/ask-question-modal";
-import { FilterRow, type FilterType, type SortOrder } from "@/components/course/filter-row";
-import { GraduationCap } from "lucide-react";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SidebarLayout } from "@/components/course/sidebar-layout";
+import { ThreadSidebar } from "@/components/course/thread-sidebar";
+import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
 
 function CourseDetailContent({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = use(params);
@@ -25,18 +23,20 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
   // Ask Question modal state
   const [showAskModal, setShowAskModal] = useState(false);
 
-  // Filter and sort state
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  // Selected thread state (from URL param)
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
-  // Course description collapsed state
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
-  // Detect modal query parameter
+  // Detect modal and thread query parameters
   useEffect(() => {
     const modalParam = searchParams.get('modal');
+    const threadParam = searchParams.get('thread');
+
     if (modalParam === 'ask') {
       setShowAskModal(true);
+    }
+
+    if (threadParam) {
+      setSelectedThreadId(threadParam);
     }
   }, [searchParams]);
 
@@ -50,6 +50,17 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
       ? `/courses/${courseId}?${params.toString()}`
       : `/courses/${courseId}`;
     router.replace(newUrl);
+  };
+
+  // Handle thread selection - sync with URL
+  const handleThreadSelect = (threadId: string) => {
+    setSelectedThreadId(threadId);
+
+    // Update URL without navigation
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('thread', threadId);
+    const newUrl = `/courses/${courseId}?${params.toString()}`;
+    window.history.replaceState(null, '', newUrl);
   };
 
   // Redirect to login if not authenticated
@@ -103,82 +114,35 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
 
 
   return (
-    <div className="min-h-screen p-8 md:p-12">
-      <div className="container-wide space-y-12">
-        {/* Breadcrumb & Header */}
-        <div className="space-y-8">
-          <Breadcrumb
-            items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: course.code, icon: <GraduationCap className="h-3 w-3" /> }
-            ]}
+    <>
+      {/* Gmail-Style Sidebar Layout */}
+      <SidebarLayout
+        courseId={courseId}
+        initialThreadId={selectedThreadId}
+        sidebar={
+          <ThreadSidebar
+            courseId={courseId}
+            threads={threads || []}
+            selectedThreadId={selectedThreadId}
+            onThreadSelect={handleThreadSelect}
+            isLoading={threadsLoading}
           />
-
-          {/* Course Hero */}
-          <div className="space-y-3">
-            <div className="flex items-baseline gap-4 flex-wrap">
-              <h1 className="heading-2 glass-text">{course.name}</h1>
-              <span className="text-sm text-subtle glass-text">
-                {course.enrollmentCount} students enrolled
-              </span>
-            </div>
-
-            {isDescriptionExpanded && (
-              <p className="text-base text-muted-foreground glass-text leading-relaxed max-w-3xl">
-                {course.description}
-              </p>
-            )}
-
-            {course.description && (
-              <button
-                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="text-sm text-primary hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 transition-colors"
-                aria-expanded={isDescriptionExpanded}
-                aria-controls="course-description"
-              >
-                {isDescriptionExpanded ? "Show less" : "Show more"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Filter Row */}
-        <FilterRow
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
+        }
+      >
+        {/* Main Content: Thread Detail Panel */}
+        <ThreadDetailPanel
+          threadId={selectedThreadId}
+          onClose={() => {
+            setSelectedThreadId(null);
+            // Remove thread param from URL
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete('thread');
+            const newUrl = params.toString()
+              ? `/courses/${courseId}?${params.toString()}`
+              : `/courses/${courseId}`;
+            window.history.replaceState(null, '', newUrl);
+          }}
         />
-
-        {/* Threads Section */}
-        <div className="space-y-4">
-          {threads && threads.length > 0 ? (
-            <div className="space-y-4">
-              {threads.map((thread) => (
-                <ThreadCard key={thread.id} thread={thread} variant="compact" />
-              ))}
-            </div>
-          ) : (
-            <Card variant="glass" className="p-12 text-center">
-              <div className="max-w-md mx-auto space-y-4">
-                <div className="flex justify-center">
-                  <div className="text-5xl opacity-50" aria-hidden="true">💬</div>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">No Threads Yet</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Be the first to start a discussion in this course!
-                  </p>
-                </div>
-                <Link href={`/ask?courseId=${courseId}`}>
-                  <Button variant="glass-primary" size="default">
-                    Ask First Question
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          )}
-        </div>
 
         {/* Floating Quokka AI Agent */}
         <FloatingQuokka
@@ -186,7 +150,7 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
           courseName={course.name}
           courseCode={course.code}
         />
-      </div>
+      </SidebarLayout>
 
       {/* Ask Question Modal */}
       <AskQuestionModal
@@ -196,10 +160,10 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
         onClose={handleModalClose}
         onSuccess={(threadId) => {
           handleModalClose();
-          router.push(`/threads/${threadId}`);
+          handleThreadSelect(threadId); // Select the new thread inline
         }}
       />
-    </div>
+    </>
   );
 }
 
