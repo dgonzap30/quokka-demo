@@ -29,6 +29,9 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
+  // Course description collapsed state
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
   // Detect modal query parameter
   useEffect(() => {
     const modalParam = searchParams.get('modal');
@@ -60,13 +63,12 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
       <div className="min-h-screen p-8">
         <div className="container-wide space-y-12">
           <div className="space-y-4">
-            <Skeleton className="h-6 w-32 bg-glass-medium rounded-lg" />
-            <Skeleton className="h-16 w-96 bg-glass-medium rounded-lg" />
-            <Skeleton className="h-8 w-full max-w-2xl bg-glass-medium rounded-lg" />
+            <Skeleton className="h-6 w-32 glass-panel rounded-lg" />
+            <Skeleton className="h-12 w-96 glass-panel rounded-lg" />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40 bg-glass-medium rounded-xl" />
+              <Skeleton key={i} className="h-24 glass-panel rounded-xl" />
             ))}
           </div>
         </div>
@@ -113,16 +115,30 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
           />
 
           {/* Course Hero */}
-          <div className="space-y-4">
-            <h1 className="heading-2 glass-text">{course.name}</h1>
-            <p className="text-lg text-muted-foreground glass-text leading-relaxed max-w-3xl">
-              {course.description}
-            </p>
-            <div className="flex items-center gap-6 text-sm text-subtle glass-text">
-              <span className="font-medium">{course.term}</span>
-              <span>•</span>
-              <span>{course.enrollmentCount} students enrolled</span>
+          <div className="space-y-3">
+            <div className="flex items-baseline gap-4 flex-wrap">
+              <h1 className="heading-2 glass-text">{course.name}</h1>
+              <span className="text-sm text-subtle glass-text">
+                {course.enrollmentCount} students enrolled
+              </span>
             </div>
+
+            {isDescriptionExpanded && (
+              <p className="text-base text-muted-foreground glass-text leading-relaxed max-w-3xl">
+                {course.description}
+              </p>
+            )}
+
+            {course.description && (
+              <button
+                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                className="text-sm text-primary hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 transition-colors"
+                aria-expanded={isDescriptionExpanded}
+                aria-controls="course-description"
+              >
+                {isDescriptionExpanded ? "Show less" : "Show more"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -135,29 +151,27 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
         />
 
         {/* Threads Section */}
-        <div className="space-y-6">
-          <h2 className="heading-3 glass-text">Discussion Threads</h2>
-
+        <div className="space-y-4">
           {threads && threads.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {threads.map((thread) => (
-                <ThreadCard key={thread.id} thread={thread} />
+                <ThreadCard key={thread.id} thread={thread} variant="compact" />
               ))}
             </div>
           ) : (
-            <Card variant="glass" className="p-16 text-center">
-              <div className="max-w-md mx-auto space-y-6">
+            <Card variant="glass" className="p-12 text-center">
+              <div className="max-w-md mx-auto space-y-4">
                 <div className="flex justify-center">
-                  <div className="text-6xl opacity-50" aria-hidden="true">💬</div>
+                  <div className="text-5xl opacity-50" aria-hidden="true">💬</div>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">No Threads Yet</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <h3 className="text-lg font-semibold">No Threads Yet</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     Be the first to start a discussion in this course!
                   </p>
                 </div>
                 <Link href={`/ask?courseId=${courseId}`}>
-                  <Button variant="glass-primary" size="lg">
+                  <Button variant="glass-primary" size="default">
                     Ask First Question
                   </Button>
                 </Link>
@@ -195,13 +209,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ courseI
       <div className="min-h-screen p-8">
         <div className="container-wide space-y-12">
           <div className="space-y-4">
-            <Skeleton className="h-6 w-32 bg-glass-medium rounded-lg" />
-            <Skeleton className="h-16 w-96 bg-glass-medium rounded-lg" />
-            <Skeleton className="h-8 w-full max-w-2xl bg-glass-medium rounded-lg" />
+            <Skeleton className="h-6 w-32 glass-panel rounded-lg" />
+            <Skeleton className="h-12 w-96 glass-panel rounded-lg" />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40 bg-glass-medium rounded-xl" />
+              <Skeleton key={i} className="h-24 glass-panel rounded-xl" />
             ))}
           </div>
         </div>

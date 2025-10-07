@@ -16,6 +16,14 @@ export interface ThreadCardProps {
   thread: Thread;
 
   /**
+   * Display variant
+   * - full: Shows description preview and generous padding (default)
+   * - compact: Hides description, tighter padding for list views
+   * @default "full"
+   */
+  variant?: "full" | "compact";
+
+  /**
    * Optional className for composition
    */
   className?: string;
@@ -38,7 +46,10 @@ export interface ThreadCardProps {
  * <ThreadCard thread={thread} />
  * ```
  */
-export function ThreadCard({ thread, className }: ThreadCardProps) {
+export function ThreadCard({ thread, variant = "full", className }: ThreadCardProps) {
+  const isCompact = variant === "compact";
+  const padding = isCompact ? "p-4" : "p-6";
+
   return (
     <Link
       href={`/threads/${thread.id}`}
@@ -50,24 +61,26 @@ export function ThreadCard({ thread, className }: ThreadCardProps) {
     >
       <Card variant="glass-hover" className="transition-all duration-250 group-focus-visible:shadow-[var(--shadow-glass-lg)]">
         <article>
-          <CardHeader className="p-6">
+          <CardHeader className={padding}>
             {/* Header Row: Title + Status */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-              <div className="flex-1 space-y-3">
+              <div className={cn("flex-1", isCompact ? "space-y-0" : "space-y-3")}>
                 <h2 className="text-lg font-semibold leading-snug line-clamp-2 glass-text">
                   {thread.title}
                 </h2>
-              <CardDescription className="text-sm leading-relaxed line-clamp-2 glass-text">
-                {thread.content}
-              </CardDescription>
+                {!isCompact && (
+                  <CardDescription className="text-sm leading-relaxed line-clamp-2 glass-text">
+                    {thread.content}
+                  </CardDescription>
+                )}
+              </div>
+              <StatusBadge status={thread.status} aria-label={`Thread status: ${thread.status}`} />
             </div>
-            <StatusBadge status={thread.status} aria-label={`Thread status: ${thread.status}`} />
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent className="p-6 pt-0">
-          {/* Metadata Row with Icons */}
-          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground glass-text">
+          <CardContent className={cn(padding, "pt-0")}>
+            {/* Metadata Row with Icons */}
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground glass-text">
             {/* AI Badge */}
             {thread.hasAIAnswer && (
               <>
@@ -111,8 +124,8 @@ export function ThreadCard({ thread, className }: ThreadCardProps) {
                 </div>
               </>
             )}
-          </div>
-        </CardContent>
+            </div>
+          </CardContent>
         </article>
       </Card>
     </Link>
