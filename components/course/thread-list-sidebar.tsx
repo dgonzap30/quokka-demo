@@ -5,8 +5,7 @@ import { SidebarThreadCard } from "@/components/course/sidebar-thread-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Thread } from "@/lib/models/types";
 import { cn } from "@/lib/utils";
-import { Inbox, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Inbox } from "lucide-react";
 
 export interface ThreadListSidebarProps {
   /**
@@ -33,16 +32,6 @@ export interface ThreadListSidebarProps {
    * Current user ID (for unread tracking)
    */
   currentUserId?: string;
-
-  /**
-   * Collapse handler
-   */
-  onCollapse?: () => void;
-
-  /**
-   * Whether the sidebar is open (expanded) or compact
-   */
-  isOpen?: boolean;
 
   /**
    * Optional className for composition
@@ -93,8 +82,6 @@ export function ThreadListSidebar({
   onThreadSelect,
   isLoading = false,
   currentUserId,
-  onCollapse,
-  isOpen = true,
   className,
 }: ThreadListSidebarProps) {
   // Track viewed thread IDs for unread indicators
@@ -106,33 +93,6 @@ export function ThreadListSidebar({
     setViewedThreadIds((prev) => new Set([...prev, threadId]));
   };
 
-  // Compact view when sidebar is closed
-  if (!isOpen) {
-    return (
-      <div
-        className={cn(
-          "w-full h-screen flex flex-col items-center glass-panel-strong border-r border-glass shadow-glass-md py-4",
-          className
-        )}
-        aria-label="Thread list (compact)"
-      >
-        {onCollapse && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:glass-panel"
-            onClick={onCollapse}
-            aria-label="Expand thread list"
-            title="Expand thread list (Cmd/Ctrl + ])"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    );
-  }
-
-  // Expanded view (default)
   return (
     <div
       className={cn(
@@ -141,27 +101,13 @@ export function ThreadListSidebar({
       )}
       aria-label="Thread list"
     >
-      {/* Header with Collapse Button */}
+      {/* Header */}
       <div className="flex-shrink-0 border-b border-glass p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="heading-4 glass-text">Threads</h2>
-            <p className="text-xs text-muted-foreground glass-text mt-1">
-              {threads.length} {threads.length === 1 ? "thread" : "threads"}
-            </p>
-          </div>
-          {onCollapse && !selectedThreadId && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:glass-panel -mt-1"
-              onClick={onCollapse}
-              aria-label="Collapse thread list"
-              title="Collapse thread list (Cmd/Ctrl + ])"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          )}
+        <div>
+          <h2 className="heading-4 glass-text">Threads</h2>
+          <p className="text-xs text-muted-foreground glass-text mt-1">
+            {threads.length} {threads.length === 1 ? "thread" : "threads"}
+          </p>
         </div>
       </div>
 

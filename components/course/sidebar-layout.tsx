@@ -2,8 +2,6 @@
 
 import { type ReactNode, type ReactElement, useState, useEffect, cloneElement, isValidElement } from "react";
 import { cn } from "@/lib/utils";
-import { PanelLeftClose } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export interface SidebarLayoutProps {
   /**
@@ -85,9 +83,8 @@ export function SidebarLayout({
   children,
   className,
 }: SidebarLayoutProps) {
-  // Independent sidebar open/close states (default open on desktop, closed on mobile)
+  // Filter sidebar open/close state (thread list is always visible)
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(true);
-  const [isThreadListOpen, setIsThreadListOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile viewport
@@ -95,10 +92,9 @@ export function SidebarLayout({
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024; // lg breakpoint
       setIsMobile(mobile);
-      // Auto-close both sidebars on mobile initially
+      // Auto-close filter sidebar on mobile initially
       if (mobile) {
         setIsFilterSidebarOpen(false);
-        setIsThreadListOpen(false);
       }
     };
 
@@ -107,7 +103,7 @@ export function SidebarLayout({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Keyboard shortcuts for sidebar control
+  // Keyboard shortcuts for filter sidebar control
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey) {
@@ -116,52 +112,32 @@ export function SidebarLayout({
           e.preventDefault();
           setIsFilterSidebarOpen((prev) => !prev);
         }
-        // Cmd/Ctrl + ] → Toggle thread list (only if no thread selected)
-        else if (e.key === "]") {
-          e.preventDefault();
-          // Only toggle if no thread is selected
-          if (!selectedThreadId) {
-            setIsThreadListOpen((prev) => !prev);
-          }
-        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFilterSidebarOpen, isThreadListOpen, selectedThreadId]);
+  }, []);
 
-  // Toggle sidebar handlers
+  // Toggle filter sidebar handler
   const toggleFilterSidebar = () => setIsFilterSidebarOpen((prev) => !prev);
-  const toggleThreadList = () => setIsThreadListOpen((prev) => !prev);
 
-  // Calculate grid columns based on sidebar states and thread selection
-  // When no thread selected: 2-column grid, thread list fills space
-  // When thread selected: 3-column grid, thread list fixed width
+  // Calculate grid columns based on filter state and thread selection
+  // Thread list is always visible (no collapse)
+  // When no thread selected: 2-column grid, thread list expands to fill space
+  // When thread selected: 3-column grid, thread list fixed width (320px)
   const gridCols = (() => {
-    // No thread selected: 2-column grid, thread list expands
+    // No thread selected: 2-column grid, threads expand to fill space
     if (!selectedThreadId) {
-      if (isFilterSidebarOpen && isThreadListOpen) {
-        return "lg:grid-cols-[220px_1fr]"; // Both open, threads expand
-      } else if (isFilterSidebarOpen && !isThreadListOpen) {
-        return "lg:grid-cols-[220px_56px]"; // Filter open, threads compact
-      } else if (!isFilterSidebarOpen && isThreadListOpen) {
-        return "lg:grid-cols-[56px_1fr]"; // Filter compact, threads expand
-      } else {
-        return "lg:grid-cols-[56px_56px]"; // Both compact
-      }
+      return isFilterSidebarOpen
+        ? "lg:grid-cols-[220px_1fr]"      // Filter open, threads expand
+        : "lg:grid-cols-[56px_1fr]";      // Filter compact, threads expand
     }
 
-    // Thread selected: 3-column grid, thread list fixed width
-    if (isFilterSidebarOpen && isThreadListOpen) {
-      return "lg:grid-cols-[220px_300px_auto]"; // Both open
-    } else if (isFilterSidebarOpen && !isThreadListOpen) {
-      return "lg:grid-cols-[220px_56px_auto]"; // Filter open, threads compact
-    } else if (!isFilterSidebarOpen && isThreadListOpen) {
-      return "lg:grid-cols-[56px_300px_auto]"; // Filter compact, threads open
-    } else {
-      return "lg:grid-cols-[56px_56px_auto]"; // Both compact
-    }
+    // Thread selected: 3-column grid, threads fixed width
+    return isFilterSidebarOpen
+      ? "lg:grid-cols-[220px_320px_1fr]"  // Filter open, threads fixed, detail fluid
+      : "lg:grid-cols-[56px_320px_1fr]";  // Filter compact, threads fixed, detail fluid
   })();
 
   return (
@@ -171,16 +147,12 @@ export function SidebarLayout({
         className
       )}
       data-filter-sidebar-open={isFilterSidebarOpen}
-      data-thread-list-open={isThreadListOpen}
     >
-      {/* Mobile Overlay (when any sidebar is open) */}
-      {isMobile && (isFilterSidebarOpen || isThreadListOpen) && (
+      {/* Mobile Overlay (when filter sidebar is open) */}
+      {isMobile && isFilterSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm lg:hidden"
-          onClick={() => {
-            setIsFilterSidebarOpen(false);
-            setIsThreadListOpen(false);
-          }}
+          onClick={() => setIsFilterSidebarOpen(false)}
           aria-hidden="true"
         />
       )}
@@ -214,42 +186,16 @@ export function SidebarLayout({
             : filterSidebar}
         </aside>
 
-        {/* Thread List Sidebar (Middle - 300px) */}
+        {/* Thread List Sidebar (Middle - Always visible, responsive width) */}
         <aside
           className={cn(
             "relative h-screen overflow-hidden transition-all duration-300 ease-in-out",
-            // Mobile: Fixed overlay drawer (offset by filter sidebar width)
-            "fixed left-[220px] top-0 z-50 w-[300px] lg:relative lg:left-0 lg:z-0 lg:w-full",
-            // Transform for mobile drawer
-            isThreadListOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+            // Always visible on all screen sizes
+            "lg:w-full"
           )}
           aria-label="Thread list sidebar"
-          aria-hidden={!isThreadListOpen}
         >
-          {isValidElement(threadListSidebar)
-            ? cloneElement(threadListSidebar as ReactElement<{ onCollapse?: () => void; isOpen?: boolean }>, {
-                onCollapse: toggleThreadList,
-                isOpen: isThreadListOpen
-              })
-            : threadListSidebar}
-
-          {/* Mobile Close Button */}
-          {isMobile && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-2 lg:hidden"
-              onClick={() => {
-                setIsFilterSidebarOpen(false);
-                setIsThreadListOpen(false);
-              }}
-              aria-label="Close sidebars"
-            >
-              <PanelLeftClose className="h-5 w-5" />
-            </Button>
-          )}
+          {threadListSidebar}
         </aside>
 
         {/* Main Content Area - Only render when thread is selected */}
