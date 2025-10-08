@@ -39,7 +39,6 @@ export interface ThreadDetailPanelProps {
  * - Endorsement functionality
  * - Sticky header with thread title
  * - Close button (mobile only)
- * - Keyboard shortcuts (R to reply, E to endorse)
  * - Loading and error states
  * - Glass panel styling (QDS compliant)
  *
@@ -48,7 +47,6 @@ export interface ThreadDetailPanelProps {
  * - Added close button for mobile
  * - Compact breadcrumb
  * - Optimistic UI updates
- * - Keyboard shortcuts
  *
  * @example
  * ```tsx

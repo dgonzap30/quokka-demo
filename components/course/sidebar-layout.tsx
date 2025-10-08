@@ -48,7 +48,6 @@ export interface SidebarLayoutProps {
  * - Resizable sidebar (280px min, 400px max, 320px default)
  * - Collapsible with smooth transitions
  * - Mobile: Drawer pattern (overlay sidebar)
- * - Keyboard shortcuts: Toggle sidebar (Cmd/Ctrl + \\)
  * - Responsive breakpoints: Mobile (<768px), Tablet (768-1023px), Desktop (≥1024px)
  *
  * Layout Structure:
@@ -101,22 +100,6 @@ export function SidebarLayout({
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Keyboard shortcuts for filter sidebar control
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey) {
-        // Cmd/Ctrl + [ → Toggle filter sidebar
-        if (e.key === "[") {
-          e.preventDefault();
-          setIsFilterSidebarOpen((prev) => !prev);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Toggle filter sidebar handler

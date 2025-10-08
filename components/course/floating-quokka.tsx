@@ -194,17 +194,6 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
     ];
   };
 
-  // Handle Escape key to close
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && state === "expanded") {
-        setState("minimized");
-        localStorage.setItem(`quokka-state-${courseId}`, "minimized");
-      }
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [state, courseId]);
 
   // Hidden state - show nothing
   if (state === "hidden") {

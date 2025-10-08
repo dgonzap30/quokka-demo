@@ -38,7 +38,7 @@ export interface GlobalSearchProps {
 
 /**
  * Global search component with W3C combobox pattern
- * Implements full keyboard navigation and screen reader support
+ * Implements full screen reader support and accessible navigation
  */
 export function GlobalSearch({
   placeholder = "Search threads...",
@@ -59,24 +59,6 @@ export function GlobalSearch({
   const [statusMessage, setStatusMessage] = React.useState('');
 
   const inputRef = React.useRef<HTMLInputElement>(null);
-
-  // Global keyboard shortcut: "/" to focus search
-  React.useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if "/" is pressed and not inside an input/textarea
-      if (
-        e.key === '/' &&
-        document.activeElement?.tagName !== 'INPUT' &&
-        document.activeElement?.tagName !== 'TEXTAREA'
-      ) {
-        e.preventDefault();
-        inputRef.current?.focus();
-      }
-    };
-
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
 
   // Debounced search function
   const debouncedSearch = React.useMemo(
@@ -286,16 +268,6 @@ export function GlobalSearch({
           className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
           aria-hidden="true"
         />
-
-        {/* Keyboard hint - "/" key */}
-        {!query && (
-          <kbd
-            className="hidden md:inline-flex absolute right-10 top-1/2 -translate-y-1/2 items-center gap-1 rounded border border-border bg-glass-subtle px-1.5 py-0.5 text-xs text-muted-foreground pointer-events-none"
-            aria-hidden="true"
-          >
-            <span>/</span>
-          </kbd>
-        )}
 
         {/* Clear button - appears when input has value */}
         {query && (
