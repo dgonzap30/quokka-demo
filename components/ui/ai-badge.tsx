@@ -39,7 +39,7 @@ export function AIBadge({
   variant = "default",
   className,
   children,
-  "aria-label": ariaLabel = "AI-powered feature",
+  "aria-label": ariaLabel = "Quokka-powered answer",
 }: AIBadgeProps) {
   const baseClasses = "inline-flex items-center gap-1.5 ai-gradient text-white font-semibold rounded-full";
 
@@ -66,7 +66,7 @@ export function AIBadge({
         aria-hidden="true"
       />
       {variant !== "icon-only" && (
-        <span>{children || "AI"}</span>
+        <span>{children || "Quokka"}</span>
       )}
     </span>
   );

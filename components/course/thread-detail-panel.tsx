@@ -215,7 +215,7 @@ export function ThreadDetailPanel({
       {/* AI Answer Section */}
       {aiAnswer && (
         <section className="space-y-4">
-          <h2 className="heading-4 glass-text">AI-Generated Answer</h2>
+          <h2 className="heading-4 glass-text">Quokka's Answer</h2>
           <AIAnswerCard
             answer={aiAnswer}
             currentUserEndorsed={aiAnswer.endorsedBy.includes(user?.id || "")}

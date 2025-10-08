@@ -84,7 +84,7 @@ export function ThreadCard({ thread, variant = "full", className }: ThreadCardPr
             {/* AI Badge */}
             {thread.hasAIAnswer && (
               <>
-                <AIBadge variant="compact" aria-label="This thread has an AI-generated answer" />
+                <AIBadge variant="compact" aria-label="Quokka answered this" />
                 <span className="text-muted-foreground opacity-50" aria-hidden="true">•</span>
               </>
             )}

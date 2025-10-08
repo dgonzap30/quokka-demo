@@ -188,7 +188,7 @@ export function AskQuestionModal({
 
             {/* Preview Helper Text */}
             <div className="text-sm text-muted-foreground glass-text">
-              💡 Preview the AI-generated answer before posting your question
+              💡 Preview Quokka's answer before posting your question
             </div>
 
             {/* Action Buttons */}
@@ -213,7 +213,7 @@ export function AskQuestionModal({
                   !isFormValid
                 }
               >
-                {previewMutation.isPending ? "Generating Preview..." : "Preview AI Answer"}
+                {previewMutation.isPending ? "Generating Preview..." : "Ask Quokka"}
               </Button>
               <Button
                 type="submit"
@@ -232,9 +232,9 @@ export function AskQuestionModal({
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glass-panel-strong">
           <DialogHeader>
-            <DialogTitle className="heading-3 glass-text">AI Answer Preview</DialogTitle>
+            <DialogTitle className="heading-3 glass-text">Quokka's Answer</DialogTitle>
             <DialogDescription className="text-base glass-text">
-              Review the AI-generated answer before posting your question. You can still edit your question or post it directly.
+              Review Quokka's answer before posting your question. You can still edit your question or post it directly.
             </DialogDescription>
           </DialogHeader>
 

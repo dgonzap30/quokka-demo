@@ -35,7 +35,7 @@ export function AIAnswerCard({
       variant={cardVariant}
       className={cn("ai-card", className)}
       role="article"
-      aria-label="AI-generated answer"
+      aria-label="Quokka's answer"
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-4 flex-wrap">
