@@ -85,12 +85,12 @@ export function SidebarThreadCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group w-full text-left p-3 md:p-4 rounded-lg transition-all duration-200",
+        "group w-full text-left p-3 md:p-4 rounded-lg transition-all duration-300 ease-in-out",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2",
         // Selected state
         isSelected
           ? "glass-panel-strong border border-primary/30 shadow-sm"
-          : "hover:glass-panel border border-transparent",
+          : "hover:glass-panel hover:scale-[1.01] hover:shadow-lg hover:border-primary/20 border border-border/50",
         // Unread state
         isUnread && "font-medium",
         className

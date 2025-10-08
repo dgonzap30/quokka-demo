@@ -145,7 +145,7 @@ export function ThreadListSidebar({
 
         {/* Thread Cards - Vertical Stack */}
         {!isLoading && threads.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3 max-w-full">
             {threads.map((thread) => (
               <div key={thread.id} role="listitem">
                 <SidebarThreadCard
