@@ -171,17 +171,6 @@ export function CourseOverviewPanel({
           <p className="text-sm text-muted-foreground glass-text max-w-md mx-auto">
             Browse threads in the sidebar, or use filters to find specific topics. Click any thread to read and respond.
           </p>
-          <div className="flex items-center justify-center gap-3">
-            <Button variant="ghost" size="sm" className="text-xs">
-              <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono mr-2">
-                {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
-              </kbd>
-              <kbd className="px-2 py-1 rounded bg-glass-medium border border-glass font-mono mr-2">
-                \
-              </kbd>
-              Toggle Sidebars
-            </Button>
-          </div>
         </div>
       </div>
     </div>
