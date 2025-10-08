@@ -5,12 +5,20 @@ import { FocusScope } from "@radix-ui/react-focus-scope";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { AIBadge } from "@/components/ui/ai-badge";
-import { X, Send, Sparkles, MessageSquarePlus } from "lucide-react";
+import { X, Send, Sparkles, MessageSquarePlus, Trash2 } from "lucide-react";
 import type { Message } from "@/lib/models/types";
 import { isValidConversation } from "@/lib/utils/conversation-to-thread";
 import { ConversationToThreadModal } from "./conversation-to-thread-modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface FloatingQuokkaProps {
   courseId: string;
@@ -32,6 +40,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
   const [isThinking, setIsThinking] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const fabButtonRef = useRef<HTMLButtonElement>(null);
@@ -189,6 +198,18 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
     ];
   };
 
+  // Handle clear conversation
+  const handleClearConversation = () => {
+    // Reset to welcome message only
+    setMessages([{
+      id: "welcome",
+      role: "assistant",
+      content: `Hi! I'm Quokka, your AI study assistant for ${courseCode}. Ask me anything about the course material! 🎓`,
+      timestamp: new Date(),
+    }]);
+    setShowClearConfirm(false);
+  };
+
 
   // Hidden state - show nothing
   if (state === "hidden") {
@@ -236,38 +257,45 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
     >
       <div
         ref={dialogRef}
-        className="fixed bottom-8 right-8 z-40 w-[90vw] max-w-[400px]"
+        className="fixed bottom-8 right-8 z-40 w-[95vw] sm:w-[600px] lg:w-[700px] h-[80vh] sm:h-[75vh] lg:h-[70vh] max-h-[85vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="quokka-title"
         aria-describedby="quokka-description"
       >
-      <Card variant="glass-strong" className="flex flex-col shadow-e3 h-[500px]">
+      <Card variant="glass-strong" className="flex flex-col shadow-e3 h-full">
         {/* Header */}
         <CardHeader className="p-4 border-b border-[var(--border-glass)] flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full ai-gradient flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full ai-gradient flex items-center justify-center shrink-0">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle id="quokka-title" className="text-base glass-text flex items-center gap-2">
+              <CardTitle id="quokka-title" className="text-base glass-text">
                 Quokka AI
-                <AIBadge variant="compact" />
               </CardTitle>
               <p id="quokka-description" className="sr-only">
                 AI study assistant for {courseCode}
               </p>
-              <Badge variant="outline" className="mt-1 status-online text-xs">
-                ● Online
-              </Badge>
             </div>
           </div>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setShowClearConfirm(true)}
+              className="min-h-[44px] min-w-[44px] p-0"
+              aria-label="Clear conversation"
+              disabled={messages.length === 0}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Clear conversation</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleMinimize}
-              className="h-8 w-8 p-0"
+              className="min-h-[44px] min-w-[44px] p-0"
               aria-label="Minimize chat"
             >
               <span className="sr-only">Minimize</span>
@@ -279,10 +307,11 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
               variant="ghost"
               size="sm"
               onClick={handleDismiss}
-              className="h-8 w-8 p-0"
+              className="min-h-[44px] min-w-[44px] p-0"
               aria-label="Close chat"
             >
               <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </Button>
           </div>
         </CardHeader>
@@ -410,6 +439,27 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
           // Optional: could navigate to thread, but minimizing is less disruptive
         }}
       />
+
+      {/* Clear Conversation Confirmation Dialog */}
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent className="glass-panel-strong">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="glass-text">Clear this conversation?</AlertDialogTitle>
+            <AlertDialogDescription className="glass-text">
+              This will delete all messages in your current conversation with Quokka. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearConversation}
+              className="bg-danger hover:bg-danger/90"
+            >
+              Clear Conversation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </FocusScope>
   );
 }
