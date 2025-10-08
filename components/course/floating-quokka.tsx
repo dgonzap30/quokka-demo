@@ -255,6 +255,14 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
         e.preventDefault();
       }}
     >
+      {/* Backdrop - click outside to close */}
+      <div
+        className="fixed inset-0 z-30 bg-black/20"
+        onClick={handleMinimize}
+        aria-hidden="true"
+      />
+
+      {/* Modal */}
       <div
         ref={dialogRef}
         className="fixed bottom-8 right-8 z-40 w-[95vw] sm:w-[600px] lg:w-[700px] h-[80vh] sm:h-[75vh] lg:h-[70vh] max-h-[85vh]"
@@ -290,18 +298,6 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
             >
               <Trash2 className="h-4 w-4" />
               <span className="sr-only">Clear conversation</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleMinimize}
-              className="min-h-[44px] min-w-[44px] p-0"
-              aria-label="Minimize chat"
-            >
-              <span className="sr-only">Minimize</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <rect x="3" y="7" width="10" height="2" rx="1" />
-              </svg>
             </Button>
             <Button
               variant="ghost"
