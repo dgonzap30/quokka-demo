@@ -125,19 +125,19 @@ export function SidebarLayout({
   // Calculate grid columns based on filter state and thread selection
   // Thread list is always visible (no collapse)
   // When no thread selected: 2-column grid, thread list expands to fill space
-  // When thread selected: 3-column grid, thread list fixed width (320px)
+  // When thread selected: 3-column grid, thread list responsive width with minmax
   const gridCols = (() => {
     // No thread selected: 2-column grid, threads expand to fill space
     if (!selectedThreadId) {
       return isFilterSidebarOpen
-        ? "lg:grid-cols-[220px_1fr]"      // Filter open, threads expand
-        : "lg:grid-cols-[56px_1fr]";      // Filter compact, threads expand
+        ? "lg:grid-cols-[minmax(200px,220px)_1fr]"      // Filter open, threads expand
+        : "lg:grid-cols-[minmax(48px,56px)_1fr]";       // Filter compact, threads expand
     }
 
-    // Thread selected: 3-column grid, threads fixed width
+    // Thread selected: 3-column grid, threads responsive width
     return isFilterSidebarOpen
-      ? "lg:grid-cols-[220px_320px_1fr]"  // Filter open, threads fixed, detail fluid
-      : "lg:grid-cols-[56px_320px_1fr]";  // Filter compact, threads fixed, detail fluid
+      ? "lg:grid-cols-[minmax(200px,220px)_minmax(280px,400px)_1fr]"  // All responsive
+      : "lg:grid-cols-[minmax(48px,56px)_minmax(280px,400px)_1fr]";   // All responsive
   })();
 
   return (
@@ -207,10 +207,7 @@ export function SidebarLayout({
             )}
             aria-label="Thread content"
           >
-            {/* Main Content */}
-            <div className="p-4 md:p-6 lg:p-8">
-              {children}
-            </div>
+            {children}
           </main>
         )}
       </div>

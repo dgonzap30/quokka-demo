@@ -80,7 +80,7 @@ export function ThreadDetailPanel({
   // Loading state
   if (threadLoading) {
     return (
-      <div className={cn("space-y-8 px-4 md:px-6 lg:px-8", className)}>
+      <div className={cn("space-y-8 p-4 md:p-6 lg:p-8", className)}>
         <div className="space-y-4">
           <Skeleton className="h-8 w-full bg-glass-medium rounded-lg" />
           <Skeleton className="h-6 w-3/4 bg-glass-medium rounded-lg" />
@@ -99,7 +99,7 @@ export function ThreadDetailPanel({
   // Error state (thread not found)
   if (!threadData) {
     return (
-      <div className={cn("flex items-center justify-center h-full px-8", className)}>
+      <div className={cn("flex items-center justify-center h-full p-8", className)}>
         <div className="text-center max-w-md">
           <div className="text-6xl opacity-50 mb-6" aria-hidden="true">🔍</div>
           <h3 className="heading-3 glass-text mb-3">Thread not found</h3>
@@ -160,7 +160,7 @@ export function ThreadDetailPanel({
   };
 
   return (
-    <div className={cn("space-y-8", className)}>
+    <div className={cn("space-y-8 p-4 md:p-6 lg:p-8 max-w-full overflow-hidden", className)}>
       {/* Mobile Close Button */}
       {onClose && (
         <div className="lg:hidden flex justify-end">
@@ -195,7 +195,7 @@ export function ThreadDetailPanel({
           </div>
         </CardHeader>
         <CardContent className="p-6 md:p-8 pt-0">
-          <p className="text-base leading-relaxed whitespace-pre-wrap mb-6">
+          <p className="text-base leading-relaxed whitespace-pre-wrap break-words mb-6">
             {thread.content}
           </p>
           {thread.tags && thread.tags.length > 0 && (
@@ -259,7 +259,7 @@ export function ThreadDetailPanel({
                   </div>
                 </CardHeader>
                 <CardContent className="p-6 pt-0">
-                  <p className="text-base leading-relaxed whitespace-pre-wrap">
+                  <p className="text-base leading-relaxed whitespace-pre-wrap break-words">
                     {post.content}
                   </p>
                 </CardContent>
