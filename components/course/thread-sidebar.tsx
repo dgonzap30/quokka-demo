@@ -147,17 +147,20 @@ export function ThreadSidebar({
     // Apply status filter
     if (activeFilter !== "all") {
       switch (activeFilter) {
-        case "unanswered":
-          filtered = filtered.filter((thread) => thread.status === "open");
+        case "high-confidence":
+          // TODO: Requires AI answer data
+          break;
+        case "instructor-endorsed":
+          // TODO: Requires AI answer data
+          break;
+        case "popular":
+          // TODO: Requires AI answer data
+          break;
+        case "resolved":
+          filtered = filtered.filter((thread) => thread.status === "resolved");
           break;
         case "my-posts":
-          // TODO: Filter by user participation (requires post data)
-          // For now, filter by thread author
           filtered = filtered.filter((thread) => thread.authorId === currentUserId);
-          break;
-        case "needs-review":
-          // Threads that are answered but not resolved
-          filtered = filtered.filter((thread) => thread.status === "answered");
           break;
       }
     }

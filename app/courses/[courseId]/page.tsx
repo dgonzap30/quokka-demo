@@ -71,14 +71,27 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
       );
     }
 
-    // Apply status filter
-    if (activeFilter === "unanswered") {
-      filtered = filtered.filter((thread) => thread.status === "open");
+    // Apply status filter with AI-powered options
+    if (activeFilter === "instructor-endorsed") {
+      // Show only threads with instructor-endorsed AI answers
+      filtered = filtered.filter((thread) => thread.aiAnswer?.instructorEndorsed === true);
+    } else if (activeFilter === "high-confidence") {
+      // Show only threads with high-confidence AI answers
+      filtered = filtered.filter((thread) => thread.aiAnswer?.confidenceLevel === "high");
+    } else if (activeFilter === "popular") {
+      // Show threads with 5+ student endorsements
+      const POPULAR_THRESHOLD = 5;
+      filtered = filtered.filter((thread) =>
+        (thread.aiAnswer?.studentEndorsements ?? 0) >= POPULAR_THRESHOLD
+      );
+    } else if (activeFilter === "resolved") {
+      // Show only resolved threads
+      filtered = filtered.filter((thread) => thread.status === "resolved");
     } else if (activeFilter === "my-posts") {
+      // Show only user's threads
       filtered = filtered.filter((thread) => thread.authorId === user?.id);
-    } else if (activeFilter === "needs-review") {
-      filtered = filtered.filter((thread) => thread.status === "answered");
     }
+    // "all" filter: no filtering needed
 
     // Apply tag filter (AND logic - thread must have ALL selected tags)
     if (selectedTags.length > 0) {

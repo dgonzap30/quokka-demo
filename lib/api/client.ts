@@ -7,6 +7,7 @@ import type {
   AuthError,
   Course,
   Thread,
+  ThreadWithAIAnswer,
   Post,
   Notification,
   CourseInsight,
@@ -578,14 +579,33 @@ export const api = {
   },
 
   /**
-   * Get threads for a course
+   * Get threads for a course with embedded AI answers
+   *
+   * Returns ThreadWithAIAnswer[] where threads with AI answers have
+   * the aiAnswer property populated. Threads without AI answers have
+   * aiAnswer: undefined.
    */
-  async getCourseThreads(courseId: string): Promise<Thread[]> {
+  async getCourseThreads(courseId: string): Promise<ThreadWithAIAnswer[]> {
     await delay();
     seedData();
 
     const threads = getThreadsByCourse(courseId);
-    return threads.sort(
+
+    // Enrich threads with AI answer data
+    const enrichedThreads = threads.map((thread): ThreadWithAIAnswer => {
+      // Check if thread has an AI answer
+      if (thread.hasAIAnswer && thread.aiAnswerId) {
+        const aiAnswer = getAIAnswerById(thread.aiAnswerId);
+        if (aiAnswer) {
+          // Return thread with embedded AI answer
+          return { ...thread, aiAnswer };
+        }
+      }
+      // Return thread without aiAnswer (will be undefined)
+      return thread as ThreadWithAIAnswer;
+    });
+
+    return enrichedThreads.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );

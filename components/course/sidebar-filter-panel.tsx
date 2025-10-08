@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { List, HelpCircle, User, AlertCircle, type LucideIcon } from "lucide-react";
+import { List, Target, BadgeCheck, Flame, CheckSquare, User, type LucideIcon } from "lucide-react";
 
-export type FilterType = "all" | "unanswered" | "my-posts" | "needs-review";
+export type FilterType = "all" | "high-confidence" | "instructor-endorsed" | "popular" | "resolved" | "my-posts";
 
 export interface SidebarFilterPanelProps {
   /**
@@ -37,22 +37,34 @@ const filters: Filter[] = [
     description: "Show all threads in this course",
   },
   {
-    id: "unanswered",
-    label: "Unanswered",
-    icon: HelpCircle,
-    description: "Show threads without answers",
+    id: "high-confidence",
+    label: "High Confidence",
+    icon: Target,
+    description: "Show threads with high-confidence AI answers (80% or higher)",
+  },
+  {
+    id: "instructor-endorsed",
+    label: "Instructor Endorsed",
+    icon: BadgeCheck,
+    description: "Show threads with instructor-endorsed AI answers",
+  },
+  {
+    id: "popular",
+    label: "Popular",
+    icon: Flame,
+    description: "Show popular threads with many student endorsements",
+  },
+  {
+    id: "resolved",
+    label: "Resolved",
+    icon: CheckSquare,
+    description: "Show threads marked as resolved by instructors",
   },
   {
     id: "my-posts",
     label: "My Posts",
     icon: User,
-    description: "Show threads you've participated in",
-  },
-  {
-    id: "needs-review",
-    label: "Needs Review",
-    icon: AlertCircle,
-    description: "Show threads that need instructor attention",
+    description: "Show threads you've created or participated in",
   },
 ];
 
