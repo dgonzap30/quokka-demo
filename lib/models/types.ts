@@ -567,3 +567,118 @@ export function hasValidCitations(answer: AIAnswer, minCount: number = 3): boole
 export function hasAIAnswer(thread: Thread): thread is Required<Pick<Thread, 'hasAIAnswer' | 'aiAnswerId'>> & Thread {
   return thread.hasAIAnswer === true && thread.aiAnswerId !== undefined;
 }
+
+// ============================================
+// Conversation & Message Types
+// ============================================
+
+/**
+ * Chat message for FloatingQuokka conversations
+ */
+export interface Message {
+  /** Unique message identifier */
+  id: string;
+
+  /** Message sender role */
+  role: "user" | "assistant";
+
+  /** Message text content */
+  content: string;
+
+  /** Message timestamp */
+  timestamp: Date;
+}
+
+/**
+ * Metadata extracted from a conversation
+ */
+export interface ConversationMetadata {
+  /** Number of messages in conversation */
+  messageCount: number;
+
+  /** Number of user messages */
+  userMessageCount: number;
+
+  /** Number of assistant messages */
+  assistantMessageCount: number;
+
+  /** First message timestamp */
+  startedAt: Date;
+
+  /** Last message timestamp */
+  lastMessageAt: Date;
+}
+
+/**
+ * Message formatted for display/preview
+ */
+export interface FormattedMessage {
+  /** Message role label (e.g., "You", "Quokka") */
+  roleLabel: string;
+
+  /** Message content */
+  content: string;
+
+  /** ISO 8601 timestamp string */
+  timestamp: string;
+}
+
+/**
+ * Input for converting conversation to thread
+ */
+export interface ConversationToThreadInput {
+  /** Array of conversation messages */
+  messages: Message[];
+
+  /** Target course ID */
+  courseId: string;
+
+  /** Course code (for context) */
+  courseCode: string;
+}
+
+/**
+ * Result of conversation-to-thread conversion
+ */
+export interface ConversationToThreadResult {
+  /** CreateThreadInput ready for API */
+  threadInput: CreateThreadInput;
+
+  /** Formatted messages for preview */
+  formattedMessages: FormattedMessage[];
+
+  /** Conversation metadata */
+  metadata: ConversationMetadata;
+}
+
+// ============================================
+// Conversation Type Guards
+// ============================================
+
+/**
+ * Type guard to validate conversation has minimum required messages
+ */
+export function isValidConversation(messages: Message[]): boolean {
+  if (messages.length < 2) return false;
+
+  const hasUser = messages.some((m) => m.role === "user");
+  const hasAssistant = messages.some((m) => m.role === "assistant");
+
+  return hasUser && hasAssistant;
+}
+
+/**
+ * Type guard to check if object is a valid Message
+ */
+export function isMessage(obj: unknown): obj is Message {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const msg = obj as Record<string, unknown>;
+
+  return (
+    typeof msg.id === "string" &&
+    (msg.role === "user" || msg.role === "assistant") &&
+    typeof msg.content === "string" &&
+    msg.timestamp instanceof Date
+  );
+}

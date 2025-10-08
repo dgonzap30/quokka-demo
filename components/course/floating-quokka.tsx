@@ -7,14 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
-import { X, Send, Sparkles } from "lucide-react";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+import { X, Send, Sparkles, MessageSquarePlus } from "lucide-react";
+import type { Message } from "@/lib/models/types";
+import { isValidConversation } from "@/lib/utils/conversation-to-thread";
+import { ConversationToThreadModal } from "./conversation-to-thread-modal";
 
 interface FloatingQuokkaProps {
   courseId: string;
@@ -35,6 +31,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [showPostModal, setShowPostModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const fabButtonRef = useRef<HTMLButtonElement>(null);
@@ -43,12 +40,9 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
   // Initialize state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem(`quokka-state-${courseId}`);
-    const dismissed = localStorage.getItem(`quokka-dismissed-${courseId}`);
     const firstVisit = localStorage.getItem(`quokka-first-visit-${courseId}`);
 
-    if (dismissed === "true") {
-      setState("hidden");
-    } else if (savedState === "expanded") {
+    if (savedState === "expanded") {
       setState("expanded");
       // Initialize with welcome message
       setMessages([{
@@ -72,9 +66,6 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
   const updateState = (newState: "hidden" | "minimized" | "expanded") => {
     setState(newState);
     localStorage.setItem(`quokka-state-${courseId}`, newState);
-    if (newState === "hidden") {
-      localStorage.setItem(`quokka-dismissed-${courseId}`, "true");
-    }
   };
 
   // Handle minimize
@@ -86,9 +77,13 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
     }, 100);
   };
 
-  // Handle dismiss
+  // Handle dismiss (minimize instead of permanent hide)
   const handleDismiss = () => {
-    updateState("hidden");
+    updateState("minimized");
+    // Restore focus to FAB button after minimize
+    setTimeout(() => {
+      fabButtonRef.current?.focus();
+    }, 100);
   };
 
   // Handle expand
@@ -338,6 +333,24 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
 
         {/* Input */}
         <div className="border-t border-[var(--border-glass)] p-4">
+          {/* Post as Thread Button */}
+          {isValidConversation(messages) && (
+            <Button
+              variant="glass"
+              size="default"
+              onClick={() => setShowPostModal(true)}
+              className="w-full mb-2 min-h-[44px] justify-start"
+              aria-label={`Post conversation as thread (${messages.length} messages)`}
+              aria-describedby="post-thread-hint"
+            >
+              <MessageSquarePlus className="h-4 w-4 mr-2" />
+              Post as Thread
+            </Button>
+          )}
+          <span id="post-thread-hint" className="sr-only">
+            Share this conversation with your class for feedback and endorsements
+          </span>
+
           {messages.length === 1 && (
             <div className="mb-3">
               <p className="text-xs font-semibold text-muted-foreground mb-2">Quick prompts:</p>
@@ -372,14 +385,31 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
               variant="glass-primary"
               size="sm"
               disabled={isThinking || !input.trim()}
-              className="shrink-0"
+              className="shrink-0 min-h-[44px] min-w-[44px]"
             >
               <Send className="h-4 w-4" />
+              <span className="sr-only">Send message</span>
             </Button>
           </form>
         </div>
       </Card>
       </div>
+
+      {/* Conversation to Thread Modal */}
+      <ConversationToThreadModal
+        isOpen={showPostModal}
+        onClose={() => setShowPostModal(false)}
+        messages={messages}
+        courseId={courseId}
+        courseName={courseName}
+        courseCode={courseCode}
+        onSuccess={() => {
+          // Close modal and minimize Quokka after successful post
+          setShowPostModal(false);
+          updateState("minimized");
+          // Optional: could navigate to thread, but minimizing is less disruptive
+        }}
+      />
     </FocusScope>
   );
 }
