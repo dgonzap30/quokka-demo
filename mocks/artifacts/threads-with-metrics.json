@@ -11,7 +11,7 @@
       "binary-search",
       "debugging"
     ],
-    "views": 52,
+    "views": 73,
     "createdAt": "2025-09-13T17:12:26.013Z",
     "updatedAt": "2025-09-14T19:12:26.013Z",
     "hasAIAnswer": true,
@@ -29,7 +29,7 @@
       "functions",
       "concepts"
     ],
-    "views": 39,
+    "views": 73,
     "createdAt": "2025-09-14T18:12:26.013Z",
     "updatedAt": "2025-09-15T20:12:26.013Z",
     "hasAIAnswer": true,
@@ -65,7 +65,7 @@
       "pointers",
       "c-programming"
     ],
-    "views": 52,
+    "views": 47,
     "createdAt": "2025-09-16T20:12:26.013Z",
     "updatedAt": "2025-09-17T22:12:26.013Z",
     "hasAIAnswer": true,
@@ -83,7 +83,7 @@
       "best-practices",
       "python"
     ],
-    "views": 50,
+    "views": 57,
     "createdAt": "2025-09-17T21:12:26.013Z",
     "updatedAt": "2025-09-18T23:12:26.013Z",
     "hasAIAnswer": true,
@@ -92,8 +92,8 @@
   {
     "id": "thread-6",
     "courseId": "course-cs201",
-    "title": "Why is nested loop O(n\u00b2) but binary search is O(log n)?",
-    "content": "I'm studying for the midterm and confused about Big O notation. I understand that a nested loop like:\n\n```python\nfor i in range(n):\n    for j in range(n):\n        print(i, j)\n```\n\nis O(n\u00b2) because it runs n\u00d7n times. But I don't understand why binary search is O(log n). Doesn't it also loop through the array? Why isn't it O(n) like a normal search?\n\nAlso, if I have a loop that goes `for i in range(0, n, 2)`, is that O(n) or O(n/2)? Does the /2 matter for Big O?",
+    "title": "Why is nested loop O(n²) but binary search is O(log n)?",
+    "content": "I'm studying for the midterm and confused about Big O notation. I understand that a nested loop like:\n\n```python\nfor i in range(n):\n    for j in range(n):\n        print(i, j)\n```\n\nis O(n²) because it runs n×n times. But I don't understand why binary search is O(log n). Doesn't it also loop through the array? Why isn't it O(n) like a normal search?\n\nAlso, if I have a loop that goes `for i in range(0, n, 2)`, is that O(n) or O(n/2)? Does the /2 matter for Big O?",
     "authorId": "user-student-7",
     "status": "open",
     "tags": [
@@ -101,7 +101,7 @@
       "complexity",
       "big-o"
     ],
-    "views": 41,
+    "views": 45,
     "createdAt": "2025-09-18T17:12:26.013Z",
     "updatedAt": "2025-09-19T19:12:26.013Z",
     "hasAIAnswer": true,
@@ -119,7 +119,7 @@
       "hash-tables",
       "design"
     ],
-    "views": 35,
+    "views": 39,
     "createdAt": "2025-09-19T18:12:26.013Z",
     "updatedAt": "2025-09-20T20:12:26.013Z",
     "hasAIAnswer": true,
@@ -137,7 +137,7 @@
       "algorithms",
       "dfs-bfs"
     ],
-    "views": 28,
+    "views": 47,
     "createdAt": "2025-09-20T19:12:26.013Z",
     "updatedAt": "2025-09-21T21:12:26.013Z",
     "hasAIAnswer": true,
@@ -155,7 +155,7 @@
       "optimization",
       "memoization"
     ],
-    "views": 52,
+    "views": 47,
     "createdAt": "2025-09-21T20:12:26.013Z",
     "updatedAt": "2025-09-22T22:12:26.013Z",
     "hasAIAnswer": true,
@@ -173,7 +173,7 @@
       "data-structures",
       "avl-trees"
     ],
-    "views": 24,
+    "views": 44,
     "createdAt": "2025-09-22T21:12:26.013Z",
     "updatedAt": "2025-09-23T23:12:26.013Z",
     "hasAIAnswer": true,
@@ -183,7 +183,7 @@
     "id": "thread-11",
     "courseId": "course-math221",
     "title": "Integration by parts - how do I choose u and dv?",
-    "content": "I'm stuck on problem 23 from section 7.1: \u222b x\u00b7ln(x) dx\n\nI know I need to use integration by parts: \u222b u dv = uv - \u222b v du\n\nBut how do I decide which part is u and which is dv? I tried:\n- u = x, dv = ln(x)dx \u2192 but I don't know the antiderivative of ln(x)\n- u = ln(x), dv = x dx \u2192 this gives du = (1/x)dx and v = x\u00b2/2\n\nThe second choice seems to work but I'm not sure why. Is there a rule for choosing u and dv? The professor mentioned \"LIATE\" but I forget what that means.",
+    "content": "I'm stuck on problem 23 from section 7.1: ∫ x·ln(x) dx\n\nI know I need to use integration by parts: ∫ u dv = uv - ∫ v du\n\nBut how do I decide which part is u and which is dv? I tried:\n- u = x, dv = ln(x)dx → but I don't know the antiderivative of ln(x)\n- u = ln(x), dv = x dx → this gives du = (1/x)dx and v = x²/2\n\nThe second choice seems to work but I'm not sure why. Is there a rule for choosing u and dv? The professor mentioned \"LIATE\" but I forget what that means.",
     "authorId": "user-student-12",
     "status": "answered",
     "tags": [
@@ -191,7 +191,7 @@
       "calculus",
       "integration-by-parts"
     ],
-    "views": 52,
+    "views": 70,
     "createdAt": "2025-09-23T17:12:26.013Z",
     "updatedAt": "2025-09-24T19:12:26.013Z",
     "hasAIAnswer": true,
@@ -201,7 +201,7 @@
     "id": "thread-12",
     "courseId": "course-math221",
     "title": "Is u-substitution the same as chain rule backwards?",
-    "content": "We learned u-substitution for integrals like \u222b 2x\u00b7cos(x\u00b2) dx. I substitute u = x\u00b2, so du = 2x dx, and get \u222b cos(u) du = sin(u) + C = sin(x\u00b2) + C.\n\nThis feels like doing the chain rule in reverse. Is that what's actually happening? If so, does that mean every time I see a composite function in an integral, I should try u-substitution?\n\nAlso, what do I do when the substitution doesn't work cleanly? Like for \u222b x\u00b7cos(x\u00b2) dx (without the 2), du = 2x dx but I only have x dx. Can I still use u-substitution or do I need a different technique?",
+    "content": "We learned u-substitution for integrals like ∫ 2x·cos(x²) dx. I substitute u = x², so du = 2x dx, and get ∫ cos(u) du = sin(u) + C = sin(x²) + C.\n\nThis feels like doing the chain rule in reverse. Is that what's actually happening? If so, does that mean every time I see a composite function in an integral, I should try u-substitution?\n\nAlso, what do I do when the substitution doesn't work cleanly? Like for ∫ x·cos(x²) dx (without the 2), du = 2x dx but I only have x dx. Can I still use u-substitution or do I need a different technique?",
     "authorId": "user-student-13",
     "status": "answered",
     "tags": [
@@ -209,7 +209,7 @@
       "u-substitution",
       "techniques"
     ],
-    "views": 44,
+    "views": 52,
     "createdAt": "2025-09-24T18:12:26.013Z",
     "updatedAt": "2025-09-25T20:12:26.013Z",
     "hasAIAnswer": true,
@@ -219,7 +219,7 @@
     "id": "thread-13",
     "courseId": "course-math221",
     "title": "Series convergence tests - which test do I use when?",
-    "content": "I'm studying for Exam 3 and completely overwhelmed by all the convergence tests. We have:\n- Ratio test\n- Root test  \n- Comparison test\n- Limit comparison test\n- Integral test\n- Alternating series test\n- p-series test\n\nFor the series \u03a3(n=1 to \u221e) of n\u00b2/e\u207f, which test should I try first? I tried the ratio test and got a limit of 0, so it converges. But could I have used a different test? Is there a decision tree or flowchart for choosing the right test?\n\nAlso, what happens if the ratio test gives me a limit of 1? The test is inconclusive but then what?",
+    "content": "I'm studying for Exam 3 and completely overwhelmed by all the convergence tests. We have:\n- Ratio test\n- Root test  \n- Comparison test\n- Limit comparison test\n- Integral test\n- Alternating series test\n- p-series test\n\nFor the series Σ(n=1 to ∞) of n²/eⁿ, which test should I try first? I tried the ratio test and got a limit of 0, so it converges. But could I have used a different test? Is there a decision tree or flowchart for choosing the right test?\n\nAlso, what happens if the ratio test gives me a limit of 1? The test is inconclusive but then what?",
     "authorId": "user-student-14",
     "status": "answered",
     "tags": [
@@ -237,7 +237,7 @@
     "id": "thread-14",
     "courseId": "course-math221",
     "title": "Partial fractions - stuck on the algebra after decomposition",
-    "content": "I'm working on \u222b (3x+5)/(x\u00b2-x-6) dx and I know I need partial fractions.\n\nFirst I factored: x\u00b2-x-6 = (x-3)(x+2)\n\nSo (3x+5)/((x-3)(x+2)) = A/(x-3) + B/(x+2)\n\nMultiplying both sides by (x-3)(x+2):\n3x+5 = A(x+2) + B(x-3)\n\nBut now I'm stuck. I tried plugging in x=3 and x=-2 to solve for A and B:\n- x=3: 3(3)+5 = A(5) + 0 \u2192 14 = 5A \u2192 A = 14/5\n- x=-2: 3(-2)+5 = 0 + B(-5) \u2192 -1 = -5B \u2192 B = 1/5\n\nBut when I check by adding A/(x-3) + B/(x+2) back together, I don't get the original fraction. What am I doing wrong?",
+    "content": "I'm working on ∫ (3x+5)/(x²-x-6) dx and I know I need partial fractions.\n\nFirst I factored: x²-x-6 = (x-3)(x+2)\n\nSo (3x+5)/((x-3)(x+2)) = A/(x-3) + B/(x+2)\n\nMultiplying both sides by (x-3)(x+2):\n3x+5 = A(x+2) + B(x-3)\n\nBut now I'm stuck. I tried plugging in x=3 and x=-2 to solve for A and B:\n- x=3: 3(3)+5 = A(5) + 0 → 14 = 5A → A = 14/5\n- x=-2: 3(-2)+5 = 0 + B(-5) → -1 = -5B → B = 1/5\n\nBut when I check by adding A/(x-3) + B/(x+2) back together, I don't get the original fraction. What am I doing wrong?",
     "authorId": "user-student-1",
     "status": "answered",
     "tags": [
@@ -245,7 +245,7 @@
       "partial-fractions",
       "algebra"
     ],
-    "views": 55,
+    "views": 50,
     "createdAt": "2025-09-26T20:12:26.013Z",
     "updatedAt": "2025-09-27T22:12:26.013Z",
     "hasAIAnswer": true,
@@ -255,7 +255,7 @@
     "id": "thread-15",
     "courseId": "course-math221",
     "title": "Limits at infinity - when do I use L'Hopital's rule?",
-    "content": "For lim(x\u2192\u221e) of (3x\u00b2 + 2x)/(x\u00b2 - 1), I divided numerator and denominator by x\u00b2 and got 3 as the answer. That makes sense.\n\nBut for lim(x\u2192\u221e) of (e\u02e3 - e\u207b\u02e3)/(e\u02e3 + e\u207b\u02e3), dividing by e\u02e3 doesn't seem to help. My TA said to use L'Hopital's rule, but I thought that was only for 0/0 or \u221e/\u221e forms.\n\nWhen x\u2192\u221e, e\u02e3\u2192\u221e and e\u207b\u02e3\u21920, so the limit is (\u221e-0)/(\u221e+0) = \u221e/\u221e. So it IS the \u221e/\u221e form! But why doesn't the divide-by-highest-power method work here like it did for polynomials?",
+    "content": "For lim(x→∞) of (3x² + 2x)/(x² - 1), I divided numerator and denominator by x² and got 3 as the answer. That makes sense.\n\nBut for lim(x→∞) of (eˣ - e⁻ˣ)/(eˣ + e⁻ˣ), dividing by eˣ doesn't seem to help. My TA said to use L'Hopital's rule, but I thought that was only for 0/0 or ∞/∞ forms.\n\nWhen x→∞, eˣ→∞ and e⁻ˣ→0, so the limit is (∞-0)/(∞+0) = ∞/∞. So it IS the ∞/∞ form! But why doesn't the divide-by-highest-power method work here like it did for polynomials?",
     "authorId": "user-student-2",
     "status": "answered",
     "tags": [
@@ -263,7 +263,7 @@
       "calculus",
       "lhopital"
     ],
-    "views": 56,
+    "views": 39,
     "createdAt": "2025-09-27T21:12:26.013Z",
     "updatedAt": "2025-09-28T23:12:26.013Z",
     "hasAIAnswer": true,
@@ -273,7 +273,7 @@
     "id": "thread-16",
     "courseId": "course-cs301",
     "title": "How do I prove a problem is NP-complete using reduction?",
-    "content": "I'm working on Problem Set 5 where we need to prove that the SUBSET-SUM problem is NP-complete. I understand the steps:\n\n1. Show it's in NP (easy - verify a solution in polynomial time)\n2. Reduce a known NP-complete problem to it (hard - which problem?)\n\nThe hint says to reduce from 3-SAT, but I don't see the connection between a boolean satisfiability problem and choosing integers that sum to a target. How do I even start the reduction?\n\nDo I need to convert each boolean variable to a number somehow? And what about the clauses - how do they become the target sum? The textbook example for CLIQUE\u2192VERTEX-COVER was easier to visualize.",
+    "content": "I'm working on Problem Set 5 where we need to prove that the SUBSET-SUM problem is NP-complete. I understand the steps:\n\n1. Show it's in NP (easy - verify a solution in polynomial time)\n2. Reduce a known NP-complete problem to it (hard - which problem?)\n\nThe hint says to reduce from 3-SAT, but I don't see the connection between a boolean satisfiability problem and choosing integers that sum to a target. How do I even start the reduction?\n\nDo I need to convert each boolean variable to a number somehow? And what about the clauses - how do they become the target sum? The textbook example for CLIQUE→VERTEX-COVER was easier to visualize.",
     "authorId": "user-student-3",
     "status": "answered",
     "tags": [
@@ -281,7 +281,7 @@
       "np-complete",
       "reductions"
     ],
-    "views": 54,
+    "views": 48,
     "createdAt": "2025-09-28T17:12:26.013Z",
     "updatedAt": "2025-09-29T19:12:26.013Z",
     "hasAIAnswer": true,
@@ -291,7 +291,7 @@
     "id": "thread-17",
     "courseId": "course-cs301",
     "title": "Approximation algorithms - why 2-approximation for vertex cover?",
-    "content": "In lecture, we learned that the greedy algorithm for vertex cover is a 2-approximation. The algorithm:\n\n```\nwhile there are uncovered edges:\n    pick any uncovered edge (u,v)\n    add both u and v to the cover\n    mark all edges incident to u or v as covered\n```\n\nI understand why this gives a valid cover, but I don't understand the proof that it's within 2\u00d7 of optimal. Professor Anderson said something about matching and optimal cover needing at least one endpoint from each edge, but I'm lost.\n\nAlso, can we do better than 2-approximation? If not, why not? Is there a theoretical limit?",
+    "content": "In lecture, we learned that the greedy algorithm for vertex cover is a 2-approximation. The algorithm:\n\n```\nwhile there are uncovered edges:\n    pick any uncovered edge (u,v)\n    add both u and v to the cover\n    mark all edges incident to u or v as covered\n```\n\nI understand why this gives a valid cover, but I don't understand the proof that it's within 2× of optimal. Professor Anderson said something about matching and optimal cover needing at least one endpoint from each edge, but I'm lost.\n\nAlso, can we do better than 2-approximation? If not, why not? Is there a theoretical limit?",
     "authorId": "user-student-4",
     "status": "answered",
     "tags": [
@@ -299,7 +299,7 @@
       "approximation",
       "vertex-cover"
     ],
-    "views": 27,
+    "views": 41,
     "createdAt": "2025-09-29T18:12:26.013Z",
     "updatedAt": "2025-09-30T20:12:26.013Z",
     "hasAIAnswer": true,
@@ -317,7 +317,7 @@
       "optimization",
       "coloring"
     ],
-    "views": 47,
+    "views": 42,
     "createdAt": "2025-09-30T19:12:26.013Z",
     "updatedAt": "2025-10-01T21:12:26.013Z",
     "hasAIAnswer": true,
@@ -327,7 +327,7 @@
     "id": "thread-19",
     "courseId": "course-phys201",
     "title": "What's the actual difference between E field and V potential?",
-    "content": "I'm confused about electric field E and electric potential V. I know:\n- E is a vector (has direction)\n- V is a scalar (just a number)\n- They're related by E = -\u2207V (or E = -dV/dr in 1D)\n\nBut conceptually, what's the difference? They both describe the electric force somehow. When I have a point charge Q, I can calculate both:\n- E = kQ/r\u00b2 (pointing away from Q)\n- V = kQ/r (no direction)\n\nIf I know E, I can get V by integrating. If I know V, I can get E by differentiating. So why do we need both? Is one more \"fundamental\" than the other? When solving problems, how do I know which one to use?",
+    "content": "I'm confused about electric field E and electric potential V. I know:\n- E is a vector (has direction)\n- V is a scalar (just a number)\n- They're related by E = -∇V (or E = -dV/dr in 1D)\n\nBut conceptually, what's the difference? They both describe the electric force somehow. When I have a point charge Q, I can calculate both:\n- E = kQ/r² (pointing away from Q)\n- V = kQ/r (no direction)\n\nIf I know E, I can get V by integrating. If I know V, I can get E by differentiating. So why do we need both? Is one more \"fundamental\" than the other? When solving problems, how do I know which one to use?",
     "authorId": "user-student-6",
     "status": "answered",
     "tags": [
@@ -335,7 +335,7 @@
       "fields",
       "potential"
     ],
-    "views": 36,
+    "views": 56,
     "createdAt": "2025-10-01T17:12:26.013Z",
     "updatedAt": "2025-10-02T19:12:26.013Z",
     "hasAIAnswer": true,
@@ -345,7 +345,7 @@
     "id": "thread-20",
     "courseId": "course-phys201",
     "title": "Kirchhoff's current law - why do currents sum to zero?",
-    "content": "I'm working on the circuit analysis homework and stuck on Kirchhoff's current law (KCL). The law says \"the sum of currents entering a node equals the sum leaving\" or equivalently \"the sum of all currents at a node is zero.\"\n\nFor the circuit in Problem 4, I have three resistors meeting at node A:\n- I\u2081 = 2A flowing in\n- I\u2082 = ? flowing out (unknown)\n- I\u2083 = 1A flowing out\n\nSo KCL gives: I\u2081 - I\u2082 - I\u2083 = 0, so 2 - I\u2082 - 1 = 0, so I\u2082 = 1A.\n\nBut WHY must currents balance? Is it conservation of charge? If charge can't accumulate at a node, where would it go? Is the node assumed to have zero capacitance?\n\nAlso, how do I know which currents are positive and which are negative? Is it just based on the direction arrow?",
+    "content": "I'm working on the circuit analysis homework and stuck on Kirchhoff's current law (KCL). The law says \"the sum of currents entering a node equals the sum leaving\" or equivalently \"the sum of all currents at a node is zero.\"\n\nFor the circuit in Problem 4, I have three resistors meeting at node A:\n- I₁ = 2A flowing in\n- I₂ = ? flowing out (unknown)\n- I₃ = 1A flowing out\n\nSo KCL gives: I₁ - I₂ - I₃ = 0, so 2 - I₂ - 1 = 0, so I₂ = 1A.\n\nBut WHY must currents balance? Is it conservation of charge? If charge can't accumulate at a node, where would it go? Is the node assumed to have zero capacitance?\n\nAlso, how do I know which currents are positive and which are negative? Is it just based on the direction arrow?",
     "authorId": "user-student-7",
     "status": "answered",
     "tags": [
@@ -353,7 +353,7 @@
       "kirchhoff",
       "current"
     ],
-    "views": 57,
+    "views": 50,
     "createdAt": "2025-10-02T18:12:26.013Z",
     "updatedAt": "2025-10-03T20:12:26.013Z",
     "hasAIAnswer": true,
@@ -363,7 +363,7 @@
     "id": "thread-21",
     "courseId": "course-phys201",
     "title": "Magnetic flux calculation - confused about the angle",
-    "content": "Problem 18 from Chapter 22: A circular loop of radius 5cm is in a uniform magnetic field B = 0.2T. Calculate the magnetic flux through the loop.\n\nI know \u03a6 = B\u00b7A\u00b7cos(\u03b8) where A is the area and \u03b8 is the angle between B and the normal to the loop. \n\nMy attempt:\n- A = \u03c0r\u00b2 = \u03c0(0.05)\u00b2 = 7.85\u00d710\u207b\u00b3 m\u00b2\n- B = 0.2 T\n- \u03b8 = ?\n\nThe problem doesn't specify the angle! Do I assume \u03b8 = 0\u00b0 (so cos(\u03b8) = 1 and \u03a6 = BA)? Or is the loop in the xy-plane and B pointing in some direction I need to figure out from a diagram?\n\nAlso, what does it mean physically if cos(\u03b8) = 0? Does that mean zero flux even though there's a magnetic field?",
+    "content": "Problem 18 from Chapter 22: A circular loop of radius 5cm is in a uniform magnetic field B = 0.2T. Calculate the magnetic flux through the loop.\n\nI know Φ = B·A·cos(θ) where A is the area and θ is the angle between B and the normal to the loop. \n\nMy attempt:\n- A = πr² = π(0.05)² = 7.85×10⁻³ m²\n- B = 0.2 T\n- θ = ?\n\nThe problem doesn't specify the angle! Do I assume θ = 0° (so cos(θ) = 1 and Φ = BA)? Or is the loop in the xy-plane and B pointing in some direction I need to figure out from a diagram?\n\nAlso, what does it mean physically if cos(θ) = 0? Does that mean zero flux even though there's a magnetic field?",
     "authorId": "user-student-8",
     "status": "answered",
     "tags": [
@@ -371,7 +371,7 @@
       "flux",
       "calculations"
     ],
-    "views": 41,
+    "views": 38,
     "createdAt": "2025-10-03T19:12:26.013Z",
     "updatedAt": "2025-10-04T21:12:26.013Z",
     "hasAIAnswer": true,
@@ -389,7 +389,7 @@
       "research",
       "structure"
     ],
-    "views": 43,
+    "views": 44,
     "createdAt": "2025-10-04T17:12:26.013Z",
     "updatedAt": "2025-10-05T19:12:26.013Z",
     "hasAIAnswer": true,
@@ -407,7 +407,7 @@
       "mla",
       "plagiarism"
     ],
-    "views": 28,
+    "views": 35,
     "createdAt": "2025-10-05T18:12:26.013Z",
     "updatedAt": "2025-10-06T20:12:26.013Z",
     "hasAIAnswer": true,
@@ -425,7 +425,7 @@
       "thesis",
       "argumentation"
     ],
-    "views": 33,
+    "views": 30,
     "createdAt": "2025-10-06T19:12:26.013Z",
     "updatedAt": "2025-10-07T21:12:26.013Z",
     "hasAIAnswer": true,

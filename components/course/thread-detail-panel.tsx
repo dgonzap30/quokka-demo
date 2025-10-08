@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { AIAnswerCard } from "@/components/course/ai-answer-card";
 import { StatusBadge } from "@/components/course/status-badge";
-import { X } from "lucide-react";
+import { X, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ThreadDetailPanelProps {
@@ -161,16 +161,18 @@ export function ThreadDetailPanel({
 
   return (
     <div className={cn("space-y-8 p-4 md:p-6 lg:p-8 max-w-full overflow-hidden", className)}>
-      {/* Mobile Close Button */}
+      {/* Back Button */}
       {onClose && (
-        <div className="lg:hidden flex justify-end">
+        <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
-            size="icon"
+            variant="glass"
+            size="sm"
             onClick={onClose}
-            aria-label="Close thread detail"
+            className="gap-2"
+            aria-label="Back to thread list"
           >
-            <X className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Threads</span>
           </Button>
         </div>
       )}

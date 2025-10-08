@@ -158,7 +158,7 @@ export function TimelineActivity({
 
             {/* Activity card */}
             <div className="flex-1 pb-4">
-              <Link href={`/threads/${activity.threadId}`}>
+              <Link href={`/courses/${activity.courseId}?thread=${activity.threadId}`}>
                 <Card variant="glass-hover" className="h-full">
                   <CardContent className="p-3">
                     <article className="space-y-2">

@@ -234,7 +234,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
             {data.unansweredQueue.length > 0 ? (
               <div className="space-y-3">
                 {data.unansweredQueue.slice(0, 5).map((thread) => (
-                  <Link key={thread.id} href={`/threads/${thread.id}`}>
+                  <Link key={thread.id} href={`/courses/${thread.courseId}?thread=${thread.id}`}>
                     <Card variant="glass-hover">
                       <CardContent className="p-4">
                         <div className="space-y-2">

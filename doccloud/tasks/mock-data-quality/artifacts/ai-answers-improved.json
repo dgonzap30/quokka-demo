@@ -1,0 +1,682 @@
+[
+  {
+    "id": "ai-answer-1",
+    "threadId": "thread-1",
+    "courseId": "course-cs101",
+    "content": "The issue in your binary search implementation is a classic off-by-one error in how you update the `left` and `right` pointers. When the target is not found at the middle position, you're setting `left = mid` and `right = mid` instead of `left = mid + 1` and `right = mid - 1`. This causes the algorithm to get stuck in an infinite loop or skip elements.\n\nHere's why this happens: After checking `arr[mid]`, you've already confirmed that position `mid` is not the target. Therefore, you need to exclude it from the next search range. If you keep including `mid` in the range (by setting `left = mid` or `right = mid`), you'll either loop forever when the array has only one element left, or you'll miss the target element.\n\nHere's the corrected version:\n\n```python\ndef binary_search(arr, target):\n    \"\"\"\n    Binary search implementation for sorted arrays.\n    Returns index of target if found, -1 otherwise.\n    \"\"\"\n    left = 0\n    right = len(arr) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2  # Find middle index\n        \n        if arr[mid] == target:\n            return mid  # Found it!\n        elif arr[mid] < target:\n            left = mid + 1  # Search right half (exclude mid)\n        else:\n            right = mid - 1  # Search left half (exclude mid)\n    \n    return -1  # Target not in array\n\n# Test with your example:\ntest_array = [1, 3, 5, 7, 9]\nresult = binary_search(test_array, 7)\nprint(f\"Found 7 at index: {result}\")  # Output: Found 7 at index: 3\n```\n\nLet's trace through the corrected version with your example `[1, 3, 5, 7, 9]` searching for 7:\n\n**Iteration 1:** left=0, right=4, mid=2, arr[2]=5 < 7 → left = 3\n**Iteration 2:** left=3, right=4, mid=3, arr[3]=7 == 7 → return 3 ✓\n\nThe key difference: when `arr[mid] < target`, we set `left = mid + 1` (not `left = mid`), which correctly moves the search range to exclude the middle element we already checked. The same logic applies when updating `right`.\n\nCommon mistake pattern: Many students forget to add/subtract 1 because the textbook pseudocode sometimes uses different conventions. Always remember that once you've checked `arr[mid]`, you know it's not the target, so exclude it from the next iteration. This ensures the search space shrinks by at least one element each time, guaranteeing the algorithm terminates.",
+    "confidenceLevel": "high",
+    "confidenceScore": 92,
+    "citations": [
+      {
+        "id": "cite-1-1",
+        "sourceType": "lecture",
+        "source": "Lecture 4: Binary Search Algorithm",
+        "excerpt": "Binary search maintains two pointers, left and right, defining the current search range. At each step, compute mid = (left + right) // 2 and compare arr[mid] with the target. Critical implementation detail: after comparing with arr[mid], you must exclude mid from the next search range. If arr[mid] < target, set left = mid + 1 (not left = mid). If arr[mid] > target, set right = mid - 1 (not right = mid). Failing to exclude mid causes infinite loops or incorrect results. The loop continues while left <= right, ensuring all elements are considered.",
+        "relevance": 95,
+        "link": null
+      },
+      {
+        "id": "cite-1-2",
+        "sourceType": "textbook",
+        "source": "Introduction to Algorithms - Chapter 2.3",
+        "excerpt": "The binary search algorithm divides the search space in half at each iteration. When arr[mid] is not equal to the target, we know the target cannot be at position mid, so we update our search boundaries to exclude it. Setting left = mid + 1 when arr[mid] < target ensures we search only indices greater than mid. Similarly, right = mid - 1 searches only indices less than mid. This exclusion is essential for correctness and termination.",
+        "relevance": 88,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 3,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 4,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-17T17:12:26.011Z",
+    "updatedAt": "2025-09-17T18:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-2",
+    "threadId": "thread-2",
+    "courseId": "course-cs101",
+    "content": "Recursion stops when it reaches the **base case** - a condition where the function returns a value directly without making another recursive call. In the factorial example, the base case is `n == 0` (or `n == 1`), which returns 1 without further recursion. This is not magic; it's a condition you explicitly write in your code.\n\nHere's how the call stack works for `factorial(5)`:\n\n```python\ndef factorial(n):\n    # Base case - stops the recursion\n    if n == 0:\n        return 1\n    # Recursive case - calls itself with smaller n\n    return n * factorial(n - 1)\n```\n\n**Execution trace:**\n```\nfactorial(5) = 5 * factorial(4)\n  factorial(4) = 4 * factorial(3)\n    factorial(3) = 3 * factorial(2)\n      factorial(2) = 2 * factorial(1)\n        factorial(1) = 1 * factorial(0)\n          factorial(0) = 1  ← BASE CASE, stops here\n        factorial(1) = 1 * 1 = 1  ← starts returning\n      factorial(2) = 2 * 1 = 2\n    factorial(3) = 3 * 2 = 6\n  factorial(4) = 4 * 6 = 24\nfactorial(5) = 5 * 24 = 120\n```\n\nEach function call is placed on the **call stack** (Python's memory for tracking function calls). When `factorial(0)` hits the base case and returns 1, Python pops that call off the stack and resumes `factorial(1)`, which can now multiply `1 * 1`. This continues until all calls complete.\n\n**Why we need `return n * factorial(n-1)`:**\n\nIf you wrote just `factorial(n-1)` without the `return n *` part, you'd calculate factorial(n-1) but throw away the result! The function would return `None` because there's no explicit return value. The multiplication `n *` is how each level contributes its value to the final answer.\n\nThink of it like a chain of boxes: each box contains a number (`n`) and a smaller box (`factorial(n-1)`). You can't calculate the total until you open all the boxes down to the smallest one (base case), then multiply all the numbers as you work back up.\n\n**Common pitfalls:**\n- **Forgetting the base case:** Causes infinite recursion and stack overflow\n- **Wrong base case:** Returns wrong value or doesn't stop\n- **Not returning the recursive call:** Returns `None` instead of the answer\n\nEvery recursive function needs:\n1. **Base case(s)** - when to stop\n2. **Recursive case** - how to break the problem into smaller pieces\n3. **Progress toward base case** - each call must get closer to stopping (factorial(n-1) is smaller than factorial(n))",
+    "confidenceLevel": "high",
+    "confidenceScore": 91,
+    "citations": [
+      {
+        "id": "cite-2-1",
+        "sourceType": "lecture",
+        "source": "Lecture 6: Recursion Fundamentals",
+        "excerpt": "A recursive function must have a base case - a condition where it returns a value without making another recursive call. Without a base case, recursion continues infinitely until the program crashes with a stack overflow error. The call stack stores each function invocation along with its local variables and return address. When the base case is reached, the stack 'unwinds' as each function call completes and returns its value to the caller. In factorial(n), the base case factorial(0) = 1 stops the recursion, and each level multiplies its value with the result from the recursive call.",
+        "relevance": 94,
+        "link": null
+      },
+      {
+        "id": "cite-2-2",
+        "sourceType": "textbook",
+        "source": "Python Programming - Chapter 8: Recursion",
+        "excerpt": "The call stack is a data structure that tracks active function calls. Each recursive call adds a new frame to the stack containing the function's parameters and local variables. When a function returns, its frame is popped from the stack and control returns to the calling function. This mechanism enables recursion to work correctly: each call maintains its own copy of variables, and return values propagate back through the chain of callers. The depth of recursion is limited by available stack memory.",
+        "relevance": 87,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-18T18:12:26.012Z",
+    "updatedAt": "2025-09-18T19:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-3",
+    "threadId": "thread-3",
+    "courseId": "course-cs101",
+    "content": "Based on the assignment description mentioning \"the technique we learned this week,\" you should implement this using recursion. The hint about learning recursion this week suggests the assignment is designed to practice recursive problem-solving, even though an iterative solution would work.\n\nHere's the recursive approach:\n\n```python\ndef sum_numbers(n):\n    # Base case: sum of numbers from 1 to 1 is just 1\n    if n == 1:\n        return 1\n    # Recursive case: sum(n) = n + sum(n-1)\n    return n + sum_numbers(n - 1)\n\n# Example: sum_numbers(5) = 5 + 4 + 3 + 2 + 1 = 15\n```\n\nWhile your loop solution is simpler and more efficient for this problem, recursion is a fundamental technique you'll need for more complex problems where iterative solutions aren't obvious - like tree traversal, parsing nested structures, or divide-and-conquer algorithms.\n\n**When to choose recursion over loops:**\n- Problems with naturally recursive structure (trees, graphs, nested data)\n- Divide-and-conquer algorithms (merge sort, quicksort)\n- When the recursive solution is significantly clearer than iterative\n- Mathematical definitions that are inherently recursive (fibonacci, factorials)\n\n**When to prefer loops:**\n- Simple iteration over sequences\n- Performance-critical code (recursion has overhead)\n- Deep recursion that might exceed stack limits\n\nFor this assignment, use recursion to practice the concept, but in real-world code, the loop version would typically be preferred for simple summation. You might also want to consider the mathematical formula: sum(n) = n*(n+1)/2, which is O(1) and doesn't need loops or recursion at all!",
+    "confidenceLevel": "medium",
+    "confidenceScore": 72,
+    "citations": [
+      {
+        "id": "cite-3-1",
+        "sourceType": "slides",
+        "source": "Week 4 Slides: When to Use Recursion",
+        "excerpt": "Recursion is most appropriate when a problem can be naturally broken into smaller instances of the same problem. While any recursive solution can be converted to iteration, recursive solutions often provide clearer, more elegant code for problems with recursive structure like tree traversal or divide-and-conquer algorithms. For simple iteration, loops are typically preferred due to better performance and lower memory usage.",
+        "relevance": 75,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-19T19:12:26.012Z",
+    "updatedAt": "2025-09-19T20:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-4",
+    "threadId": "thread-4",
+    "courseId": "course-cs101",
+    "content": "The segmentation fault is caused by an **array index out of bounds error**. In C, an array with 10 elements has valid indices 0 through 9, not 0 through 10. When you use `i <= 10` in your loop condition, `i` reaches 10, and accessing `arr[10]` writes to memory that doesn't belong to your array, causing the crash.\n\nHere's the corrected code:\n\n```c\n#include <stdio.h>\n\nint main() {\n    int arr[10];\n    \n    // Read 10 integers - indices 0 through 9\n    for (int i = 0; i < 10; i++) {  // Changed from i <= 10\n        scanf(\"%d\", &arr[i]);\n    }\n    \n    // Print in reverse - start at index 9, end at 0\n    for (int i = 9; i >= 0; i--) {  // Changed from i = 10\n        printf(\"%d \", arr[i]);\n    }\n    printf(\"\\n\");\n    \n    return 0;\n}\n```\n\n**What changed:**\n1. **First loop:** `i < 10` instead of `i <= 10` - this ensures `i` ranges from 0 to 9 (10 iterations)\n2. **Second loop:** start at `i = 9` instead of `i = 10` - the last valid index is 9, not 10\n\n**Why this causes a segmentation fault:**\nWhen you declare `int arr[10]`, C allocates exactly 40 bytes of memory (10 integers × 4 bytes each). The valid indices are:\n- `arr[0]` - first element\n- `arr[1]` through `arr[8]` - middle elements  \n- `arr[9]` - last element\n- `arr[10]` - **INVALID** - this memory location doesn't belong to your array!\n\nAccessing `arr[10]` is called a **buffer overflow**. You're reading or writing memory beyond your array's allocated space. This memory might belong to other variables, the stack, or the operating system. The OS detects this illegal access and terminates your program with \"Segmentation fault.\"\n\n**Debugging tips:**\n1. **Array size N means indices 0 to N-1** - this is fundamental to C/C++ programming\n2. Use `i < N` for loops, not `i <= N`\n3. Last valid index is `N-1`, so reverse iteration starts at `N-1`\n4. Use tools like Valgrind to detect memory errors: `valgrind ./your_program`\n5. Enable compiler warnings: `gcc -Wall -Wextra` will catch some of these issues\n\nRemember: C doesn't check array bounds at runtime (unlike Python or Java). It's your responsibility to ensure indices are valid. Off-by-one errors like this are extremely common in C programming, so always double-check your loop conditions!",
+    "confidenceLevel": "high",
+    "confidenceScore": 93,
+    "citations": [
+      {
+        "id": "cite-4-1",
+        "sourceType": "lecture",
+        "source": "Lecture 8: Arrays and Pointers in C",
+        "excerpt": "In C, an array of size N has valid indices from 0 to N-1. The declaration int arr[10] allocates space for exactly 10 elements: arr[0] through arr[9]. Accessing arr[10] or any index >= N results in undefined behavior - typically a segmentation fault. C performs no runtime bounds checking; it's the programmer's responsibility to ensure all array accesses use valid indices. The most common mistake is using <= N in loop conditions instead of < N, causing off-by-one errors that write beyond the array bounds.",
+        "relevance": 96,
+        "link": null
+      },
+      {
+        "id": "cite-4-2",
+        "sourceType": "textbook",
+        "source": "C Programming: A Modern Approach - Chapter 12",
+        "excerpt": "Buffer overflows occur when a program writes data beyond the boundaries of allocated memory. In the case of arrays, this happens when accessing an element at an invalid index. A segmentation fault (also called access violation) is the operating system's protection mechanism - it detects that your program attempted to access memory it doesn't own and terminates it. To avoid these errors, always ensure loop bounds use < size rather than <= size for zero-indexed arrays.",
+        "relevance": 89,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-20T20:12:26.012Z",
+    "updatedAt": "2025-09-20T21:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-5",
+    "threadId": "thread-5",
+    "courseId": "course-cs101",
+    "content": "For this course, follow **PEP 8**, Python's official style guide, which recommends specific naming conventions for different programming constructs. Here's what you should use:\n\n**For local variables and function parameters:** Use `snake_case` (lowercase with underscores)\n```python\nuser_name = \"Alice\"\ntotal_count = 42\nmax_retry_attempts = 3\n```\n\n**For function names:** Also use `snake_case`\n```python\ndef calculate_total(items):\n    return sum(items)\n\ndef get_user_input():\n    return input(\"Enter name: \")\n```\n\n**For class names:** Use `PascalCase` (capitalize first letter of each word, no underscores)\n```python\nclass StudentRecord:\n    pass\n\nclass BankAccount:\n    pass\n```\n\n**For constants:** Use `UPPER_CASE_WITH_UNDERSCORES`\n```python\nMAX_CONNECTIONS = 100\nPI = 3.14159\nDEFAULT_TIMEOUT = 30\n```\n\nThe textbook inconsistency you noticed is likely because different chapters cover different languages or older Python conventions. In Python 3, snake_case is standard for variables and functions, while PascalCase is reserved for classes.\n\n**Quick reference:**\n- `snake_case` → variables, functions, methods\n- `PascalCase` → classes\n- `UPPER_SNAKE_CASE` → constants\n- `_leading_underscore` → internal/private variables (advanced topic)\n\nFor your assignments, stick to these rules and your code will be consistent with professional Python standards. The autograder and instructors will appreciate the clean, readable code!",
+    "confidenceLevel": "medium",
+    "confidenceScore": 68,
+    "citations": [
+      {
+        "id": "cite-5-1",
+        "sourceType": "reading",
+        "source": "PEP 8 Style Guide Summary (Course Reading)",
+        "excerpt": "Python follows specific naming conventions outlined in PEP 8. Function names and variable names should be lowercase with words separated by underscores (snake_case). Class names should use CapWords convention (PascalCase). Constants should be all uppercase with underscores separating words. Following these conventions makes code more readable and helps other Python developers understand your code structure at a glance.",
+        "relevance": 71,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-21T21:12:26.012Z",
+    "updatedAt": "2025-09-21T22:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-6",
+    "threadId": "thread-6",
+    "courseId": "course-cs201",
+    "content": "Binary search is O(log n) because it **eliminates half of the remaining elements** with each comparison, while a normal linear search checks elements one by one. This halving property is what makes it logarithmic rather than linear.\n\nLet's see why halving leads to O(log n): If you have an array of 16 elements, binary search needs at most 4 comparisons:\n- Compare with middle (position 8) → eliminate 8 elements\n- Compare with middle of remaining half (4 elements) → eliminate 4 elements  \n- Compare with middle of remaining half (2 elements) → eliminate 2 elements\n- Compare with last remaining element → done\n\n4 comparisons for 16 elements. Notice that 2^4 = 16, so log₂(16) = 4.\n\n**General pattern:** For n elements, binary search needs at most log₂(n) comparisons because:\n- Each step divides the search space by 2\n- You can only divide by 2 about log₂(n) times before reaching 1 element\n- This is the **inverse relationship** of exponential growth\n\n**Why normal search is O(n):**\nLinear search checks elements sequentially: position 0, then 1, then 2, etc. In the worst case, your target is at the end or not present, requiring n comparisons. It doesn't eliminate half the array - it eliminates one element at a time.\n\n**Binary search visualization for n=1024:**\n- Iteration 1: search space = 1024 → 512 (check middle)\n- Iteration 2: search space = 512 → 256\n- Iteration 3: search space = 256 → 128\n- ...\n- Iteration 10: search space = 2 → 1\n\nOnly 10 comparisons for 1024 elements! (log₂ 1024 = 10)\n\n**Regarding your second question:** A loop with `range(0, n, 2)` is still O(n). In Big O notation, we drop constant factors - O(n/2) simplifies to O(n). Why? Because Big O describes how the algorithm **scales** as n grows large. Whether it takes n steps or n/2 steps, both grow proportionally with n. The difference between O(n) and O(log n) is much more significant:\n\n- O(n): 1,000,000 elements → ~1,000,000 operations\n- O(n/2): 1,000,000 elements → ~500,000 operations (still linear)\n- O(log n): 1,000,000 elements → ~20 operations (logarithmic)\n\nThe /2 constant factor matters in practice but not for Big O classification. We only care about the growth rate: linear vs logarithmic vs quadratic, etc.",
+    "confidenceLevel": "high",
+    "confidenceScore": 90,
+    "citations": [
+      {
+        "id": "cite-6-1",
+        "sourceType": "lecture",
+        "source": "Lecture 3: Asymptotic Analysis and Big O",
+        "excerpt": "Logarithmic time complexity O(log n) occurs when an algorithm repeatedly divides the problem size by a constant factor. Binary search exemplifies this: each comparison eliminates half the search space, so the maximum number of comparisons is log₂(n). For n = 1,000,000 elements, binary search requires at most 20 comparisons. In contrast, linear search O(n) checks elements sequentially and may require all n comparisons. Big O notation ignores constant factors, so O(n/2) = O(n), but O(log n) represents a fundamentally different growth rate.",
+        "relevance": 94,
+        "link": null
+      },
+      {
+        "id": "cite-6-2",
+        "sourceType": "textbook",
+        "source": "Algorithm Design - Chapter 4: Complexity Analysis",
+        "excerpt": "The key to understanding logarithmic complexity is recognizing the halving pattern. If you can eliminate half of the remaining work at each step, the total steps needed is proportional to log₂(n). This is why binary search on a sorted array is so efficient compared to linear search. As n doubles, binary search only needs one additional comparison, while linear search needs twice as many comparisons. Constants and lower-order terms are dropped in Big O notation because they become insignificant as n approaches infinity.",
+        "relevance": 86,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-22T22:12:26.012Z",
+    "updatedAt": "2025-09-22T23:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-7",
+    "threadId": "thread-7",
+    "courseId": "course-cs201",
+    "content": "For your phone book assignment requiring both fast lookups AND sorted iteration, use a **hash table (dictionary) for the primary storage** and generate the sorted view when needed for printing. This is the most practical approach given the requirements.\n\n```python\nclass PhoneBook:\n    def __init__(self):\n        self.contacts = {}  # Hash table for O(1) lookups\n    \n    def add_contact(self, name, number):\n        self.contacts[name] = number  # O(1)\n    \n    def lookup(self, name):\n        return self.contacts.get(name)  # O(1)\n    \n    def print_all(self):\n        # Sort only when printing - O(n log n)\n        for name in sorted(self.contacts.keys()):\n            print(f\"{name}: {self.contacts[name]}\")\n```\n\n**Why this works:**\n- Lookups are O(1) using the hash table - fast for frequent operations\n- Sorting happens only when printing - the cost is O(n log n), but you only pay it when displaying\n- If printing is rare compared to lookups, this is optimal\n\n**Alternative: Maintain both structures**\nIf you need frequent sorted iteration, maintain both a dictionary and a sorted list:\n\n```python\nfrom bisect import insort\n\nclass PhoneBook:\n    def __init__(self):\n        self.contacts = {}          # For O(1) lookup\n        self.sorted_names = []      # For sorted iteration\n    \n    def add_contact(self, name, number):\n        self.contacts[name] = number\n        if name not in self.sorted_names:\n            insort(self.sorted_names, name)  # Keep sorted\n```\n\nThis gives O(1) lookup and O(n) sorted iteration, but adds memory overhead and O(log n) insertion cost.\n\n**To answer your question about a single structure:** There's no standard data structure that provides both O(1) lookup and sorted iteration. Balanced binary search trees (like TreeMap in Java) give O(log n) lookup with sorted iteration, which is a middle ground. In Python, you'd need to use an external library for this.\n\nFor your assignment, the first approach (hash table + sort when printing) is clearest and most Pythonic. Unless printing happens very frequently, the O(n log n) sorting cost is acceptable.",
+    "confidenceLevel": "high",
+    "confidenceScore": 88,
+    "citations": [
+      {
+        "id": "cite-7-1",
+        "sourceType": "lecture",
+        "source": "Lecture 6: Hash Tables and Trade-offs",
+        "excerpt": "Hash tables provide O(1) average-case lookup, insertion, and deletion, making them ideal for dictionary-like data structures. However, they don't maintain any ordering of keys. When you need both fast lookup and ordered traversal, you have two options: use a hash table and sort when needed, or maintain dual data structures. The best choice depends on your access patterns. If lookups are frequent and sorted iteration is rare, pay the sorting cost only when iterating. If both operations are frequent, maintaining both structures may be worth the memory overhead.",
+        "relevance": 91,
+        "link": null
+      },
+      {
+        "id": "cite-7-2",
+        "sourceType": "textbook",
+        "source": "Data Structures - Chapter 9: Hash Tables",
+        "excerpt": "Hash tables excel at fast lookups but don't preserve insertion order or maintain sorted keys. Sorted arrays allow binary search (O(log n) lookup) and trivial sorted iteration, but have O(n) insertion cost. Balanced binary search trees offer a middle ground with O(log n) operations for both lookup and sorted traversal. Choose your data structure based on which operations are most frequent in your application. Python's built-in dict is implemented as a hash table, prioritizing lookup speed over order.",
+        "relevance": 84,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-23T23:12:26.012Z",
+    "updatedAt": "2025-09-24T00:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-8",
+    "threadId": "thread-8",
+    "courseId": "course-cs201",
+    "content": "For simply checking if a path exists (not finding the shortest path), both DFS and BFS work correctly and the autograder accepts both. However, they have different characteristics that matter in other contexts.\n\n**Your DFS implementation is fine for this lab.** It correctly finds whether a path exists using recursion and a visited set to avoid cycles.\n\n**When BFS is better:**\nIf you needed to find the **shortest path** (minimum number of edges), BFS is the correct choice because it explores nodes level-by-level, guaranteeing the first path found is shortest.\n\n```python\nfrom collections import deque\n\ndef shortest_path_bfs(graph, start, end):\n    queue = deque([(start, [start])])  # Store node and path\n    visited = {start}\n    \n    while queue:\n        node, path = queue.popleft()\n        if node == end:\n            return path  # First path found is shortest\n        \n        for neighbor in graph[node]:\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append((neighbor, path + [neighbor]))\n    \n    return None  # No path exists\n```\n\n**Key differences:**\n- **DFS:** Explores deep first, uses less memory (recursion stack or explicit stack), may find long paths before short ones\n- **BFS:** Explores level-by-level, uses more memory (queue), guarantees shortest path in unweighted graphs\n\n**For your lab:** Since you only need to check if a path exists (returns True/False), both algorithms are equally valid. The choice between them typically matters when you need:\n- Shortest path → BFS\n- Detect cycles → DFS  \n- Topological sorting → DFS\n- Minimum spanning tree → Either can work\n\nYour DFS solution is correct and appropriate for the assignment. Understanding when each algorithm is better will help in future problems!",
+    "confidenceLevel": "medium",
+    "confidenceScore": 74,
+    "citations": [
+      {
+        "id": "cite-8-1",
+        "sourceType": "slides",
+        "source": "Lab 7: Graph Traversal Algorithms",
+        "excerpt": "Both DFS and BFS can determine if a path exists between two nodes. DFS explores as deep as possible before backtracking, while BFS explores all neighbors at the current depth before moving deeper. For unweighted graphs, BFS guarantees the shortest path because it explores nodes in order of increasing distance from the start. DFS makes no such guarantee but may use less memory. When only testing for path existence, either algorithm is acceptable.",
+        "relevance": 78,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-25T00:12:26.012Z",
+    "updatedAt": "2025-09-25T01:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-9",
+    "threadId": "thread-9",
+    "courseId": "course-cs201",
+    "content": "The key to identifying what to memoize in dynamic programming is recognizing **overlapping subproblems** - smaller instances of the same problem that you solve multiple times. For Fibonacci, notice that `fib(5)` calls `fib(4)` and `fib(3)`, but `fib(4)` also calls `fib(3)`. This means `fib(3)` is computed twice, and this redundancy grows exponentially.\n\n**General strategy for identifying subproblems to cache:**\n\n1. **Look at the recursive calls:** What parameters change in each recursive call? Those parameters define your subproblems. In Fibonacci, the parameter is `n`, so subproblems are `fib(0)`, `fib(1)`, ..., `fib(n)`.\n\n2. **Draw the recursion tree:** Visualize which subproblems appear multiple times. Any repeated subproblem is a candidate for memoization.\n\n3. **Identify the state:** The \"state\" is the set of parameters that uniquely identify a subproblem. For Fibonacci: just `n`. For knapsack: typically `(item_index, remaining_capacity)`.\n\nFor the knapsack problem, you're deciding for each item whether to include it or not. The subproblems are:\n- \"Maximum value using items 0..i with capacity c\"\n- State: `(i, c)` - which items you've considered and how much capacity remains\n- Memoize: results for each `(i, c)` pair\n\n**Pattern recognition:**\nMost DP problems follow one of these patterns:\n- **Choice at each step:** Knapsack (include/exclude), coin change (use/don't use coin)\n- **Optimal substructure:** Shortest path, edit distance\n- **Counting:** Ways to climb stairs, ways to partition\n\nIf you can express the solution as combining solutions to smaller instances of the same problem, and those instances repeat, you've found a DP problem. The parameters that change in your recursion define what to cache.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 70,
+    "citations": [
+      {
+        "id": "cite-9-1",
+        "sourceType": "reading",
+        "source": "Dynamic Programming Problem-Solving Guide",
+        "excerpt": "Identifying overlapping subproblems requires analyzing your recursive solution to see which function calls repeat with the same arguments. The parameters that change between recursive calls define the state space - these are what you memoize. For a knapsack with n items and capacity W, the state is (current_item_index, remaining_capacity), giving you an n×W table to fill. Drawing the recursion tree helps visualize which subproblems are computed multiple times.",
+        "relevance": 72,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-26T01:12:26.012Z",
+    "updatedAt": "2025-09-26T02:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-10",
+    "threadId": "thread-10",
+    "courseId": "course-cs201",
+    "content": "The left-right (and right-left) double rotation cases are needed because a single rotation can't fix certain imbalance configurations. Let me explain why with a visual example.\n\n**Why two rotations are needed:**\n\nWhen you have a \"zig-zag\" pattern (left-right or right-left), a single rotation doesn't reduce the height properly. The double rotation essentially \"straightens\" the zig-zag first, then performs the balancing rotation.\n\n**Identifying which case you're in:**\n\nCheck the balance factors of both the unbalanced node and its taller child:\n\n```python\ndef get_balance(node):\n    if not node:\n        return 0\n    return height(node.left) - height(node.right)\n\ndef rebalance(node):\n    balance = get_balance(node)\n    \n    # Left heavy (balance > 1)\n    if balance > 1:\n        if get_balance(node.left) < 0:  # Left-Right case\n            node.left = rotate_left(node.left)  # First rotation\n            return rotate_right(node)            # Second rotation\n        else:  # Left-Left case\n            return rotate_right(node)            # Single rotation\n    \n    # Right heavy (balance < -1)\n    if balance < -1:\n        if get_balance(node.right) > 0:  # Right-Left case\n            node.right = rotate_right(node.right)  # First rotation\n            return rotate_left(node)               # Second rotation\n        else:  # Right-Right case\n            return rotate_left(node)               # Single rotation\n    \n    return node  # Already balanced\n```\n\n**The four cases:**\n1. **Left-Left:** node's left child is left-heavy → single right rotation\n2. **Left-Right:** node's left child is right-heavy → rotate left child left, then rotate node right\n3. **Right-Right:** node's right child is right-heavy → single left rotation  \n4. **Right-Left:** node's right child is left-heavy → rotate right child right, then rotate node left\n\nThe key insight: check the balance factor of the taller child. If it has the opposite sign from the parent's imbalance, you need a double rotation.\n\nFor Practice Problem 6, identify which subtree caused the imbalance and check its balance factor to determine if it's a straight line (single rotation) or zig-zag (double rotation) pattern.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 67,
+    "citations": [
+      {
+        "id": "cite-10-1",
+        "sourceType": "textbook",
+        "source": "Data Structures - Chapter 12: Balanced Trees",
+        "excerpt": "AVL tree rotations restore balance after insertions or deletions. Single rotations handle left-left and right-right cases where the path from root to inserted node goes in one direction. Double rotations (left-right and right-left) handle zig-zag patterns. To identify the case, examine the balance factor of the unbalanced node's taller child: if the signs match, use single rotation; if opposite, use double rotation. The first rotation in a double rotation straightens the zig-zag pattern.",
+        "relevance": 71,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-27T02:12:26.012Z",
+    "updatedAt": "2025-09-27T03:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-11",
+    "threadId": "thread-11",
+    "courseId": "course-math221",
+    "content": "Integration by parts is used when integrating a product of two functions where standard techniques won't work. The formula ∫u dv = uv - ∫v du transforms a difficult integral into a simpler one by strategically choosing which part to differentiate (u) and which to integrate (dv).\n\nThe key to choosing u and dv effectively is the **LIATE priority rule**: **L**ogarithmic, **I**nverse trigonometric, **A**lgebraic, **T**rigonometric, **E**xponential. Choose u as the function that appears earliest in this list, and let the remaining part be dv. This ordering ensures that du (the derivative of u) is simpler than u, making the resulting integral ∫v du easier to solve.\n\nFor your problem ∫ x·ln(x) dx:\n\n**Step 1:** Apply LIATE to choose u and dv\n- We have an algebraic function (x) and a logarithmic function (ln(x))\n- Logarithmic comes before algebraic in LIATE\n- Therefore: **u = ln(x)** and **dv = x dx**\n\n**Step 2:** Find du and v\n- du = (1/x) dx  (derivative of ln(x))\n- v = x²/2  (antiderivative of x)\n\n**Step 3:** Apply the integration by parts formula\n∫ x·ln(x) dx = uv - ∫v du\n              = ln(x)·(x²/2) - ∫(x²/2)·(1/x) dx\n              = (x²/2)ln(x) - ∫(x/2) dx\n              = (x²/2)ln(x) - x²/4 + C\n              = (x²/4)(2ln(x) - 1) + C\n\n**Why this choice works:**\nThe derivative of ln(x) is 1/x, which simplifies when multiplied by v = x²/2, giving us x/2 - a simple algebraic expression we can integrate easily. If we had chosen u = x and dv = ln(x) dx instead, we'd need to integrate ln(x), which gives x·ln(x) - x (also requires integration by parts!), and the problem becomes more complex rather than simpler.\n\n**LIATE in action:**\nThe LIATE rule works because:\n- Logarithmic and inverse trig functions become algebraic when differentiated (simpler)\n- Algebraic functions decrease in degree when differentiated (simpler)  \n- Trig functions stay trig when differentiated (same complexity)\n- Exponential functions stay exponential (same complexity)\n\nBy choosing u from earlier in LIATE, you ensure du is simpler than u, making progress toward a solvable integral. This is not a rigid rule but a reliable heuristic that works for most integration by parts problems you'll encounter.",
+    "confidenceLevel": "high",
+    "confidenceScore": 91,
+    "citations": [
+      {
+        "id": "cite-11-1",
+        "sourceType": "lecture",
+        "source": "Lecture 8: Integration by Parts",
+        "excerpt": "Integration by parts derives from the product rule for differentiation. The formula ∫u dv = uv - ∫v du requires strategic choice of u and dv. The LIATE acronym (Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential) provides a hierarchy for choosing u: select u as the function appearing earliest in LIATE. This ensures the derivative du is simpler than the original u, transforming the integral into a more tractable form. For ∫x·ln(x)dx, choose u = ln(x) because logarithmic precedes algebraic in LIATE.",
+        "relevance": 94,
+        "link": null
+      },
+      {
+        "id": "cite-11-2",
+        "sourceType": "textbook",
+        "source": "Calculus: Early Transcendentals - Section 7.1",
+        "excerpt": "The integration by parts formula ∫u dv = uv - ∫v du is particularly useful when integrating products like x·ln(x), x²·sin(x), or eˣ·cos(x). Success depends on choosing u such that its derivative du simplifies the problem. For products involving logarithms or inverse trigonometric functions, these should typically be chosen as u since their derivatives are algebraic expressions. The resulting integral ∫v du should be simpler than the original integral.",
+        "relevance": 87,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-22T17:12:26.012Z",
+    "updatedAt": "2025-09-22T18:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-12",
+    "threadId": "thread-12",
+    "courseId": "course-math221",
+    "content": "Yes, u-substitution is essentially the chain rule applied in reverse (also called the reverse chain rule). The course materials suggest that recognizing this relationship helps identify when to use substitution.\n\nFor ∫ 2x·cos(x²) dx, you correctly identified u = x², which gives du = 2x dx - exactly what appears in the integrand. This \"perfect match\" is what makes substitution work cleanly.\n\n**When the substitution doesn't match perfectly:**\nFor ∫ x·cos(x²) dx, you have du = 2x dx but only x dx in the integrand. You can still use substitution by introducing a constant:\n\n- u = x²  \n- du = 2x dx\n- Therefore: x dx = (1/2) du\n\nThe integral becomes:\n∫ x·cos(x²) dx = ∫ cos(u)·(1/2) du = (1/2)∫ cos(u) du = (1/2)sin(u) + C = (1/2)sin(x²) + C\n\nYou can \"adjust\" by constant factors. If you have 2x dx but need x dx, multiply by 1/2. If you have x dx but need 3x dx, you can't fix it with substitution alone (you'd need a different technique).\n\n**General rule:** U-substitution works when you can express dx in terms of du using only constant multiplication. If the substitution requires variable adjustments, you'll need integration by parts or another technique instead.\n\nNot every composite function integral can be solved with u-substitution - only those where the derivative of the inner function (or a constant multiple of it) appears in the integrand.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 73,
+    "citations": [
+      {
+        "id": "cite-12-1",
+        "sourceType": "slides",
+        "source": "Chapter 5 Slides: U-Substitution Techniques",
+        "excerpt": "U-substitution is the reverse of the chain rule. When you see a composite function f(g(x)) in an integral, look for g'(x) (or a constant multiple) elsewhere in the integrand. If present, substitute u = g(x) and du = g'(x)dx. You can adjust by constant factors: if you have 2g'(x) but need g'(x), multiply by 1/2. Variable adjustments require different techniques like integration by parts.",
+        "relevance": 76,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-22T18:12:26.012Z",
+    "updatedAt": "2025-09-22T19:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-13",
+    "threadId": "thread-13",
+    "courseId": "course-math221",
+    "content": "For the series Σ(n=1 to ∞) n²/eⁿ, the **ratio test** is an excellent choice because you have both a polynomial (n²) and an exponential (eⁿ). The ratio test handles this combination well.\n\nYour work was correct: computing lim(n→∞) |aₙ₊₁/aₙ| gives 0 < 1, so the series converges. You could also use the limit comparison test (comparing with Σ1/eⁿ, a convergent geometric series), but the ratio test is more direct here.\n\n**General decision strategy:**\n\n1. **Ratio Test** - Use when you see factorials (n!), exponentials (eⁿ, 2ⁿ), or powers of n (nⁿ)\n2. **Root Test** - Use when the general term is raised to the nth power: (expression)ⁿ\n3. **Comparison/Limit Comparison** - Use when the series resembles a known convergent/divergent series (geometric, p-series)\n4. **Integral Test** - Use when you can easily integrate the function  \n5. **Alternating Series Test** - Use for series with alternating signs: Σ(-1)ⁿaₙ\n6. **p-Series Test** - Direct application for Σ1/nᵖ\n\n**When ratio test gives limit = 1:**\nThe test is inconclusive. This often happens with p-series-like terms. Try:\n- **Comparison test** with a known series\n- **Limit comparison test** (more flexible than direct comparison)\n- **Integral test** if the function is integrable\n\nFor example, Σ1/n² converges (p-series with p=2>1), but the ratio test gives limit=1 (inconclusive). You'd use the p-series test or integral test instead.\n\nThere's no single \"decision tree\" that works for every series, but with practice you'll recognize patterns. The course materials recommend trying the ratio test first for most series involving exponentials or factorials, then falling back to comparison tests if that's inconclusive.",
+    "confidenceLevel": "high",
+    "confidenceScore": 87,
+    "citations": [
+      {
+        "id": "cite-13-1",
+        "sourceType": "lecture",
+        "source": "Lecture 11: Convergence Tests Strategy",
+        "excerpt": "When selecting a convergence test, examine the general term's structure. Exponentials and factorials suggest the ratio test. Nth powers suggest the root test. Terms resembling 1/nᵖ suggest comparison or p-series test. If the ratio or root test yields L=1, the test is inconclusive and you must try another method. For Σn²/eⁿ, the ratio test works well because the exponential dominates the polynomial, giving limit 0. No single test works for all series - develop pattern recognition through practice.",
+        "relevance": 89,
+        "link": null
+      },
+      {
+        "id": "cite-13-2",
+        "sourceType": "textbook",
+        "source": "Calculus - Chapter 10.5: Convergence Tests",
+        "excerpt": "The ratio test computes L = lim(n→∞)|aₙ₊₁/aₙ|. If L<1, the series converges absolutely. If L>1 or L=∞, the series diverges. If L=1, the test is inconclusive - the series might converge or diverge. The ratio test is particularly effective for series involving exponential functions or factorials because these terms dominate in the limit. When inconclusive, try comparison tests, the integral test, or examine whether the series is alternating.",
+        "relevance": 85,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-23T19:12:26.012Z",
+    "updatedAt": "2025-09-23T20:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-14",
+    "threadId": "thread-14",
+    "courseId": "course-math221",
+    "content": "Your algebra and approach are actually correct! Let me verify: you found A = 14/5 and B = 1/5. Let's check if this works:\n\n(14/5)/(x-3) + (1/5)/(x+2) = [(14/5)(x+2) + (1/5)(x-3)] / [(x-3)(x+2)]\n                             = [14x/5 + 28/5 + x/5 - 3/5] / [(x-3)(x+2)]\n                             = [(14x + x)/5 + (28 - 3)/5] / [(x-3)(x+2)]\n                             = [15x/5 + 25/5] / [(x-3)(x+2)]\n                             = [3x + 5] / [(x-3)(x+2)] ✓\n\nYour solution is correct! You might have made an arithmetic error when checking. Now you can integrate:\n\n∫ (3x+5)/(x²-x-6) dx = ∫ [(14/5)/(x-3) + (1/5)/(x+2)] dx\n                      = (14/5)ln|x-3| + (1/5)ln|x+2| + C\n                      = (1/5)[14ln|x-3| + ln|x+2|] + C\n\nThe technique you used (substituting x=3 and x=-2 to solve for A and B) is exactly right - these are the roots of the denominator, which make one of the terms vanish and allow you to solve for the coefficients directly.\n\n**Common mistake when checking:** Make sure you're finding a common denominator correctly and combining fractions carefully. The arithmetic can get messy, but your method and values are correct.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 69,
+    "citations": [
+      {
+        "id": "cite-14-1",
+        "sourceType": "reading",
+        "source": "Section 7.4: Partial Fractions Method",
+        "excerpt": "Partial fraction decomposition expresses a rational function as a sum of simpler fractions. For distinct linear factors in the denominator, set up A/(x-r₁) + B/(x-r₂) + ... and solve for constants. The substitution method uses the roots of the denominator to create equations where all but one unknown vanishes. Once you have the coefficients, verify by combining the fractions back together.",
+        "relevance": 72,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-23T20:12:26.012Z",
+    "updatedAt": "2025-09-23T21:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-15",
+    "threadId": "thread-15",
+    "courseId": "course-math221",
+    "content": "The divide-by-highest-power method works for polynomial ratios but not for exponential functions because polynomials and exponentials have fundamentally different growth rates.\n\nFor polynomial ratios like (3x² + 2x)/(x² - 1), dividing by x² works because both numerator and denominator are polynomials of the same degree. The lower-degree terms (2x/x², -1/x²) vanish as x→∞, leaving just the ratio of leading coefficients: 3/1 = 3.\n\nFor (eˣ - e⁻ˣ)/(eˣ + e⁻ˣ), if you try dividing by eˣ:\n\nNumerator: (eˣ - e⁻ˣ)/eˣ = 1 - e⁻²ˣ → 1 as x→∞  \nDenominator: (eˣ + e⁻ˣ)/eˣ = 1 + e⁻²ˣ → 1 as x→∞\n\nSo you get 1/1 = 1. Actually, this does work! The limit is 1.\n\nYou can also use L'Hôpital's rule since it's ∞/∞ form:\nlim(x→∞) (eˣ - e⁻ˣ)/(eˣ + e⁻ˣ)  \nApply L'Hôpital: derivative of numerator = eˣ + e⁻ˣ, derivative of denominator = eˣ - e⁻ˣ  \nlim(x→∞) (eˣ + e⁻ˣ)/(eˣ - e⁻ˣ)... this is still ∞/∞, apply again:\nlim(x→∞) (eˣ - e⁻ˣ)/(eˣ + e⁻ˣ)... we're back where we started!\n\nThe algebraic approach (dividing by eˣ) is cleaner here. Both methods work, but for exponentials, the divide-by-highest-power method means dividing by the fastest-growing exponential term.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 66,
+    "citations": [
+      {
+        "id": "cite-15-1",
+        "sourceType": "slides",
+        "source": "Limits at Infinity - Techniques",
+        "excerpt": "For limits at infinity of rational functions, divide numerator and denominator by the highest power of x. For exponential expressions, divide by the dominant exponential term. L'Hôpital's rule applies to indeterminate forms 0/0 and ∞/∞, but repeated application may not always simplify the problem. Check whether algebraic manipulation gives a clearer path to the limit.",
+        "relevance": 70,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-24T21:12:26.012Z",
+    "updatedAt": "2025-09-24T22:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-16",
+    "threadId": "thread-16",
+    "courseId": "course-cs301",
+    "content": "This is a preliminary answer - NP-completeness proofs are advanced and the 3-SAT to SUBSET-SUM reduction is quite involved. The general approach is to encode boolean variables as numbers and clauses as target sum constraints, but the details require careful construction to ensure the reduction works correctly in polynomial time.\n\nThe course materials mention that you need to:\n1. Convert each boolean variable and clause into numeric values\n2. Construct a target sum such that a satisfying assignment for 3-SAT corresponds to a subset that sums to the target\n3. Show the reduction can be computed in polynomial time\n\nHowever, the specific encoding scheme for this reduction is not covered in detail in the available lecture notes. I recommend reviewing the textbook section on NP-completeness proofs and attending office hours to work through the construction step-by-step with the instructor. The CLIQUE→VERTEX-COVER example from lecture may provide a useful template for structuring your proof, even though the reduction mechanism is different.",
+    "confidenceLevel": "low",
+    "confidenceScore": 38,
+    "citations": [
+      {
+        "id": "cite-16-1",
+        "sourceType": "assignment",
+        "source": "Problem Set 5 - NP-Completeness",
+        "excerpt": "To prove SUBSET-SUM is NP-complete, first show it is in NP (given a subset, verify it sums to the target in polynomial time). Then reduce from a known NP-complete problem such as 3-SAT. The reduction must map instances in polynomial time such that the 3-SAT instance is satisfiable if and only if the corresponding SUBSET-SUM instance has a solution.",
+        "relevance": 52,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-27T17:12:26.012Z",
+    "updatedAt": "2025-09-27T17:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-17",
+    "threadId": "thread-17",
+    "courseId": "course-cs301",
+    "content": "The 2-approximation guarantee for the greedy vertex cover algorithm comes from a matching-based argument. The key insight is that the algorithm selects both endpoints of uncovered edges, and any valid vertex cover must include at least one endpoint from each edge the algorithm picks.\n\nHere's the intuition: when you pick an edge (u,v) and add both vertices, you're creating a **matching** (a set of edges with no shared vertices). Since any vertex cover must cover all edges in this matching, and each edge requires at least one of its endpoints in the cover, the optimal cover needs at least |matching| vertices. Your greedy algorithm uses exactly 2|matching| vertices, giving the 2-approximation.\n\nRegarding whether we can do better than factor-2: this is a deep question in computational complexity. Under certain complexity assumptions (specifically, the Unique Games Conjecture), it's believed that no polynomial-time algorithm can achieve better than 2-approximation for vertex cover. In practice, the 2-approximation is the best guaranteed bound we know for polynomial-time algorithms, though there are algorithms with better average-case performance.\n\nThe lecture notes mention this relationship between the matching and optimal cover but don't provide the full proof. For a complete understanding, you may want to review the matching-based analysis in the textbook or ask during office hours.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 71,
+    "citations": [
+      {
+        "id": "cite-17-1",
+        "sourceType": "slides",
+        "source": "Approximation Algorithms - Vertex Cover",
+        "excerpt": "The greedy vertex cover algorithm that selects both endpoints of uncovered edges achieves a 2-approximation. The analysis uses the concept of maximal matching: the selected edges form a matching, and any vertex cover must include at least one vertex per matched edge. Since the algorithm uses both endpoints, it uses at most twice the optimal number of vertices.",
+        "relevance": 74,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-25T23:12:26.012Z",
+    "updatedAt": "2025-09-26T00:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-18",
+    "threadId": "thread-18",
+    "courseId": "course-cs301",
+    "content": "Your greedy coloring implementation is correct, but as you've discovered, the order in which you process nodes significantly affects the number of colors used. This is a known limitation of greedy graph coloring algorithms.\n\nFor k-coloring with k=3, you need to determine if the graph is 3-colorable, which is actually an NP-complete problem (there's no known polynomial-time algorithm that works for all graphs). However, there are better greedy heuristics than arbitrary node ordering:\n\n**Better greedy approach:** Process nodes in decreasing order of degree (number of neighbors). Higher-degree nodes have more constraints, so coloring them first often leads to better results.\n\n```python\ndef greedy_color_by_degree(graph):\n    # Sort nodes by degree (descending)\n    nodes = sorted(graph.keys(), key=lambda n: len(graph[n]), reverse=True)\n    colors = {}\n    \n    for node in nodes:\n        neighbor_colors = {colors[n] for n in graph[node] if n in colors}\n        for color in range(len(graph)):\n            if color not in neighbor_colors:\n                colors[node] = color\n                break\n    return colors\n```\n\nThis heuristic doesn't guarantee optimal coloring, but it often performs better than arbitrary ordering. For the specific case of determining 3-colorability on your midterm problem, you might need to try different orderings or use backtracking if the greedy approach fails.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 68,
+    "citations": [
+      {
+        "id": "cite-18-1",
+        "sourceType": "reading",
+        "source": "Graph Coloring Heuristics",
+        "excerpt": "Greedy graph coloring assigns colors to vertices in sequence, using the smallest available color not used by neighbors. The number of colors used depends heavily on vertex ordering. The Welsh-Powell algorithm improves greedy coloring by processing vertices in decreasing degree order, typically achieving better results than random orderings. However, no greedy algorithm guarantees optimal coloring.",
+        "relevance": 72,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-26T00:12:26.012Z",
+    "updatedAt": "2025-09-26T01:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-19",
+    "threadId": "thread-19",
+    "courseId": "course-phys201",
+    "content": "The electric field **E** and electric potential **V** are two different but related ways to describe electric forces. Both are created by charges, but they represent different physical quantities:\n\n**Electric field E** (vector):\n- Force per unit charge: **E** = **F**/q₀\n- Tells you the force a test charge would experience at that point\n- Has direction (the direction of force on a positive charge)\n- Units: N/C (newtons per coulomb) or V/m\n\n**Electric potential V** (scalar):  \n- Potential energy per unit charge: V = U/q₀\n- Tells you the work needed to bring a test charge from infinity to that point\n- No direction (just a number)\n- Units: V (volts) or J/C\n\n**Conceptual difference:**\nThink of **E** as describing the \"push\" at each point in space, while **V** describes the \"elevation\" in an energy landscape. Just as gravity pulls objects toward lower elevation, electric fields push charges toward lower potential.\n\n**Relationship:** E = -∇V (or E = -dV/dr in one dimension)\n\nThe negative sign means **E** points from high potential to low potential - this is the direction a positive charge would naturally move.\n\n**When to use each:**\n- Use **E** when calculating forces: **F** = q**E**\n- Use **V** when calculating potential energy: U = qV\n- Use **V** when working with energy conservation (often simpler than force analysis)\n- Use **E** for field line visualization and understanding force directions\n\n**Which is more fundamental?**\nNeither is more fundamental - they're equivalent descriptions. For point charges, it's often easier to calculate V first (scalar addition) and then find **E** by differentiation, rather than doing vector addition to find **E** directly. For complex charge distributions, calculating V and then taking the gradient is usually simpler than directly computing the vector field **E**.\n\n**Example:** Near a positive point charge:\n- V is high (positive values, decreasing with distance)\n- **E** points radially outward (from high V toward low V)\n- A positive test charge would be pushed outward (following **E**), moving from high V to low V and losing potential energy",
+    "confidenceLevel": "high",
+    "confidenceScore": 89,
+    "citations": [
+      {
+        "id": "cite-19-1",
+        "sourceType": "lecture",
+        "source": "Lecture 5: Electric Potential",
+        "excerpt": "The electric field E and electric potential V are complementary descriptions of the electric force. E is a vector field giving force per unit charge, while V is a scalar field giving potential energy per unit charge. They are related by E = -∇V, meaning the electric field points in the direction of maximum potential decrease. For problem-solving, V is often easier to calculate (scalar sum) than E (vector sum). Once you have V, you can find E by taking the negative gradient. Both contain the same physical information about the electric force.",
+        "relevance": 92,
+        "link": null
+      },
+      {
+        "id": "cite-19-2",
+        "sourceType": "textbook",
+        "source": "University Physics - Chapter 23: Electric Potential",
+        "excerpt": "Electric potential V at a point is defined as the work per unit charge required to move a test charge from infinity to that point. The electric field E can be derived from the potential using E = -dV/dr (in one dimension) or E = -∇V (in three dimensions). The negative sign indicates that E points from regions of high potential to low potential. For point charge Q: V = kQ/r (scalar) and E = kQ/r² r̂ (vector). V is often more convenient for calculations because potentials from multiple charges add as scalars, not vectors.",
+        "relevance": 85,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-27T01:12:26.012Z",
+    "updatedAt": "2025-09-27T02:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-20",
+    "threadId": "thread-20",
+    "courseId": "course-phys201",
+    "content": "Kirchhoff's current law (KCL) states that the sum of currents entering a node equals the sum leaving, which is indeed based on **conservation of electric charge**. Charge cannot accumulate at a node because we assume the wires and junctions have negligible capacitance - any excess charge would create enormous electric fields that immediately push charge away.\n\nThink of current as a flow of charge (measured in coulombs per second). If 2 coulombs per second enter a junction but only 1 coulomb per second leaves, where does that extra 1 coulomb per second go? It can't pile up indefinitely at the junction point (that would violate charge conservation and create infinite charge density). Therefore, the rate of charge entering must equal the rate leaving: I_in = I_out.\n\n**Your calculation is correct:**\nAt node A: I₁ - I₂ - I₃ = 0\nWith I₁ = 2A (entering) and I₃ = 1A (leaving):\n2 - I₂ - 1 = 0  \nI₂ = 1A ✓\n\n**Sign convention:**\nYou define current directions with arrows when drawing the circuit. Currents flowing into the node get positive signs, currents flowing out get negative signs (or vice versa - just be consistent). If you don't know the actual direction of a current, just pick a direction and assign a variable. If your calculation gives a negative value, it means the actual current flows opposite to your assumed direction.\n\n**Example:**\nIf you assumed I₂ flows out but calculated I₂ = -0.5A, the actual current is 0.5A flowing **into** the node (opposite your assumption).\n\n**Why charge can't accumulate:**\nIn circuit analysis, we assume **steady-state DC conditions** where currents and voltages are constant in time. Any transient charge buildup at a node would create a voltage that drives current to balance the flow within nanoseconds. For the timescales we consider (milliseconds to seconds), nodes are always in equilibrium with zero net charge accumulation.\n\nKirchhoff's current law is essentially a restatement of \"charge is conserved\" applied to electrical circuits in steady state.",
+    "confidenceLevel": "high",
+    "confidenceScore": 90,
+    "citations": [
+      {
+        "id": "cite-20-1",
+        "sourceType": "lecture",
+        "source": "Lecture 7: Kirchhoff's Laws",
+        "excerpt": "Kirchhoff's current law (KCL) is a direct consequence of charge conservation. At any node in a circuit, the rate at which charge enters must equal the rate at which charge leaves, assuming no charge accumulation. In equation form: ΣI_in = ΣI_out, or equivalently ΣI = 0 if we use sign conventions (currents entering are positive, leaving are negative). The sign of current indicates direction: if a calculated current is negative, the actual direction is opposite to the assumed direction. In steady-state DC analysis, nodes cannot accumulate charge - any imbalance would create fields that instantly restore equilibrium.",
+        "relevance": 94,
+        "link": null
+      },
+      {
+        "id": "cite-20-2",
+        "sourceType": "textbook",
+        "source": "Fundamentals of Electric Circuits - Chapter 2",
+        "excerpt": "Kirchhoff's current law states that the algebraic sum of currents entering a node is zero. This law reflects the principle of conservation of charge: charge cannot accumulate at a point in a circuit under steady-state conditions. When applying KCL, assign reference directions to currents (usually with arrows on the circuit diagram). If the calculated value is positive, current flows in the assumed direction; if negative, it flows in the opposite direction. The choice of reference direction is arbitrary and does not affect the final answer.",
+        "relevance": 86,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 2,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 3,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-09-28T03:12:26.012Z",
+    "updatedAt": "2025-09-28T04:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-21",
+    "threadId": "thread-21",
+    "courseId": "course-phys201",
+    "content": "Based on the course materials, when a problem doesn't specify the angle, you should typically assume the magnetic field is perpendicular to the loop's surface (θ = 0°, so cos(θ) = 1), which gives maximum flux. However, the exact problem statement matters.\n\nFor Φ = B·A·cos(θ):\n- θ is the angle between the magnetic field **B** and the **normal vector** to the loop's surface\n- If the loop is in the xy-plane and B points in the z-direction, θ = 0° (perpendicular)\n- If B is parallel to the loop's surface, θ = 90° and cos(90°) = 0, giving zero flux\n\nWith your values and assuming θ = 0°:\nΦ = B·A·cos(0°) = (0.2 T)(7.85×10⁻³ m²)(1) = 1.57×10⁻³ Wb\n\n**Physical meaning of cos(θ) = 0:**\nWhen θ = 90°, the magnetic field is parallel to the loop's surface. The field lines don't \"pass through\" the loop - they run along it. Magnetic flux measures how much field passes through a surface, so parallel fields contribute zero flux. This is analogous to wind blowing parallel to a window (no air passes through) versus perpendicular (maximum airflow through).\n\nCheck if the problem diagram shows the field orientation. If not specified, assume maximum flux (θ = 0°) is likely what's intended, but note this assumption in your answer.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 64,
+    "citations": [
+      {
+        "id": "cite-21-1",
+        "sourceType": "slides",
+        "source": "Chapter 22: Magnetic Flux",
+        "excerpt": "Magnetic flux through a surface is Φ = B·A·cos(θ), where θ is the angle between the magnetic field and the surface normal. When θ = 0° (field perpendicular to surface), flux is maximum. When θ = 90° (field parallel to surface), flux is zero because field lines don't pass through the surface. Always check problem diagrams for field orientation; if unspecified, state your assumption.",
+        "relevance": 68,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-28T03:12:26.012Z",
+    "updatedAt": "2025-09-28T04:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-22",
+    "threadId": "thread-22",
+    "courseId": "course-eng101",
+    "content": "Both structures (separate literature review section vs. integrated with introduction) can be correct depending on the field, journal, or instructor preference. For your class, follow the assignment guidelines' explicit structure with a separate literature review section.\n\n**Organizing your 8 sources:**\nGroup them thematically rather than discussing each source individually. This creates a coherent narrative:\n\n**Good approach (thematic):**\n\"Several researchers have examined the impact of social media on mental health. Smith (2019) and Johnson (2020) found increased anxiety among heavy users, while Chen (2021) noted that moderate use had minimal effects. In contrast, Lee (2018) and Garcia (2020) argue that the type of content matters more than usage frequency...\"\n\n**Weak approach (source-by-source):**\n\"Smith (2019) argues that... Johnson (2020) found that... Chen (2021) discovered that...\" [Just lists sources without synthesis]\n\n**Literature review length:**\n3 pages out of 6 is too much - aim for 1.5-2 pages. The lit review should survey existing research and identify gaps your paper will address, not exhaustively summarize every source. Focus on:\n- What's known about your topic\n- What gaps or debates exist  \n- How your research fits in\n\nSave detailed discussion of your own analysis for the Discussion section. Think of the lit review as \"setting the stage\" for your contribution, not as the main performance.",
+    "confidenceLevel": "medium",
+    "confidenceScore": 70,
+    "citations": [
+      {
+        "id": "cite-22-1",
+        "sourceType": "reading",
+        "source": "Writing a Literature Review - Course Guide",
+        "excerpt": "A literature review synthesizes existing research on a topic, identifying themes, debates, and gaps. Organize by theme or concept rather than source-by-source summary. Group similar studies together and highlight where researchers agree or disagree. The review should be concise (typically 15-25% of total paper length) and focused on establishing context for your research question. Avoid excessive summary; instead, critically evaluate how sources relate to each other and to your work.",
+        "relevance": 73,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 1,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 1,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-28T04:12:26.012Z",
+    "updatedAt": "2025-09-28T05:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-23",
+    "threadId": "thread-23",
+    "courseId": "course-eng101",
+    "content": "This is a preliminary answer - specific MLA citation practices should be confirmed with your instructor or the official MLA Handbook. However, the general rule is that you don't need to cite every sentence when summarizing a single source in a paragraph.\n\n**For a paragraph summarizing one source:**\nIntroduce the source at the beginning and cite at the end of the summary:\n\n\"According to Johnson (2020), climate change significantly affects agriculture. Rising temperatures reduce crop yields, especially for wheat and rice. The effects are more severe in developing countries due to limited adaptation resources (Johnson 25).\"\n\nThe opening phrase signals you're summarizing Johnson, and the page number at the end covers the entire paragraph.\n\n**Common knowledge:**\nFacts that are widely known and appear in many sources without attribution don't need citation. \"Shakespeare wrote Romeo and Juliet\" is common knowledge. \"The average summer temperature in London increased 2°C from 1990-2020\" is specific data requiring citation.\n\n**Gray area rule:** If you learned it from a specific source while researching (even if it seems obvious now), cite it. When in doubt, cite - over-citing is better than accidental plagiarism.\n\nI recommend reviewing the MLA citation examples in your course textbook or visiting the writing center for specific guidance on your essay.",
+    "confidenceLevel": "low",
+    "confidenceScore": 41,
+    "citations": [
+      {
+        "id": "cite-23-1",
+        "sourceType": "assignment",
+        "source": "Essay Guidelines - MLA Format",
+        "excerpt": "Use in-text citations to credit sources. When paraphrasing or summarizing, include the author's name and page number. You may introduce the source at the beginning of a summary and cite at the end rather than citing every sentence. Common knowledge does not require citation, but specific facts, data, or arguments do. When uncertain whether something is common knowledge, err on the side of citation.",
+        "relevance": 56,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 0,
+    "instructorEndorsements": 0,
+    "totalEndorsements": 0,
+    "endorsedBy": [],
+    "instructorEndorsed": false,
+    "generatedAt": "2025-09-27T17:12:26.012Z",
+    "updatedAt": "2025-09-27T17:12:26.012Z"
+  },
+  {
+    "id": "ai-answer-24",
+    "threadId": "thread-24",
+    "courseId": "course-eng101",
+    "content": "Your instructor is right - this thesis is too broad and not arguable. A good thesis makes a specific, debatable claim that you'll support with evidence. Your current statement just acknowledges that social media has effects (which everyone agrees on) without taking a position.\n\n**How to narrow it:**\n\n1. **Pick one aspect:** Choose one of your topics (mental health, misinformation, connectivity, or business). Don't try to cover everything.\n\n2. **Make a specific claim:** Instead of \"has effects,\" argue for a particular position.\n\n**Weak (too broad):**\n\"Social media has both positive and negative effects.\"\n\n**Better (specific, arguable):**\n\"While social media platforms enable global connectivity, their algorithmic amplification of divisive content has significantly increased political polarization among young adults.\"\n\nOr:\n\n\"Instagram's emphasis on curated self-presentation contributes to increased anxiety and depression in teenage users, outweighing its benefits for social connection.\"\n\n**What makes a thesis arguable:**\n- Someone could reasonably disagree with it\n- It requires evidence to support (not just obvious facts)\n- It takes a position rather than stating both sides exist\n\n**Bad example (not arguable):** \"Social media exists and people use it.\" [Just a fact]\n\n**Good example (arguable):** \"Social media companies should be regulated like publishers because they actively curate content through algorithms.\" [Debatable claim]\n\nRevise your thesis to make ONE specific claim about ONE aspect of social media, then organize your 5 pages around supporting that claim with your examples.",
+    "confidenceLevel": "high",
+    "confidenceScore": 85,
+    "citations": [
+      {
+        "id": "cite-24-1",
+        "sourceType": "lecture",
+        "source": "Lecture 4: Crafting Effective Thesis Statements",
+        "excerpt": "A strong thesis statement makes a specific, arguable claim that serves as the foundation for your essay. It should be narrow enough to support in the given length and debatable enough that reasonable people could disagree. Avoid broad statements like 'X has many effects' or 'There are pros and cons.' Instead, take a clear position on one focused aspect of your topic. Your thesis should preview your argument, not just announce your topic. Think of it as your essay's answer to a specific question.",
+        "relevance": 88,
+        "link": null
+      },
+      {
+        "id": "cite-24-2",
+        "sourceType": "reading",
+        "source": "The Craft of Research - Chapter 12",
+        "excerpt": "An arguable thesis makes a claim that requires evidence and reasoning to support. It should be specific rather than general, focused rather than sprawling. A thesis that merely acknowledges multiple perspectives ('X has both positive and negative aspects') fails to take a position. Narrow your topic to one aspect you can thoroughly analyze within your page limit. Ask yourself: What specific claim am I making? What evidence supports this claim? Could someone reasonably disagree?",
+        "relevance": 81,
+        "link": null
+      }
+    ],
+    "studentEndorsements": 3,
+    "instructorEndorsements": 1,
+    "totalEndorsements": 4,
+    "endorsedBy": [],
+    "instructorEndorsed": true,
+    "generatedAt": "2025-10-06T19:12:26.012Z",
+    "updatedAt": "2025-10-07T21:12:26.012Z"
+  }
+]

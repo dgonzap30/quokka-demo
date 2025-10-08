@@ -52,7 +52,7 @@ export function ThreadCard({ thread, variant = "full", className }: ThreadCardPr
 
   return (
     <Link
-      href={`/threads/${thread.id}`}
+      href={`/courses/${thread.courseId}?thread=${thread.id}`}
       className={cn(
         "group rounded-xl focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all",
         className
