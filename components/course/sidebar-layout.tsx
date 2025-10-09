@@ -126,7 +126,7 @@ export function SidebarLayout({
   return (
     <div
       className={cn(
-        "relative h-screen w-full overflow-hidden",
+        "relative h-full w-full overflow-hidden",
         className
       )}
       data-filter-sidebar-open={isFilterSidebarOpen}
@@ -150,9 +150,9 @@ export function SidebarLayout({
         {/* Filter Sidebar (Left - 220px) */}
         <aside
           className={cn(
-            "relative h-screen overflow-hidden transition-all duration-300 ease-in-out",
+            "relative h-full overflow-hidden transition-all duration-300 ease-in-out",
             // Mobile: Fixed overlay drawer
-            "fixed left-0 top-0 z-50 w-[220px] lg:relative lg:z-0 lg:w-full",
+            "fixed left-0 top-0 z-50 w-[220px] h-screen lg:relative lg:z-0 lg:w-full lg:h-full",
             // Transform for mobile drawer
             isFilterSidebarOpen
               ? "translate-x-0"
@@ -172,7 +172,7 @@ export function SidebarLayout({
         {/* Thread List Sidebar (Middle - Always visible, responsive width) */}
         <aside
           className={cn(
-            "relative h-screen overflow-hidden transition-all duration-300 ease-in-out",
+            "relative h-full overflow-hidden transition-all duration-300 ease-in-out",
             // Always visible on all screen sizes
             "lg:w-full"
           )}
@@ -185,7 +185,7 @@ export function SidebarLayout({
         {selectedThreadId && (
           <main
             className={cn(
-              "relative h-screen overflow-y-auto sidebar-scroll",
+              "relative h-full overflow-y-auto sidebar-scroll",
               "transition-all duration-300 ease-in-out"
             )}
             aria-label="Thread content"

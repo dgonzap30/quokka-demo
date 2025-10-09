@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen overflow-hidden flex flex-col`}>
         {/* Enhanced Liquid Glass Background */}
         <div className="fixed inset-0 -z-10 bg-gradient-to-br from-neutral-50 via-primary/5 to-secondary/5 dark:from-neutral-950 dark:via-primary-950/10 dark:to-secondary-950/10 overflow-hidden">
           {/* Noise texture overlay */}
@@ -65,7 +65,9 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <NavHeader />
           </Suspense>
-          {children}
+          <main className="flex-1 overflow-y-auto sidebar-scroll relative">
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

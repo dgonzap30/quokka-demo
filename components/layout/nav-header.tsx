@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCurrentUser, useLogout, useCourse } from "@/lib/api/hooks";
 import { GlobalNavBar } from "@/components/layout/global-nav-bar";
@@ -21,26 +21,6 @@ export function NavHeader() {
   // Fetch course data (hook must be called unconditionally, before early returns)
   const { data: course } = useCourse(navContext.courseId);
 
-  // Scroll state for shadow effect and progress bar
-  const [hasScrolled, setHasScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  // Track scroll position for shadow effect and progress calculation
-  useEffect(() => {
-    const handleScroll = () => {
-      const sy = window.scrollY;
-      const h = document.documentElement.scrollHeight - window.innerHeight;
-
-      setHasScrolled(sy > 8);
-      setScrollProgress(h > 0 ? Math.min(100, Math.max(0, (sy / h) * 100)) : 0);
-    };
-
-    // Initial calculation
-    handleScroll();
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Don't show nav on auth pages
   if (pathname?.startsWith("/login") || pathname?.startsWith("/signup")) {
@@ -92,8 +72,6 @@ export function NavHeader() {
           href: `/courses/${course.id}`,
         } : undefined}
         onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
-        hasScrolled={hasScrolled}
-        scrollProgress={scrollProgress}
       />
 
       {/* Course Context Bar (Row 2) - Only in course pages */}
@@ -105,7 +83,7 @@ export function NavHeader() {
           term={course.term}
           studentCount={course.enrollmentCount}
           hasAiCoverage={false}
-          isCompact={hasScrolled}
+          isCompact={false}
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />

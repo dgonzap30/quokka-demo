@@ -35,12 +35,6 @@ export interface GlobalNavBarProps {
   /** Optional Ask Question handler (for course context) */
   onAskQuestion?: () => void;
 
-  /** Whether nav has scrolled (for shadow effect) */
-  hasScrolled?: boolean;
-
-  /** Scroll progress percentage (0-100) for progress bar */
-  scrollProgress?: number;
-
   /** Optional className for composition */
   className?: string;
 }
@@ -50,25 +44,15 @@ export function GlobalNavBar({
   onLogout,
   breadcrumb,
   onAskQuestion,
-  hasScrolled = false,
-  scrollProgress = 0,
   className,
 }: GlobalNavBarProps) {
   const router = useRouter();
 
   return (
     <>
-      {/* Scroll Progress Bar */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed left-0 top-0 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 z-[60] transition-all duration-200"
-        style={{ width: `${scrollProgress}%` }}
-      />
-
       <nav
         className={cn(
-          "sticky top-0 z-50 w-full glass-panel-strong border-b border-glass transition-shadow duration-200",
-          hasScrolled && "shadow-[var(--shadow-glass-md)]",
+          "fixed top-0 z-50 w-full glass-panel-strong border-b border-glass shadow-[var(--shadow-glass-md)] transition-shadow duration-200",
           className
         )}
         role="navigation"
