@@ -126,7 +126,7 @@ export function SidebarLayout({
   return (
     <div
       className={cn(
-        "relative min-h-screen w-full",
+        "relative h-screen w-full overflow-hidden",
         className
       )}
       data-filter-sidebar-open={isFilterSidebarOpen}
