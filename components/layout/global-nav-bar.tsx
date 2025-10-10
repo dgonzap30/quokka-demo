@@ -52,7 +52,7 @@ export function GlobalNavBar({
     <>
       <nav
         className={cn(
-          "fixed top-0 z-50 w-full glass-panel-strong border-b border-glass shadow-[var(--shadow-glass-md)] transition-shadow duration-200",
+          "w-full z-50 glass-panel-strong border-b border-glass shadow-[var(--shadow-glass-md)] transition-shadow duration-200",
           className
         )}
         role="navigation"

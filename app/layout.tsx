@@ -65,7 +65,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <NavHeader />
           </Suspense>
-          <main className="flex-1 overflow-y-auto sidebar-scroll relative">
+          <main className="flex-1 overflow-y-auto sidebar-scroll relative pt-[104px]">
             {children}
           </main>
         </Providers>

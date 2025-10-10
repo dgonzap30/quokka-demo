@@ -62,7 +62,7 @@ export function NavHeader() {
   };
 
   return (
-    <>
+    <div className="fixed top-0 left-0 right-0 z-50">
       {/* Global Navigation Bar (Row 1) */}
       <GlobalNavBar
         user={user}
@@ -101,6 +101,6 @@ export function NavHeader() {
           courseName: course.name,
         } : undefined}
       />
-    </>
+    </div>
   );
 }
