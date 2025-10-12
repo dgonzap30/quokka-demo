@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { AIAnswerCard } from "@/components/course/ai-answer-card";
 import { StatusBadge } from "@/components/course/status-badge";
-import { X, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ThreadDetailPanelProps {
@@ -213,7 +213,7 @@ export function ThreadDetailPanel({
       {/* AI Answer Section */}
       {aiAnswer && (
         <section className="space-y-4">
-          <h2 className="heading-4 glass-text">Quokka's Answer</h2>
+          <h2 className="heading-4 glass-text">Quokka&apos;s Answer</h2>
           <AIAnswerCard
             answer={aiAnswer}
             currentUserEndorsed={aiAnswer.endorsedBy.includes(user?.id || "")}

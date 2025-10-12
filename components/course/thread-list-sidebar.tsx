@@ -81,7 +81,7 @@ export function ThreadListSidebar({
   selectedThreadId,
   onThreadSelect,
   isLoading = false,
-  currentUserId,
+  currentUserId: _currentUserId,
   className,
 }: ThreadListSidebarProps) {
   // Track viewed thread IDs for unread indicators

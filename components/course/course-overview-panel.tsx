@@ -2,7 +2,6 @@
 
 import type { Thread, User } from "@/lib/models/types";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { MessageSquare, HelpCircle, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 

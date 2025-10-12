@@ -59,12 +59,10 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   getUsers,
-  getAIAnswers,
   getAIAnswerById,
   getAIAnswerByThread,
   addAIAnswer,
   updateAIAnswer,
-  getUserById,
 } from "@/lib/store/localStore";
 
 // ============================================
@@ -156,7 +154,7 @@ function generateCitations(courseCode: string, keywords: string[]): Citation[] {
     .slice(0, 3 + Math.floor(Math.random() * 3)); // 3-5 citations
 
   // Generate citations
-  return topMaterials.map((material, idx) => ({
+  return topMaterials.map((material) => ({
     id: generateId('cite'),
     sourceType: material.type,
     source: material.source,

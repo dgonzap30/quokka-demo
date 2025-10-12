@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
 import { StatusBadge } from "@/components/course/status-badge";
