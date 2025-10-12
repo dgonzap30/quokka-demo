@@ -202,6 +202,27 @@ npx tsc --noEmit # Type check
 npm run seed     # Display seed info
 ```
 
+### 🚀 Deployment
+
+**Quick Deploy:**
+```bash
+./scripts/deploy.sh  # Build, push to GitHub, and deploy to Netlify
+```
+
+**Manual Deploy:**
+```bash
+npm run build        # Build the project
+netlify deploy --prod  # Deploy to production
+```
+
+**GitHub Actions (Optional):**
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that can automatically deploy on push to `main`. To enable:
+
+1. Go to your repository settings → Secrets and variables → Actions
+2. Add these secrets:
+   - `NETLIFY_AUTH_TOKEN`: Get from https://app.netlify.com/user/applications#personal-access-tokens
+   - `NETLIFY_SITE_ID`: `39644280-e882-4bdb-8c03-baeb54de787b`
+
 ---
 
 ## 🔗 API Endpoints (Mocked)
