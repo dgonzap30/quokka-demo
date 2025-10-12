@@ -160,14 +160,6 @@ export function ThreadListSidebar({
         )}
       </div>
 
-      {/* Footer with Keyboard Hints */}
-      <div className="flex-shrink-0 border-t border-glass p-3">
-        <p className="text-xs text-subtle glass-text text-center">
-          Use <kbd className="px-1 py-0.5 rounded bg-glass-medium border border-glass font-mono text-xs">j</kbd>
-          {" "}<kbd className="px-1 py-0.5 rounded bg-glass-medium border border-glass font-mono text-xs">k</kbd>
-          {" "}to navigate
-        </p>
-      </div>
     </div>
   );
 }
