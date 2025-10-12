@@ -328,10 +328,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
         {/* Two-Column Layout: FAQs + Trending Topics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* FAQ Clusters */}
-          <section aria-labelledby="faq-heading" className="space-y-4">
-            <h2 id="faq-heading" className="heading-3 glass-text">
-              Frequently Asked Questions
-            </h2>
+          <section aria-labelledby="faq-heading">
             <FAQClustersPanel
               faqs={faqs || []}
               isLoading={faqsLoading}
@@ -339,7 +336,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
           </section>
 
           {/* Trending Topics */}
-          <section aria-labelledby="trending-heading" className="space-y-4">
+          <section aria-labelledby="trending-heading">
             <TrendingTopicsWidget
               topics={trending || []}
               timeRange={timeRange}

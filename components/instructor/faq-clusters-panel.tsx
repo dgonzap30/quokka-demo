@@ -71,40 +71,70 @@ export function FAQClustersPanel({
 
   if (isLoading) {
     return (
-      <div className={cn("space-y-3", className)}>
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="rounded-lg border bg-card p-4 animate-pulse"
-            aria-hidden="true"
-          >
-            <div className="h-6 bg-muted rounded w-3/4 mb-2" />
-            <div className="h-4 bg-muted rounded w-1/2" />
-          </div>
-        ))}
+      <div className={className}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
+            Frequently Asked Questions
+          </h3>
+          <div className="h-5 w-20 bg-muted rounded animate-pulse" />
+        </div>
+
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="rounded-lg border bg-card p-4 animate-pulse"
+              aria-hidden="true"
+            >
+              <div className="h-6 bg-muted rounded w-3/4 mb-2" />
+              <div className="h-4 bg-muted rounded w-1/2" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (faqs.length === 0) {
     return (
-      <div
-        className={cn(
-          "rounded-lg border border-dashed bg-muted/30 p-8 text-center",
-          className
-        )}
-        role="status"
-      >
-        <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-        <p className="text-sm text-muted-foreground">
-          No frequently asked questions yet. Check back after more questions are posted.
-        </p>
+      <div className={className}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
+            Frequently Asked Questions
+          </h3>
+        </div>
+
+        <div
+          className="rounded-lg border border-dashed bg-muted/30 p-8 text-center"
+          role="status"
+        >
+          <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+          <p className="text-sm text-muted-foreground">
+            No frequently asked questions yet. Check back after more questions are posted.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-3", className)} role="list">
+    <div className={className}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" aria-hidden="true" />
+          Frequently Asked Questions
+        </h3>
+        <Badge variant="outline" className="shrink-0">
+          {faqs.length} {faqs.length === 1 ? 'cluster' : 'clusters'}
+        </Badge>
+      </div>
+
+      <div className="space-y-3" role="list">
       {faqs.map((faq) => {
         const isExpanded = expandedIds.has(faq.id);
         const confidenceColor =
@@ -247,6 +277,7 @@ export function FAQClustersPanel({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
