@@ -1,4 +1,4 @@
-import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer } from "@/lib/models/types";
+import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer, ResponseTemplate } from "@/lib/models/types";
 
 import usersData from "@/mocks/users.json";
 import coursesData from "@/mocks/courses.json";
@@ -23,6 +23,7 @@ const KEYS = {
   posts: "quokkaq.posts",
   notifications: "quokkaq.notifications",
   aiAnswers: "quokkaq.aiAnswers",
+  responseTemplates: "quokkaq.responseTemplates",
   seedVersion: "quokkaq.seedVersion",
   initialized: "quokkaq.initialized",
 } as const;
@@ -453,5 +454,98 @@ export function updateAIAnswer(aiAnswerId: string, updates: Partial<AIAnswer>): 
   if (index !== -1) {
     aiAnswers[index] = { ...aiAnswers[index], ...updates };
     localStorage.setItem(KEYS.aiAnswers, JSON.stringify(aiAnswers));
+  }
+}
+
+// ============================================
+// Response Template Data Access (Instructor-Specific)
+// ============================================
+
+/**
+ * Get all response templates from localStorage
+ */
+export function getResponseTemplates(): ResponseTemplate[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.responseTemplates);
+  if (!data) {
+    // Initialize empty array on first access
+    localStorage.setItem(KEYS.responseTemplates, JSON.stringify([]));
+    return [];
+  }
+
+  try {
+    return JSON.parse(data) as ResponseTemplate[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get response templates for a specific user
+ */
+export function getResponseTemplatesByUser(userId: string): ResponseTemplate[] {
+  const templates = getResponseTemplates();
+  return templates.filter((t) => t.userId === userId);
+}
+
+/**
+ * Get response template by ID
+ */
+export function getResponseTemplateById(templateId: string): ResponseTemplate | null {
+  const templates = getResponseTemplates();
+  return templates.find((t) => t.id === templateId) ?? null;
+}
+
+/**
+ * Add new response template
+ */
+export function addResponseTemplate(template: ResponseTemplate): void {
+  if (typeof window === "undefined") return;
+
+  const templates = getResponseTemplates();
+  templates.push(template);
+  localStorage.setItem(KEYS.responseTemplates, JSON.stringify(templates));
+}
+
+/**
+ * Update existing response template
+ */
+export function updateResponseTemplate(templateId: string, updates: Partial<ResponseTemplate>): void {
+  if (typeof window === "undefined") return;
+
+  const templates = getResponseTemplates();
+  const index = templates.findIndex((t) => t.id === templateId);
+
+  if (index !== -1) {
+    templates[index] = { ...templates[index], ...updates };
+    localStorage.setItem(KEYS.responseTemplates, JSON.stringify(templates));
+  }
+}
+
+/**
+ * Delete response template
+ */
+export function deleteResponseTemplate(templateId: string): void {
+  if (typeof window === "undefined") return;
+
+  const templates = getResponseTemplates();
+  const filtered = templates.filter((t) => t.id !== templateId);
+  localStorage.setItem(KEYS.responseTemplates, JSON.stringify(filtered));
+}
+
+/**
+ * Increment template usage count and update lastUsed timestamp
+ */
+export function incrementTemplateUsage(templateId: string): void {
+  if (typeof window === "undefined") return;
+
+  const templates = getResponseTemplates();
+  const template = templates.find((t) => t.id === templateId);
+
+  if (template) {
+    template.usageCount = (template.usageCount || 0) + 1;
+    template.lastUsed = new Date().toISOString();
+    localStorage.setItem(KEYS.responseTemplates, JSON.stringify(templates));
   }
 }

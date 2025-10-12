@@ -71,12 +71,11 @@ export default function DashboardPage() {
 // ============================================
 
 import type { StudentDashboardData, User } from "@/lib/models/types";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TimelineActivity } from "@/components/dashboard/timeline-activity";
 import { EnhancedCourseCard } from "@/components/dashboard/enhanced-course-card";
 import { BookOpen, MessageSquare, ThumbsUp } from "lucide-react";
-import Link from "next/link";
 
 function StudentDashboard({ data, user }: { data: StudentDashboardData; user: User }) {
   return (
@@ -185,80 +184,169 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
 // ============================================
 
 import type { InstructorDashboardData } from "@/lib/models/types";
+import { useState } from "react";
 import { AlertCircle, Users } from "lucide-react";
-import { AICoverageCard } from "@/components/dashboard/ai-coverage-card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// New instructor components
+import { PriorityQueueCard } from "@/components/instructor/priority-queue-card";
+import { FAQClustersPanel } from "@/components/instructor/faq-clusters-panel";
+import { TrendingTopicsWidget } from "@/components/instructor/trending-topics-widget";
+import { QuickSearchBar } from "@/components/instructor/quick-search-bar";
+import { BulkActionsToolbar } from "@/components/instructor/bulk-actions-toolbar";
+import { InstructorEmptyState } from "@/components/instructor/instructor-empty-state";
+
+// Hooks
+import {
+  useInstructorInsights,
+  useFrequentlyAskedQuestions,
+  useTrendingTopics,
+  useBulkEndorseAIAnswers,
+} from "@/lib/api/hooks";
 
 function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter">("week");
+
+  // Fetch instructor-specific data
+  // TODO: Get actual user ID from current user context
+  const userId = "instructor-1";
+  const courseId = data.managedCourses[0]?.id || "course-1";
+
+  const { data: insights, isLoading: insightsLoading } = useInstructorInsights(userId);
+  const { data: faqs, isLoading: faqsLoading } = useFrequentlyAskedQuestions(courseId);
+  const { data: trending, isLoading: trendingLoading } = useTrendingTopics(courseId, timeRange);
+  const { mutate: bulkEndorse, isPending: isBulkEndorsing } = useBulkEndorseAIAnswers();
+
+  // Selection management
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selectedIds.size === (insights?.length || 0)) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(insights?.map((i) => i.thread.id) || []));
+    }
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
   return (
     <>
       <main id="main-content" className="min-h-screen p-4 md:p-6">
         <div className="container-wide space-y-6">
-          {/* Hero Section */}
-          <section aria-labelledby="dashboard-heading" className="py-4 md:py-6 space-y-3">
+          {/* Hero Section with Search */}
+          <section aria-labelledby="dashboard-heading" className="py-4 md:py-6 space-y-4">
             <div className="space-y-2">
-              <h1 id="dashboard-heading" className="heading-2 glass-text">Instructor Dashboard</h1>
-            <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl">
-              Manage your courses, monitor student engagement, and address unanswered questions
-            </p>
-          </div>
-        </section>
+              <h1 id="dashboard-heading" className="heading-2 glass-text">
+                Instructor Dashboard
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl">
+                Triage questions, endorse AI answers, and monitor class engagement
+              </p>
+            </div>
 
-        {/* Main Content - Courses First */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Managed Courses - 2 columns */}
-          <section aria-labelledby="managed-courses-heading" className="lg:col-span-2 space-y-4">
-            <h2 id="managed-courses-heading" className="heading-3 glass-text">Managed Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {data.managedCourses.map((course) => (
-                <EnhancedCourseCard
-                  key={course.id}
-                  course={course}
-                  viewMode="instructor"
+            {/* Quick Search */}
+            <QuickSearchBar
+              value={searchQuery}
+              onSearch={setSearchQuery}
+            />
+          </section>
+
+        {/* Priority Queue with Bulk Actions */}
+        <section aria-labelledby="priority-queue-heading" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 id="priority-queue-heading" className="heading-3 glass-text">
+              Priority Queue
+            </h2>
+            <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
+              <TabsList>
+                <TabsTrigger value="week">Week</TabsTrigger>
+                <TabsTrigger value="month">Month</TabsTrigger>
+                <TabsTrigger value="quarter">Quarter</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          {/* Bulk Actions Toolbar */}
+          {insights && insights.length > 0 && (
+            <BulkActionsToolbar
+              selectedCount={selectedIds.size}
+              totalCount={insights.length}
+              isAllSelected={selectedIds.size === insights.length}
+              onToggleAll={toggleAll}
+              onClearSelection={clearSelection}
+              onBulkEndorse={() => {
+                const aiAnswerIds = insights
+                  .filter((i) => selectedIds.has(i.thread.id) && i.aiAnswer)
+                  .map((i) => i.aiAnswer!.id);
+                bulkEndorse({ aiAnswerIds, userId });
+              }}
+              isLoading={isBulkEndorsing}
+            />
+          )}
+
+          {/* Priority Queue Cards */}
+          {insightsLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-32 rounded-lg border bg-card animate-pulse" />
+              ))}
+            </div>
+          ) : insights && insights.length > 0 ? (
+            <div className="space-y-3">
+              {insights.slice(0, 10).map((insight) => (
+                <PriorityQueueCard
+                  key={insight.thread.id}
+                  insight={insight}
+                  isSelected={selectedIds.has(insight.thread.id)}
+                  onSelectionChange={() => toggleSelection(insight.thread.id)}
+                  isLoading={isBulkEndorsing}
                 />
               ))}
             </div>
+          ) : (
+            <InstructorEmptyState
+              variant="all-done"
+              title="All Caught Up!"
+              description="No questions need your attention right now. Great work!"
+            />
+          )}
+        </section>
+
+        {/* Two-Column Layout: FAQs + Trending Topics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* FAQ Clusters */}
+          <section aria-labelledby="faq-heading" className="space-y-4">
+            <h2 id="faq-heading" className="heading-3 glass-text">
+              Frequently Asked Questions
+            </h2>
+            <FAQClustersPanel
+              faqs={faqs || []}
+              isLoading={faqsLoading}
+            />
           </section>
 
-          {/* AI Coverage & Unanswered Queue - 1 column */}
-          <aside className="space-y-6">
-            {/* AI Coverage */}
-            <AICoverageCard
-              percentage={data.stats.aiCoverage.value}
-              totalThreads={data.stats.totalThreads.value}
-              aiThreads={Math.round(data.stats.totalThreads.value * data.stats.aiCoverage.value / 100)}
+          {/* Trending Topics */}
+          <section aria-labelledby="trending-heading" className="space-y-4">
+            <TrendingTopicsWidget
+              topics={trending || []}
+              timeRange={timeRange}
+              isLoading={trendingLoading}
+              maxTopics={10}
             />
-
-            {/* Unanswered Queue */}
-            <div aria-labelledby="unanswered-queue-heading" className="space-y-4">
-              <h2 id="unanswered-queue-heading" className="heading-3 glass-text">Unanswered Queue</h2>
-            {data.unansweredQueue.length > 0 ? (
-              <div className="space-y-3">
-                {data.unansweredQueue.slice(0, 5).map((thread) => (
-                  <Link key={thread.id} href={`/courses/${thread.courseId}?thread=${thread.id}`}>
-                    <Card variant="glass-hover">
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium leading-snug line-clamp-2">{thread.title}</p>
-                          <div className="flex items-center justify-between text-xs text-subtle">
-                            <span>{thread.views} views</span>
-                            <span>{new Date(thread.createdAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <Card variant="glass" className="p-6 text-center">
-                <div className="space-y-2">
-                  <div className="text-4xl opacity-50" aria-hidden="true">✅</div>
-                  <p className="text-sm text-muted-foreground glass-text">All caught up!</p>
-                </div>
-              </Card>
-            )}
-            </div>
-          </aside>
+          </section>
         </div>
 
         {/* Stats Overview */}

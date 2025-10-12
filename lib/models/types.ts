@@ -452,6 +452,19 @@ export interface InstructorDashboardData {
     aiCoverage: StatWithTrend;  // AI coverage percentage
   };
   goals: GoalProgress[];
+
+  // NEW: Optional instructor-specific features
+  /** Priority-ranked questions requiring attention */
+  priorityQueue?: InstructorInsight[];
+
+  /** Frequently asked question clusters */
+  frequentlyAsked?: FrequentlyAskedQuestion[];
+
+  /** Trending topics across courses */
+  trendingTopics?: TrendingTopic[];
+
+  /** Instructor's saved response templates */
+  responseTemplates?: ResponseTemplate[];
 }
 
 /**
@@ -680,5 +693,398 @@ export function isMessage(obj: unknown): obj is Message {
     (msg.role === "user" || msg.role === "assistant") &&
     typeof msg.content === "string" &&
     msg.timestamp instanceof Date
+  );
+}
+
+// ============================================
+// Instructor-Specific Types
+// ============================================
+
+/**
+ * Urgency level for instructor insights (priority ranking)
+ */
+export type UrgencyLevel = 'critical' | 'high' | 'medium' | 'low';
+
+/**
+ * Trending direction for topics
+ */
+export type TrendDirection = 'rising' | 'falling' | 'stable';
+
+/**
+ * Category for response templates
+ */
+export type TemplateCategory =
+  | 'clarification'
+  | 'encouragement'
+  | 'correction'
+  | 'reference'
+  | 'general';
+
+/**
+ * Types of bulk actions instructors can perform
+ */
+export type BulkActionType =
+  | 'endorse'
+  | 'flag'
+  | 'resolve'
+  | 'unresolve';
+
+/**
+ * Thread engagement metrics (reusable across features)
+ */
+export interface ThreadEngagement {
+  /** Total views */
+  views: number;
+
+  /** Number of replies */
+  replies: number;
+
+  /** ISO 8601 timestamp of last activity */
+  lastActivity: string;
+}
+
+/**
+ * Priority-ranked thread with instructor insights
+ *
+ * Used in the instructor dashboard priority queue to show
+ * which questions need attention first based on urgency,
+ * engagement, and AI confidence.
+ */
+export interface InstructorInsight {
+  /** The thread requiring attention */
+  thread: Thread;
+
+  /** Priority score (0-100, higher = more urgent) */
+  priorityScore: number;
+
+  /** Urgency category */
+  urgency: UrgencyLevel;
+
+  /** Engagement metrics for this thread */
+  engagement: ThreadEngagement;
+
+  /** Explainable reason flags for priority ranking */
+  reasonFlags: string[];
+
+  /** Optional AI answer for quick review */
+  aiAnswer?: AIAnswer;
+}
+
+/**
+ * Cluster of similar questions (FAQ detection)
+ *
+ * Groups related threads by keyword similarity to identify
+ * frequently asked questions that could benefit from
+ * standardized responses or documentation.
+ */
+export interface FrequentlyAskedQuestion {
+  /** Unique identifier for this cluster */
+  id: string;
+
+  /** Representative question title */
+  title: string;
+
+  /** Array of related threads in this cluster */
+  threads: Thread[];
+
+  /** Common keywords across all threads */
+  commonKeywords: string[];
+
+  /** Frequency count (how many times asked) */
+  frequency: number;
+
+  /** Average AI confidence score across threads */
+  avgConfidence: number;
+
+  /** Whether any thread in cluster has instructor endorsement */
+  hasInstructorEndorsement: boolean;
+}
+
+/**
+ * Trending topic with frequency metrics
+ *
+ * Tracks popular topics based on tag frequency and
+ * temporal analysis to show what students are asking
+ * about most.
+ */
+export interface TrendingTopic {
+  /** Topic name (usually a tag) */
+  topic: string;
+
+  /** Number of threads tagged with this topic */
+  count: number;
+
+  /** Sample thread IDs for this topic (top 3) */
+  threadIds: string[];
+
+  /** Percentage growth compared to previous period */
+  recentGrowth: number;
+
+  /** Trend direction category */
+  trend: TrendDirection;
+
+  /** Time range for this trending analysis */
+  timeRange: {
+    start: string;
+    end: string;
+  };
+}
+
+/**
+ * Instructor's saved response template
+ *
+ * Reusable text snippets for common responses to
+ * speed up instructor workflows. User-owned and
+ * tracked for usage analytics.
+ */
+export interface ResponseTemplate {
+  /** Unique template identifier */
+  id: string;
+
+  /** Owning instructor's user ID */
+  userId: string;
+
+  /** Template title (for picker dropdown) */
+  title: string;
+
+  /** Template content (markdown supported) */
+  content: string;
+
+  /** Category for organization */
+  category: TemplateCategory;
+
+  /** Tags for searchability */
+  tags: string[];
+
+  /** Number of times this template has been used */
+  usageCount: number;
+
+  /** ISO 8601 timestamp of last usage */
+  lastUsed?: string;
+
+  /** ISO 8601 timestamp of creation */
+  createdAt: string;
+}
+
+/**
+ * Result of a bulk action operation
+ *
+ * Provides detailed feedback on batch operations
+ * including success/failure counts and per-item errors.
+ */
+export interface BulkActionResult {
+  /** Type of bulk action performed */
+  actionType: BulkActionType;
+
+  /** Number of items successfully processed */
+  successCount: number;
+
+  /** Number of items that failed */
+  failedCount: number;
+
+  /** Array of errors (one per failed item) */
+  errors: BulkActionError[];
+
+  /** ISO 8601 timestamp of operation */
+  timestamp: string;
+}
+
+/**
+ * Individual error in a bulk action
+ */
+export interface BulkActionError {
+  /** ID of the item that failed */
+  itemId: string;
+
+  /** Human-readable error message */
+  reason: string;
+
+  /** Optional error code */
+  code?: string;
+}
+
+/**
+ * Search result with relevance scoring
+ *
+ * Enhanced thread data with search-specific metadata
+ * including relevance score, matched keywords, and
+ * optional preview snippet.
+ */
+export interface QuestionSearchResult {
+  /** The matching thread */
+  thread: Thread;
+
+  /** Relevance score (0-100) */
+  relevanceScore: number;
+
+  /** Keywords that matched the query */
+  matchedKeywords: string[];
+
+  /** Optional preview snippet with highlights */
+  snippet?: string;
+
+  /** Optional positions of matches in content */
+  matchLocations?: Array<{ field: 'title' | 'content' | 'tags'; position: number }>;
+}
+
+// ============================================
+// Instructor Input Types
+// ============================================
+
+/**
+ * Input for creating a response template
+ */
+export interface CreateResponseTemplateInput {
+  title: string;
+  content: string;
+  category: TemplateCategory;
+  tags: string[];
+}
+
+/**
+ * Input for updating a response template
+ */
+export interface UpdateResponseTemplateInput {
+  templateId: string;
+  title?: string;
+  content?: string;
+  category?: TemplateCategory;
+  tags?: string[];
+}
+
+/**
+ * Input for bulk endorsement operation
+ */
+export interface BulkEndorseInput {
+  /** Array of AI answer IDs to endorse */
+  aiAnswerIds: string[];
+
+  /** User ID of the instructor */
+  userId: string;
+}
+
+/**
+ * Input for searching questions
+ */
+export interface SearchQuestionsInput {
+  /** Course to search within */
+  courseId: string;
+
+  /** Search query (natural language) */
+  query: string;
+
+  /** Maximum results to return */
+  limit?: number;
+}
+
+// ============================================
+// Instructor Type Guards
+// ============================================
+
+/**
+ * Type guard for InstructorInsight
+ */
+export function isInstructorInsight(obj: unknown): obj is InstructorInsight {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const insight = obj as Record<string, unknown>;
+
+  return (
+    typeof insight.priorityScore === "number" &&
+    insight.priorityScore >= 0 &&
+    insight.priorityScore <= 100 &&
+    typeof insight.urgency === "string" &&
+    ['critical', 'high', 'medium', 'low'].includes(insight.urgency as string) &&
+    typeof insight.thread === "object" &&
+    Array.isArray(insight.reasonFlags)
+  );
+}
+
+/**
+ * Type guard for FrequentlyAskedQuestion
+ */
+export function isFrequentlyAskedQuestion(obj: unknown): obj is FrequentlyAskedQuestion {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const faq = obj as Record<string, unknown>;
+
+  return (
+    typeof faq.id === "string" &&
+    typeof faq.title === "string" &&
+    Array.isArray(faq.threads) &&
+    Array.isArray(faq.commonKeywords) &&
+    typeof faq.frequency === "number" &&
+    typeof faq.avgConfidence === "number" &&
+    faq.avgConfidence >= 0 &&
+    faq.avgConfidence <= 100
+  );
+}
+
+/**
+ * Type guard for TrendingTopic
+ */
+export function isTrendingTopic(obj: unknown): obj is TrendingTopic {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const topic = obj as Record<string, unknown>;
+
+  return (
+    typeof topic.topic === "string" &&
+    typeof topic.count === "number" &&
+    Array.isArray(topic.threadIds) &&
+    typeof topic.recentGrowth === "number" &&
+    typeof topic.trend === "string" &&
+    ['rising', 'falling', 'stable'].includes(topic.trend as string)
+  );
+}
+
+/**
+ * Type guard for ResponseTemplate
+ */
+export function isResponseTemplate(obj: unknown): obj is ResponseTemplate {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const template = obj as Record<string, unknown>;
+
+  return (
+    typeof template.id === "string" &&
+    typeof template.userId === "string" &&
+    typeof template.title === "string" &&
+    typeof template.content === "string" &&
+    typeof template.category === "string" &&
+    Array.isArray(template.tags)
+  );
+}
+
+/**
+ * Type guard for BulkActionResult
+ */
+export function isBulkActionResult(obj: unknown): obj is BulkActionResult {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const result = obj as Record<string, unknown>;
+
+  return (
+    typeof result.actionType === "string" &&
+    typeof result.successCount === "number" &&
+    typeof result.failedCount === "number" &&
+    Array.isArray(result.errors)
+  );
+}
+
+/**
+ * Type guard for QuestionSearchResult
+ */
+export function isQuestionSearchResult(obj: unknown): obj is QuestionSearchResult {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const searchResult = obj as Record<string, unknown>;
+
+  return (
+    typeof searchResult.thread === "object" &&
+    typeof searchResult.relevanceScore === "number" &&
+    searchResult.relevanceScore >= 0 &&
+    searchResult.relevanceScore <= 100 &&
+    Array.isArray(searchResult.matchedKeywords)
   );
 }
