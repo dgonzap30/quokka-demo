@@ -20,6 +20,12 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the demo.
 
+### 🌐 Live Demo
+
+**Production URL**: [https://quokka-demo.netlify.app](https://quokka-demo.netlify.app)
+
+Deployed on Netlify with continuous deployment from the `main` branch.
+
 ### Explore the Demo
 
 - **Home (`/`)** - Browse discussion threads with filtering
