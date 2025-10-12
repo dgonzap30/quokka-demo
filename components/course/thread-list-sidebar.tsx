@@ -96,7 +96,7 @@ export function ThreadListSidebar({
   return (
     <div
       className={cn(
-        "w-full h-screen flex flex-col glass-panel-strong border-r border-glass shadow-glass-md",
+        "w-full h-full flex flex-col glass-panel-strong border-r border-glass shadow-glass-md",
         className
       )}
       aria-label="Thread list"

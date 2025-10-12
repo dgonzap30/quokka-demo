@@ -128,7 +128,7 @@ export function FilterSidebar({
     return (
       <div
         className={cn(
-          "w-full h-screen flex flex-col items-center glass-panel-medium border-r border-glass border-l-2 border-l-primary/20 py-4",
+          "w-full h-full flex flex-col items-center glass-panel-medium border-r border-glass border-l-2 border-l-primary/20 py-4",
           className
         )}
         aria-label="Filter controls (compact)"
@@ -154,7 +154,7 @@ export function FilterSidebar({
   return (
     <div
       className={cn(
-        "w-full h-screen flex flex-col glass-panel-medium border-r border-glass border-l-2 border-l-primary/20",
+        "w-full h-full flex flex-col glass-panel-medium border-r border-glass border-l-2 border-l-primary/20",
         className
       )}
       aria-label="Filter controls"
