@@ -195,6 +195,7 @@ import { TrendingTopicsWidget } from "@/components/instructor/trending-topics-wi
 import { QuickSearchBar } from "@/components/instructor/quick-search-bar";
 import { BulkActionsToolbar } from "@/components/instructor/bulk-actions-toolbar";
 import { InstructorEmptyState } from "@/components/instructor/instructor-empty-state";
+import { CourseSelector } from "@/components/instructor/course-selector";
 
 // Hooks
 import {
@@ -208,11 +209,33 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter">("week");
+  const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(() => {
+    // Initialize from localStorage if available
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("instructor-selected-course");
+      if (stored && data.managedCourses.some((c) => c.id === stored)) {
+        return stored;
+      }
+    }
+    return undefined; // Default to "All Courses"
+  });
+
+  // Persist selected course to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (selectedCourseId) {
+        localStorage.setItem("instructor-selected-course", selectedCourseId);
+      } else {
+        localStorage.removeItem("instructor-selected-course");
+      }
+    }
+  }, [selectedCourseId]);
 
   // Fetch instructor-specific data
   // TODO: Get actual user ID from current user context
   const userId = "instructor-1";
-  const courseId = data.managedCourses[0]?.id || "course-1";
+  // Use selected course, or first managed course, or fallback
+  const courseId = selectedCourseId || data.managedCourses[0]?.id || "course-1";
 
   const { data: insights, isLoading: insightsLoading } = useInstructorInsights(userId);
   const { data: faqs, isLoading: faqsLoading } = useFrequentlyAskedQuestions(courseId);
@@ -248,13 +271,24 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
         <div className="container-wide space-y-6">
           {/* Hero Section with Search */}
           <section aria-labelledby="dashboard-heading" className="py-4 md:py-6 space-y-4">
-            <div className="space-y-2">
-              <h1 id="dashboard-heading" className="heading-2 glass-text">
-                Instructor Dashboard
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl">
-                Triage questions, endorse AI answers, and monitor class engagement
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2 flex-1">
+                <h1 id="dashboard-heading" className="heading-2 glass-text">
+                  Instructor Dashboard
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl">
+                  Triage questions, endorse AI answers, and monitor class engagement
+                </p>
+              </div>
+
+              {/* Course Selector */}
+              {data.managedCourses.length > 1 && (
+                <CourseSelector
+                  courses={data.managedCourses}
+                  selectedCourseId={selectedCourseId}
+                  onCourseChange={setSelectedCourseId}
+                />
+              )}
             </div>
 
             {/* Quick Search */}
