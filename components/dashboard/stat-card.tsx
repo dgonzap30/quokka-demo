@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
+import { MiniSparkline } from "@/components/dashboard/mini-sparkline";
 
 export interface StatCardProps {
   /**
@@ -68,6 +69,21 @@ export interface StatCardProps {
   variant?: "default" | "warning" | "success" | "accent";
 
   /**
+   * Optional sparkline data (7-day array, left = oldest, right = newest)
+   */
+  sparklineData?: number[];
+
+  /**
+   * Optional tooltip text for sparkline
+   */
+  sparklineTooltip?: string;
+
+  /**
+   * Optional comparison period label (e.g., "vs last week")
+   */
+  comparisonPeriod?: string;
+
+  /**
    * Optional loading state
    */
   loading?: boolean;
@@ -116,6 +132,9 @@ export function StatCard({
   trend,
   cta,
   variant = "default",
+  sparklineData,
+  sparklineTooltip,
+  comparisonPeriod,
   loading = false,
   className,
 }: StatCardProps) {
@@ -164,6 +183,28 @@ export function StatCard({
             </div>
           )}
         </div>
+
+        {/* Sparkline (optional) */}
+        {sparklineData && sparklineData.length === 7 && (
+          <div className="flex items-center justify-between pt-2 border-t border-border">
+            <MiniSparkline
+              data={sparklineData}
+              variant={
+                trend?.direction === "up"
+                  ? "success"
+                  : trend?.direction === "down"
+                  ? "danger"
+                  : "default"
+              }
+            />
+            {sparklineTooltip && (
+              <span className="text-xs text-muted-foreground glass-text">{sparklineTooltip}</span>
+            )}
+            {!sparklineTooltip && comparisonPeriod && (
+              <span className="text-xs text-muted-foreground glass-text">{comparisonPeriod}</span>
+            )}
+          </div>
+        )}
 
         {/* CTA Button (optional) */}
         {cta && (
