@@ -86,7 +86,7 @@ export function StudentRecommendations({
 
 // Internal RecommendationCard component
 function RecommendationCard({ recommendation }: { recommendation: RecommendedThread }) {
-  const { thread, courseName, relevanceScore, reason } = recommendation;
+  const { thread, courseName, reason } = recommendation;
 
   const reasonLabels = {
     "high-engagement": "Trending in your course",

@@ -50,7 +50,7 @@ export function UpcomingDeadlines({
 }: UpcomingDeadlinesProps) {
   // Filter by course if specified
   const filteredDeadlines = React.useMemo(() => {
-    let filtered = courseId
+    const filtered = courseId
       ? deadlines.filter((d) => d.courseId === courseId)
       : deadlines;
     return filtered.slice(0, maxItems);
