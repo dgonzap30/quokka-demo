@@ -15,8 +15,8 @@ const cardVariants = cva(
         elevated: "p-8 shadow-e2",
         glass: "p-6 glass-panel",
         "glass-strong": "p-6 glass-panel-strong",
-        "glass-hover": "p-6 glass-panel hover:glass-panel-strong hover:-translate-y-1 hover:shadow-[var(--shadow-glass-lg)] cursor-pointer",
-        "glass-liquid": "p-6 glass-panel liquid-border hover:shadow-[var(--glow-accent)]",
+        "glass-hover": "p-6 glass-panel hover:glass-panel-strong hover:-translate-y-1 cursor-pointer",
+        "glass-liquid": "p-6 glass-panel liquid-border",
       },
     },
     defaultVariants: {

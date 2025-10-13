@@ -28,6 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen overflow-hidden flex flex-col`}>
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-6 focus:py-3 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-lg focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:font-semibold focus:transition-all"
+        >
+          Skip to main content
+        </a>
         {/* Enhanced Liquid Glass Background */}
         <div className="fixed inset-0 -z-10 bg-gradient-to-br from-neutral-50 via-primary/5 to-secondary/5 dark:from-neutral-950 dark:via-primary-950/10 dark:to-secondary-950/10 overflow-hidden">
           {/* Noise texture overlay */}

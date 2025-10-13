@@ -13,7 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
-import { Menu, LogOut, ArrowLeft } from "lucide-react";
+import {
+  Menu,
+  LogOut,
+  ArrowLeft,
+  MessageSquarePlus,
+  Sparkles,
+  HelpCircle,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, type NavItem } from "@/lib/utils/nav-config";
 
@@ -31,6 +39,18 @@ export interface MobileNavProps {
   /** Logout handler */
   onLogout: () => void;
 
+  /** Ask Question handler */
+  onAskQuestion?: () => void;
+
+  /** AI Assistant handler */
+  onOpenAIAssistant?: () => void;
+
+  /** Support handler */
+  onOpenSupport?: () => void;
+
+  /** Settings handler */
+  onOpenSettings?: () => void;
+
   /** Optional navigation items - if not provided or empty, only shows user profile */
   items?: NavItem[];
 
@@ -42,7 +62,17 @@ export interface MobileNavProps {
   };
 }
 
-export function MobileNav({ currentPath, user, onLogout, items, courseContext }: MobileNavProps) {
+export function MobileNav({
+  currentPath,
+  user,
+  onLogout,
+  onAskQuestion,
+  onOpenAIAssistant,
+  onOpenSupport,
+  onOpenSettings,
+  items,
+  courseContext,
+}: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -91,6 +121,70 @@ export function MobileNav({ currentPath, user, onLogout, items, courseContext }:
                   </Link>
                 </SheetClose>
               </div>
+              <Separator className="my-4" />
+            </>
+          )}
+
+          {/* Action Items - Ask Question, AI, Support, Settings */}
+          {(onAskQuestion || onOpenAIAssistant || onOpenSupport || onOpenSettings) && (
+            <>
+              <nav className="flex flex-col gap-2 mt-6" aria-label="Quick actions">
+                {onAskQuestion && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-transparent transition-all duration-300"
+                    onClick={() => {
+                      setOpen(false);
+                      onAskQuestion();
+                    }}
+                  >
+                    <MessageSquarePlus className="h-5 w-5 text-amber-600/70 [filter:drop-shadow(0_0_0.5px_rgba(245,158,11,0.3))] transition-all duration-300" />
+                    Ask Question
+                  </Button>
+                )}
+
+                {onOpenAIAssistant && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-transparent transition-all duration-300"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenAIAssistant();
+                    }}
+                  >
+                    <Sparkles className="h-5 w-5 text-ai-purple-500/70 [filter:drop-shadow(0_0_0.5px_rgba(168,85,247,0.3))] transition-all duration-300" />
+                    AI Assistant
+                  </Button>
+                )}
+
+                {onOpenSupport && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-accent/5 transition-all duration-300 group"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenSupport();
+                    }}
+                  >
+                    <HelpCircle className="h-5 w-5 text-foreground/80 group-hover:text-accent transition-all duration-300" />
+                    Support
+                  </Button>
+                )}
+
+                {onOpenSettings && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-primary/5 transition-all duration-300 group"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenSettings();
+                    }}
+                  >
+                    <SettingsIcon className="h-5 w-5 text-foreground/80 group-hover:text-primary transition-all duration-300" />
+                    Settings
+                  </Button>
+                )}
+              </nav>
               <Separator className="my-4" />
             </>
           )}

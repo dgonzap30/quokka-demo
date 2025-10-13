@@ -125,6 +125,13 @@
   --shadow-e2: var(--shadow-e2);
   --shadow-e3: var(--shadow-e3);
 
+  /* Glow Shadows (for interactive elements) */
+  --shadow-glow-primary: var(--shadow-glow-primary);
+  --shadow-glow-secondary: var(--shadow-glow-secondary);
+  --shadow-glow-accent: var(--shadow-glow-accent);
+  --shadow-glow-success: var(--shadow-glow-success);
+  --shadow-glow-warning: var(--shadow-glow-warning);
+
   /* Glassmorphism Tokens */
   --color-glass-ultra: var(--glass-ultra);
   --color-glass-strong: var(--glass-strong);
@@ -241,11 +248,11 @@
 
   /* Glass Borders & Glows */
   --border-glass: rgba(255, 255, 255, 0.18);
-  --glow-primary: 0 0 20px rgba(138, 107, 61, 0.15);
-  --glow-secondary: 0 0 20px rgba(94, 125, 74, 0.15);
-  --glow-accent: 0 0 20px rgba(45, 108, 223, 0.15);
-  --glow-success: 0 0 20px rgba(46, 125, 50, 0.15);
-  --glow-warning: 0 0 20px rgba(180, 83, 9, 0.15);
+  --shadow-glow-primary: 0 0 20px rgba(138, 107, 61, 0.15);
+  --shadow-glow-secondary: 0 0 20px rgba(94, 125, 74, 0.15);
+  --shadow-glow-accent: 0 0 20px rgba(45, 108, 223, 0.15);
+  --shadow-glow-success: 0 0 20px rgba(46, 125, 50, 0.15);
+  --shadow-glow-warning: 0 0 20px rgba(180, 83, 9, 0.15);
 
   /* Glass Shadows (Softer, Diffuse) */
   --shadow-glass-sm: 0 2px 16px rgba(15, 14, 12, 0.04);
@@ -408,11 +415,11 @@
 
   /* Glass Borders & Glows */
   --border-glass: rgba(255, 255, 255, 0.08);
-  --glow-primary: 0 0 24px rgba(193, 165, 118, 0.2);
-  --glow-secondary: 0 0 24px rgba(150, 179, 128, 0.2);
-  --glow-accent: 0 0 24px rgba(134, 169, 246, 0.2);
-  --glow-success: 0 0 24px rgba(46, 125, 50, 0.2);
-  --glow-warning: 0 0 24px rgba(180, 83, 9, 0.2);
+  --shadow-glow-primary: 0 0 24px rgba(193, 165, 118, 0.2);
+  --shadow-glow-secondary: 0 0 24px rgba(150, 179, 128, 0.2);
+  --shadow-glow-accent: 0 0 24px rgba(134, 169, 246, 0.2);
+  --shadow-glow-success: 0 0 24px rgba(46, 125, 50, 0.2);
+  --shadow-glow-warning: 0 0 24px rgba(180, 83, 9, 0.2);
 
   /* Glass Shadows (Dark) */
   --shadow-glass-sm: 0 2px 16px rgba(0, 0, 0, 0.2);

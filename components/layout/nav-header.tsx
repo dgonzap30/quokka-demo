@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCurrentUser, useLogout, useCourse } from "@/lib/api/hooks";
 import { GlobalNavBar } from "@/components/layout/global-nav-bar";
 import { CourseContextBar } from "@/components/layout/course-context-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { QuokkaAssistantModal } from "@/components/ai/quokka-assistant-modal";
 import { getNavContext } from "@/lib/utils/nav-config";
 
 export function NavHeader() {
@@ -14,6 +15,9 @@ export function NavHeader() {
   const searchParams = useSearchParams();
   const { data: user } = useCurrentUser();
   const logoutMutation = useLogout();
+
+  // AI Assistant Modal state
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   // Detect navigation context (must be before early returns for hook)
   const navContext = getNavContext(pathname || '');
@@ -38,6 +42,17 @@ export function NavHeader() {
 
   // Determine if we're in a course context
   const inCourseContext = navContext.context === 'course' && course;
+
+  // Determine AI modal context type
+  const getAIContextType = (): "dashboard" | "course" | "instructor" => {
+    if (pathname?.startsWith("/instructor")) {
+      return "instructor";
+    }
+    if (inCourseContext) {
+      return "course";
+    }
+    return "dashboard";
+  };
 
   // Read active tab from URL (default to "threads")
   const activeTab = (searchParams.get('tab') === 'overview' ? 'overview' : 'threads') as "threads" | "overview";
@@ -72,6 +87,19 @@ export function NavHeader() {
           href: `/courses/${course.id}`,
         } : undefined}
         onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
+        onOpenAIAssistant={() => setAiModalOpen(true)}
+        onOpenSupport={() => router.push("/support")}
+        onOpenSettings={() => router.push("/settings")}
+      />
+
+      {/* AI Assistant Modal */}
+      <QuokkaAssistantModal
+        isOpen={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        contextType={getAIContextType()}
+        courseId={inCourseContext ? course.id : undefined}
+        courseName={inCourseContext ? course.name : undefined}
+        courseCode={inCourseContext ? course.code : undefined}
       />
 
       {/* Course Context Bar (Row 2) - Only in course pages */}
@@ -94,6 +122,10 @@ export function NavHeader() {
         currentPath={pathname || ""}
         user={user}
         onLogout={handleLogout}
+        onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
+        onOpenAIAssistant={() => setAiModalOpen(true)}
+        onOpenSupport={() => router.push("/support")}
+        onOpenSettings={() => router.push("/settings")}
         items={navContext.items}
         courseContext={inCourseContext ? {
           courseId: course.id,

@@ -85,10 +85,6 @@ export function TrendingTopicsWidget({
   if (isLoading) {
     return (
       <div className={cn("space-y-3", className)}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="h-6 bg-muted rounded w-1/3 animate-pulse" />
-          <div className="h-5 bg-muted rounded w-20 animate-pulse" />
-        </div>
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
@@ -121,20 +117,7 @@ export function TrendingTopicsWidget({
   }
 
   return (
-    <div className={className}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Flame className="h-5 w-5 text-danger" aria-hidden="true" />
-          Trending Topics
-        </h3>
-        <Badge variant="outline" className="flex items-center gap-1.5">
-          <Clock className="h-3 w-3" aria-hidden="true" />
-          {timeRangeLabels[timeRange]}
-        </Badge>
-      </div>
-
-      {/* Topics List */}
+    <div className={cn("space-y-3", className)}>
       <div className="space-y-2" role="list">
         {displayTopics.map((topic, index) => {
           const trendStyle = trendConfig[topic.trend];

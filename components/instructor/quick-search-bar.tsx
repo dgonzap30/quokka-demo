@@ -30,7 +30,7 @@ interface QuickSearchBarProps {
  * Debounced search input for quick question lookup
  *
  * Features:
- * - 300ms debounce to avoid excessive API calls
+ * - 150ms debounce for responsive search experience
  * - Clear button when text is present
  * - Loading indicator during search
  * - Keyboard accessible
@@ -50,7 +50,7 @@ export function QuickSearchBar({
   onSearch,
   placeholder = "Search questions",
   isLoading = false,
-  debounceMs = 300,
+  debounceMs = 150,
   className,
 }: QuickSearchBarProps) {
   const [localValue, setLocalValue] = useState(value);

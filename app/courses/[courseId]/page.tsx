@@ -7,7 +7,6 @@ import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FloatingQuokka } from "@/components/course/floating-quokka";
 import { AskQuestionModal } from "@/components/course/ask-question-modal";
 import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
@@ -256,13 +255,6 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
               }}
             />
           ) : null}
-
-          {/* Floating Quokka AI Agent */}
-          <FloatingQuokka
-            courseId={course.id}
-            courseName={course.name}
-            courseCode={course.code}
-          />
         </SidebarLayout>
       ) : (
         /* Overview Tab: Course stats, resources, activity */
@@ -272,13 +264,6 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
             courseName={course.name}
             threads={threads || []}
             user={user || undefined}
-          />
-
-          {/* Floating Quokka AI Agent (also in overview) */}
-          <FloatingQuokka
-            courseId={course.id}
-            courseName={course.name}
-            courseCode={course.code}
           />
         </div>
       )}

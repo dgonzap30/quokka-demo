@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
 import { GlobalSearch } from "@/components/ui/global-search";
 import {
   DropdownMenu,
@@ -13,6 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  MessageSquarePlus,
+  Sparkles,
+  HelpCircle,
+  Settings,
+  User,
+} from "lucide-react";
+import { NavIconButton } from "./nav-icon-button";
 import { cn } from "@/lib/utils";
 
 export interface GlobalNavBarProps {
@@ -32,8 +39,17 @@ export interface GlobalNavBarProps {
     href: string;
   };
 
-  /** Optional Ask Question handler (for course context) */
+  /** Ask Question handler - opens new question form/modal */
   onAskQuestion?: () => void;
+
+  /** AI Assistant handler - opens AI chat interface */
+  onOpenAIAssistant?: () => void;
+
+  /** Support handler - navigates to support/help page */
+  onOpenSupport?: () => void;
+
+  /** Settings handler - navigates to settings page */
+  onOpenSettings?: () => void;
 
   /** Optional className for composition */
   className?: string;
@@ -44,6 +60,9 @@ export function GlobalNavBar({
   onLogout,
   breadcrumb,
   onAskQuestion,
+  onOpenAIAssistant,
+  onOpenSupport,
+  onOpenSettings,
   className,
 }: GlobalNavBarProps) {
   const router = useRouter();
@@ -52,7 +71,8 @@ export function GlobalNavBar({
     <>
       <nav
         className={cn(
-          "w-full z-50 glass-panel-strong border-b border-glass shadow-[var(--shadow-glass-md)] transition-shadow duration-200",
+          // Darker glass navbar: 85% opacity with stronger blur for better contrast
+          "w-full z-50 backdrop-blur-xl bg-glass-subtle border-b border-glass shadow-[var(--shadow-glass-lg)] transition-shadow duration-200",
           className
         )}
         role="navigation"
@@ -99,32 +119,150 @@ export function GlobalNavBar({
             <GlobalSearch placeholder="Search threads..." />
           </div>
 
-          {/* Right Section: Ask Button + Avatar */}
+          {/* Right Section: Icon Actions + Avatar */}
           <div className="flex items-center gap-3">
-            {/* Ask Question Button (Course Context Only) */}
-            {onAskQuestion && (
-              <Button
-                onClick={onAskQuestion}
-                className="hidden md:flex h-9 px-4 bg-amber-500 hover:bg-amber-600 text-white font-medium shadow-sm"
-                aria-label="Ask a question"
-              >
-                Ask Question
-              </Button>
-            )}
+            {/* Icon Actions Group (Desktop Only) */}
+            <div className="hidden md:flex items-center gap-3">
+              {/* Ask Question Icon */}
+              {onAskQuestion && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onAskQuestion}
+                  className={cn(
+                    "min-h-[44px] min-w-[44px] h-11 w-11",
+                    "transition-all duration-300 ease-out",
+                    "hover:bg-transparent hover:scale-[1.08]",
+                    "motion-reduce:hover:scale-100",
+                    "focus-visible:ring-4 focus-visible:ring-accent/60",
+                    "group"
+                  )}
+                  aria-label="Ask Question"
+                >
+                  <MessageSquarePlus
+                    className={cn(
+                      "h-5 w-5 text-amber-600/70",
+                      "transition-all duration-300 ease-out",
+                      "[filter:drop-shadow(0_0_0.5px_rgba(245,158,11,0.3))]",
+                      "group-hover:text-amber-600",
+                      "group-hover:[filter:drop-shadow(0_0_2px_rgba(245,158,11,0.8))_drop-shadow(0_0_6px_rgba(245,158,11,0.4))_drop-shadow(0_0_12px_rgba(245,158,11,0.2))]",
+                      "group-hover:scale-110",
+                      "motion-reduce:group-hover:scale-100"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Ask Question</span>
+                </Button>
+              )}
 
-            {/* User Avatar Menu */}
+              {/* AI Assistant Icon */}
+              {onOpenAIAssistant && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onOpenAIAssistant}
+                  className={cn(
+                    "min-h-[44px] min-w-[44px] h-11 w-11",
+                    "transition-all duration-300 ease-out",
+                    "hover:bg-transparent hover:scale-[1.08]",
+                    "motion-reduce:hover:scale-100",
+                    "focus-visible:ring-4 focus-visible:ring-accent/60",
+                    "group"
+                  )}
+                  aria-label="AI Assistant"
+                >
+                  <Sparkles
+                    className={cn(
+                      "h-5 w-5 text-ai-purple-500/70",
+                      "transition-all duration-300 ease-out",
+                      "[filter:drop-shadow(0_0_0.5px_rgba(168,85,247,0.3))]",
+                      "group-hover:text-ai-purple-500",
+                      "group-hover:[filter:drop-shadow(0_0_2px_rgba(168,85,247,0.8))_drop-shadow(0_0_6px_rgba(168,85,247,0.4))_drop-shadow(0_0_12px_rgba(168,85,247,0.2))]",
+                      "group-hover:rotate-12",
+                      "motion-reduce:group-hover:rotate-0"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">AI Assistant</span>
+                </Button>
+              )}
+
+              {/* Visual Divider */}
+              {(onOpenSupport || onOpenSettings) && (
+                <div className="h-6 w-px bg-border" aria-hidden="true" />
+              )}
+
+              {/* Support Icon */}
+              {onOpenSupport && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onOpenSupport}
+                  className={cn(
+                    "min-h-[44px] min-w-[44px] h-11 w-11",
+                    "transition-all duration-300 ease-out",
+                    "hover:bg-accent/5 hover:scale-[1.08]",
+                    "motion-reduce:hover:scale-100",
+                    "focus-visible:ring-4 focus-visible:ring-accent/60",
+                    "group"
+                  )}
+                  aria-label="Support"
+                >
+                  <HelpCircle
+                    className="h-5 w-5 text-foreground/80 transition-all duration-300 ease-out group-hover:text-accent group-hover:scale-110 motion-reduce:group-hover:scale-100"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Support</span>
+                </Button>
+              )}
+
+              {/* Settings Icon */}
+              {onOpenSettings && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onOpenSettings}
+                  className={cn(
+                    "min-h-[44px] min-w-[44px] h-11 w-11",
+                    "transition-all duration-300 ease-out",
+                    "hover:bg-primary/5 hover:scale-[1.08]",
+                    "motion-reduce:hover:scale-100",
+                    "focus-visible:ring-4 focus-visible:ring-accent/60",
+                    "group"
+                  )}
+                  aria-label="Settings"
+                >
+                  <Settings
+                    className="h-5 w-5 text-foreground/80 transition-all duration-300 ease-out group-hover:text-primary group-hover:scale-110 group-hover:rotate-45 motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Settings</span>
+                </Button>
+              )}
+            </div>
+
+            {/* User Account Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 w-10 rounded-full"
-                  aria-label="User menu"
+                  size="icon"
+                  className={cn(
+                    "min-h-[44px] min-w-[44px] h-11 w-11",
+                    "transition-all duration-300 ease-out",
+                    "hover:bg-secondary/5 hover:scale-[1.08]",
+                    "motion-reduce:hover:scale-100",
+                    "focus-visible:ring-4 focus-visible:ring-accent/60",
+                    "group"
+                  )}
+                  aria-label="Account menu"
+                  aria-haspopup="true"
                 >
-                  <Avatar className="h-10 w-10 bg-neutral-100 border border-neutral-200">
-                    <span className="text-sm font-semibold text-neutral-700">
-                      {user.name.charAt(0).toUpperCase()}
-                    </span>
-                  </Avatar>
+                  <User
+                    className="h-5 w-5 text-foreground/80 transition-all duration-300 ease-out group-hover:text-secondary group-hover:scale-110 motion-reduce:group-hover:scale-100"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Account</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>

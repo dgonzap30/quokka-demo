@@ -110,7 +110,7 @@ export function TimelineActivity({
       <div className={cn("space-y-4", className)}>
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex gap-4">
-            <Skeleton className="size-3 rounded-full bg-glass-medium shrink-0" />
+            <Skeleton className="size-4 rounded-full bg-glass-medium shrink-0" />
             <Skeleton className="h-24 flex-1 bg-glass-medium rounded-lg" />
           </div>
         ))}
@@ -141,7 +141,7 @@ export function TimelineActivity({
             <div className="relative flex flex-col items-center shrink-0">
               <div
                 className={cn(
-                  "size-3 rounded-full border-2 border-background z-10",
+                  "size-4 rounded-full border-2 border-background z-10",
                   dotColor
                 )}
                 aria-hidden="true"

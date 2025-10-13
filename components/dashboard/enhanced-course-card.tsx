@@ -96,8 +96,8 @@ export function EnhancedCourseCard({
         <Card
           variant="glass-hover"
           className={cn(
-            "group h-[220px] flex flex-col overflow-hidden transition-all duration-[180ms]",
-            !prefersReducedMotion && "hover:scale-[1.02] hover:shadow-[var(--glow-primary)]"
+            "group min-h-[220px] flex flex-col overflow-hidden transition-all duration-200",
+            !prefersReducedMotion && "hover:scale-[1.03]"
           )}
         >
           <CardHeader className="p-4 max-h-[100px] shrink-0">
