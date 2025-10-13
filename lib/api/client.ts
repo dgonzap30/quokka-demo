@@ -988,13 +988,15 @@ export const api = {
     // Generate sparklines
     const threadSparkline = generateSparkline(`student-${userId}-threads`, 7, userThreads.length / 7);
     const postSparkline = generateSparkline(`student-${userId}-posts`, 7, userPosts.length / 7);
+    const courseSparkline = generateSparkline(`student-${userId}-courses`, 7, enrolledCourses.length / 7);
+    const endorsedSparkline = generateSparkline(`student-${userId}-endorsed`, 7, userPosts.filter((p) => p.endorsed).length / 7);
 
     // Create stats with trends
     const stats = {
-      totalCourses: createStatWithTrend(currentCourses, previousCourses, "Courses"),
+      totalCourses: createStatWithTrend(currentCourses, previousCourses, "Courses", courseSparkline),
       totalThreads: createStatWithTrend(currentThreads, previousThreads, "Threads", threadSparkline),
       totalPosts: createStatWithTrend(currentPosts, previousPosts, "Replies", postSparkline),
-      endorsedPosts: createStatWithTrend(currentEndorsed, previousEndorsed, "Endorsed"),
+      endorsedPosts: createStatWithTrend(currentEndorsed, previousEndorsed, "Endorsed", endorsedSparkline),
     };
 
     // Create student goals
