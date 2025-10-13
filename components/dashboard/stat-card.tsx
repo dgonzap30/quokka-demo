@@ -140,10 +140,10 @@ export function StatCard({
 }: StatCardProps) {
   // Variant classes
   const variantClasses = {
-    default: "glass-panel hover:shadow-[var(--shadow-glass-md)]",
-    warning: "glass-panel hover:shadow-[var(--glow-warning)] border-l-4 border-l-warning",
-    success: "glass-panel hover:shadow-[var(--glow-success)] border-l-4 border-l-success",
-    accent: "glass-panel hover:shadow-[var(--glow-accent)] border-l-4 border-l-accent",
+    default: "glass-panel",
+    warning: "glass-panel border-l-4 border-l-warning",
+    success: "glass-panel border-l-4 border-l-success",
+    accent: "glass-panel border-l-4 border-l-accent",
   };
 
   if (loading) {
