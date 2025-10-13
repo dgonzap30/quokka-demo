@@ -60,7 +60,7 @@ export function SkipToContent({
         // Styling
         "inline-flex items-center gap-2 px-6 py-3 rounded-lg",
         "bg-primary text-primary-foreground font-medium text-sm",
-        "shadow-[var(--shadow-e3)] focus:shadow-[var(--shadow-glow-primary)]",
+        "shadow-[var(--shadow-e3)] focus:shadow-[var(--focus-shadow-primary)]",
         // Focus ring
         "focus:outline-none focus:ring-4 focus:ring-primary/50",
         // Transitions

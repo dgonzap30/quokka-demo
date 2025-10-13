@@ -260,7 +260,7 @@ export function GlobalSearch({
             }
           }}
           onBlur={handleBlur}
-          className="h-10 pl-10 pr-20 rounded-lg glass-panel border-glass focus:ring-2 focus:ring-primary/50 focus:border-primary focus:shadow-[var(--shadow-glow-primary)] transition-all"
+          className="h-10 pl-10 pr-20 rounded-lg glass-panel border-glass focus:ring-2 focus:ring-primary/50 focus:border-primary focus:shadow-[var(--focus-shadow-primary)] transition-all"
         />
 
         {/* Search icon - decorative */}

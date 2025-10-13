@@ -24,7 +24,7 @@ export interface NavIconButtonProps {
   className?: string;
 
   /** Optional custom hover animation class */
-  hoverAnimation?: "scale" | "scale-rotate" | "glow" | "none";
+  hoverAnimation?: "scale" | "scale-rotate" | "shine" | "none";
 
   /** Disabled state */
   disabled?: boolean;
@@ -33,7 +33,7 @@ export interface NavIconButtonProps {
 const hoverAnimations = {
   scale: "hover:scale-105",
   "scale-rotate": "hover:scale-110 hover:rotate-6",
-  glow: "",
+  shine: "",
   none: "",
 };
 
