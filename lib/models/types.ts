@@ -1088,3 +1088,85 @@ export function isQuestionSearchResult(obj: unknown): obj is QuestionSearchResul
     Array.isArray(searchResult.matchedKeywords)
   );
 }
+
+// ============================================
+// Student Dashboard Widget Types
+// ============================================
+
+/**
+ * Deadline for upcoming course events
+ *
+ * Used in UpcomingDeadlines component to display
+ * assignment due dates, exams, office hours, etc.
+ */
+export interface Deadline {
+  /** Unique deadline identifier */
+  id: string;
+
+  /** Deadline title (e.g., "Assignment 3 Due") */
+  title: string;
+
+  /** Course ID this deadline belongs to */
+  courseId: string;
+
+  /** Course name for display */
+  courseName: string;
+
+  /** Type of deadline */
+  type: "assignment" | "exam" | "office-hours" | "quiz" | "project";
+
+  /** ISO 8601 deadline timestamp */
+  dueDate: string;
+
+  /** Optional link to assignment/event details */
+  link?: string;
+}
+
+/**
+ * Quick action button for student dashboard
+ *
+ * Used in QuickActionsPanel component for
+ * fast access to common student tasks.
+ */
+export interface QuickActionButton {
+  /** Unique action identifier */
+  id: string;
+
+  /** Display label for the action */
+  label: string;
+
+  /** Icon component from lucide-react */
+  icon: React.ComponentType<{ className?: string }>;
+
+  /** Navigation href (uses Link) */
+  href?: string;
+
+  /** Click callback (alternative to href) */
+  onClick?: () => void;
+
+  /** Optional badge count (e.g., unread notifications) */
+  badgeCount?: number;
+
+  /** Visual variant */
+  variant?: "default" | "primary" | "success";
+}
+
+/**
+ * Recommended thread with relevance scoring
+ *
+ * Used in StudentRecommendations component to show
+ * personalized thread suggestions based on activity.
+ */
+export interface RecommendedThread {
+  /** The thread being recommended */
+  thread: Thread;
+
+  /** Course name for display context */
+  courseName: string;
+
+  /** Relevance score (0-100, higher = more relevant) */
+  relevanceScore: number;
+
+  /** Reason for recommendation */
+  reason: "high-engagement" | "trending" | "unanswered" | "similar-interests";
+}
