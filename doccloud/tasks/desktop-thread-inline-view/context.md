@@ -163,6 +163,12 @@ _(To be created by Component Architect agent)_
   - Enhanced ThreadDetailPanel with optional `context` prop for accessibility
   - TypeScript compilation and linting verified ✅
   - Dev server compiled successfully ✅
+- **2025-10-14**: Scrolling issue fixed:
+  - Investigated scrolling issue in desktop inline view
+  - Root cause: SidebarLayout main content had `overflow-hidden`
+  - Fixed: Changed to `overflow-y-auto sidebar-scroll` in SidebarLayout (line 193)
+  - Result: Thread detail now scrollable on desktop with custom scrollbar styling
+  - TypeScript compilation verified ✅
 
 ---
 

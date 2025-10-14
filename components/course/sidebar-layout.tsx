@@ -186,11 +186,11 @@ export function SidebarLayout({
           {threadListSidebar}
         </aside>
 
-        {/* Main Content Area - Simplified (thread detail now in modal) */}
+        {/* Main Content Area - Thread detail on desktop */}
         {children && (
           <main
             className={cn(
-              "relative h-full overflow-hidden transition-all duration-300 ease-in-out"
+              "relative h-full overflow-y-auto sidebar-scroll transition-all duration-300 ease-in-out"
             )}
             aria-label="Main content"
           >
