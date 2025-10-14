@@ -175,7 +175,7 @@ export function StatCard({
 
         {/* Value Row */}
         <div className="flex items-baseline gap-2">
-          <p className="text-3xl font-bold glass-text">{value.toLocaleString()}</p>
+          <p className="text-2xl sm:text-3xl font-bold glass-text">{value.toLocaleString()}</p>
           {trend && (
             <div className={cn("flex items-center gap-1", getTrendColor(trend.direction))}>
               {getTrendIcon(trend.direction)}

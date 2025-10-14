@@ -64,7 +64,7 @@ export function EnhancedCourseCard({
   // Loading state
   if (loading) {
     return (
-      <Card className={cn("glass-panel h-[220px] flex flex-col overflow-hidden", className)}>
+      <Card className={cn("glass-panel min-h-56 flex flex-col overflow-hidden", className)}>
         <CardHeader className="p-4 max-h-[100px] shrink-0">
           <div className="flex items-start gap-3">
             <Skeleton className="size-10 rounded-lg bg-glass-medium" />
@@ -96,7 +96,7 @@ export function EnhancedCourseCard({
         <Card
           variant="glass-hover"
           className={cn(
-            "group min-h-[220px] flex flex-col overflow-hidden transition-all duration-200",
+            "group min-h-56 flex flex-col overflow-hidden transition-all duration-200",
             !prefersReducedMotion && "hover:scale-[1.03]"
           )}
         >
