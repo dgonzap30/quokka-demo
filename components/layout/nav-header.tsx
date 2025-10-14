@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCurrentUser, useLogout, useCourse, useStudentDashboard } from "@/lib/api/hooks";
 import { GlobalNavBar } from "@/components/layout/global-nav-bar";
 import { CourseContextBar } from "@/components/layout/course-context-bar";
-import { MobileNav } from "@/components/layout/mobile-nav";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { QuokkaAssistantModal } from "@/components/ai/quokka-assistant-modal";
 import { getNavContext } from "@/lib/utils/nav-config";
 
@@ -18,9 +18,6 @@ export function NavHeader() {
 
   // AI Assistant Modal state
   const [aiModalOpen, setAiModalOpen] = useState(false);
-
-  // Mobile menu state
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Detect navigation context (must be before early returns for hook)
   const navContext = getNavContext(pathname || '');
@@ -97,7 +94,6 @@ export function NavHeader() {
         onOpenSettings={() => router.push("/settings")}
         quokkaPoints={dashboardData?.quokkaPoints}
         onViewPointsDetails={() => router.push("/dashboard?section=points")}
-        onMenuClick={() => setMobileMenuOpen(true)}
       />
 
       {/* AI Assistant Modal */}
@@ -125,23 +121,13 @@ export function NavHeader() {
         />
       )}
 
-      {/* Mobile Navigation - Hamburger Menu */}
-      <MobileNav
+      {/* Mobile Bottom Navigation - Native App Style */}
+      <MobileBottomNav
         currentPath={pathname || ""}
-        user={user}
-        onLogout={handleLogout}
+        onNavigateHome={() => router.push("/dashboard")}
         onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
         onOpenAIAssistant={() => setAiModalOpen(true)}
         onOpenSupport={() => router.push("/support")}
-        onOpenSettings={() => router.push("/settings")}
-        items={navContext.items}
-        courseContext={inCourseContext ? {
-          courseId: course.id,
-          courseCode: course.code,
-          courseName: course.name,
-        } : undefined}
-        open={mobileMenuOpen}
-        onOpenChange={setMobileMenuOpen}
       />
     </div>
   );
