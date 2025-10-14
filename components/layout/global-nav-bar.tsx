@@ -18,9 +18,11 @@ import {
   HelpCircle,
   Settings,
   User,
+  Menu,
 } from "lucide-react";
-import { NavIconButton } from "./nav-icon-button";
+import { QuokkaPointsBadge } from "@/components/navbar/quokka-points-badge";
 import { cn } from "@/lib/utils";
+import type { QuokkaPointsData } from "@/lib/models/types";
 
 export interface GlobalNavBarProps {
   /** Current user information */
@@ -51,8 +53,17 @@ export interface GlobalNavBarProps {
   /** Settings handler - navigates to settings page */
   onOpenSettings?: () => void;
 
+  /** Optional Quokka Points data for navbar badge */
+  quokkaPoints?: QuokkaPointsData;
+
+  /** Optional handler to view detailed points breakdown */
+  onViewPointsDetails?: () => void;
+
   /** Optional className for composition */
   className?: string;
+
+  /** Mobile menu handler - opens mobile navigation drawer */
+  onMenuClick?: () => void;
 }
 
 export function GlobalNavBar({
@@ -63,7 +74,10 @@ export function GlobalNavBar({
   onOpenAIAssistant,
   onOpenSupport,
   onOpenSettings,
+  quokkaPoints,
+  onViewPointsDetails,
   className,
+  onMenuClick,
 }: GlobalNavBarProps) {
   const router = useRouter();
 
@@ -80,8 +94,29 @@ export function GlobalNavBar({
       >
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-14 items-center justify-between gap-4">
-          {/* Left Section: Logo + Breadcrumb */}
+          {/* Left Section: Mobile Menu + Logo + Breadcrumb */}
           <div className="flex items-center gap-3 min-w-0">
+            {/* Mobile Menu Button (visible on mobile only) */}
+            {onMenuClick && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onMenuClick}
+                className={cn(
+                  "md:hidden min-h-[44px] min-w-[44px] h-11 w-11",
+                  "transition-all duration-300 ease-out",
+                  "hover:bg-primary/5 hover:scale-[1.08]",
+                  "motion-reduce:hover:scale-100",
+                  "focus-visible:ring-4 focus-visible:ring-accent/60"
+                )}
+                aria-label="Open mobile menu"
+                aria-haspopup="true"
+              >
+                <Menu className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            )}
+
             {/* Logo */}
             <Link
               href="/dashboard"
@@ -240,6 +275,18 @@ export function GlobalNavBar({
                 </Button>
               )}
             </div>
+
+            {/* Quokka Points Badge (Desktop Only) */}
+            {quokkaPoints && (
+              <>
+                <div className="h-6 w-px bg-border" aria-hidden="true" />
+                <QuokkaPointsBadge
+                  {...quokkaPoints}
+                  onViewDetails={onViewPointsDetails}
+                  className="hidden md:flex"
+                />
+              </>
+            )}
 
             {/* User Account Menu */}
             <DropdownMenu>

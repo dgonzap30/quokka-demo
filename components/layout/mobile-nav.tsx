@@ -60,6 +60,12 @@ export interface MobileNavProps {
     courseCode: string;
     courseName: string;
   };
+
+  /** Optional external state control for open/close */
+  open?: boolean;
+
+  /** Optional handler for external state control */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function MobileNav({
@@ -72,23 +78,32 @@ export function MobileNav({
   onOpenSettings,
   items,
   courseContext,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: MobileNavProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const handleOpenChange = externalOnOpenChange || setInternalOpen;
 
   return (
     <div className="md:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11"
-            aria-label="Open navigation menu"
-            aria-expanded={open}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
+      <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+        {/* Only show trigger if not externally controlled */}
+        {externalOpen === undefined && (
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              aria-label="Open navigation menu"
+              aria-expanded={isOpen}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+        )}
 
         <SheetContent
           side="left"
@@ -134,7 +149,7 @@ export function MobileNav({
                     variant="ghost"
                     className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-transparent transition-all duration-300"
                     onClick={() => {
-                      setOpen(false);
+                      handleOpenChange(false);
                       onAskQuestion();
                     }}
                   >
@@ -148,7 +163,7 @@ export function MobileNav({
                     variant="ghost"
                     className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-transparent transition-all duration-300"
                     onClick={() => {
-                      setOpen(false);
+                      handleOpenChange(false);
                       onOpenAIAssistant();
                     }}
                   >
@@ -162,7 +177,7 @@ export function MobileNav({
                     variant="ghost"
                     className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-accent/5 transition-all duration-300 group"
                     onClick={() => {
-                      setOpen(false);
+                      handleOpenChange(false);
                       onOpenSupport();
                     }}
                   >
@@ -176,7 +191,7 @@ export function MobileNav({
                     variant="ghost"
                     className="w-full justify-start gap-3 min-h-[44px] text-base font-medium hover:bg-primary/5 transition-all duration-300 group"
                     onClick={() => {
-                      setOpen(false);
+                      handleOpenChange(false);
                       onOpenSettings();
                     }}
                   >
@@ -241,7 +256,7 @@ export function MobileNav({
                   variant="ghost"
                   className="w-full justify-start gap-3 text-danger min-h-[44px]"
                   onClick={() => {
-                    setOpen(false);
+                    handleOpenChange(false);
                     onLogout();
                   }}
                 >

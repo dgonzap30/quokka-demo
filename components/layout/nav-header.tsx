@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCurrentUser, useLogout, useCourse } from "@/lib/api/hooks";
+import { useCurrentUser, useLogout, useCourse, useStudentDashboard } from "@/lib/api/hooks";
 import { GlobalNavBar } from "@/components/layout/global-nav-bar";
 import { CourseContextBar } from "@/components/layout/course-context-bar";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -19,12 +19,17 @@ export function NavHeader() {
   // AI Assistant Modal state
   const [aiModalOpen, setAiModalOpen] = useState(false);
 
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   // Detect navigation context (must be before early returns for hook)
   const navContext = getNavContext(pathname || '');
 
   // Fetch course data (hook must be called unconditionally, before early returns)
   const { data: course } = useCourse(navContext.courseId);
 
+  // Fetch dashboard data for Quokka Points (hook must be called unconditionally)
+  const { data: dashboardData } = useStudentDashboard(user?.id || '');
 
   // Don't show nav on auth pages
   if (pathname?.startsWith("/login") || pathname?.startsWith("/signup")) {
@@ -90,6 +95,9 @@ export function NavHeader() {
         onOpenAIAssistant={() => setAiModalOpen(true)}
         onOpenSupport={() => router.push("/support")}
         onOpenSettings={() => router.push("/settings")}
+        quokkaPoints={dashboardData?.quokkaPoints}
+        onViewPointsDetails={() => router.push("/dashboard?section=points")}
+        onMenuClick={() => setMobileMenuOpen(true)}
       />
 
       {/* AI Assistant Modal */}
@@ -132,6 +140,8 @@ export function NavHeader() {
           courseCode: course.code,
           courseName: course.name,
         } : undefined}
+        open={mobileMenuOpen}
+        onOpenChange={setMobileMenuOpen}
       />
     </div>
   );
