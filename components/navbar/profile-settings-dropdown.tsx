@@ -150,7 +150,7 @@ export function ProfileSettingsDropdown({
                 className="w-full justify-start"
                 onClick={onNavigateProfile}
               >
-                <User className="h-4 w-4" aria-hidden="true" />
+                <CircleUserRound className="h-4 w-4" aria-hidden="true" />
                 View Profile
               </Button>
             )}
