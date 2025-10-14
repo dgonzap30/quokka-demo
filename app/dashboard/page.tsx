@@ -203,7 +203,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
         {/* Stats Overview */}
         <section aria-labelledby="stats-heading" className="space-y-6">
           <h2 id="stats-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">Your Statistics</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               label={data.stats.totalCourses.label}
               value={data.stats.totalCourses.value}
@@ -480,7 +480,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
         {/* Stats Overview */}
         <section aria-labelledby="instructor-stats-heading" className="space-y-6">
           <h2 id="instructor-stats-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">Your Statistics</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <StatCard
               label={data.stats.totalCourses.label}
               value={data.stats.totalCourses.value}
