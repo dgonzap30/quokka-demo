@@ -1,4 +1,6 @@
 @source "../{app,components,lib}";
+@source not "../doccloud";
+@source not "../**/*.md";
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -344,6 +346,21 @@
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: var(--neutral-200);
   --sidebar-ring: var(--accent);
+
+  /* ===== Mobile-Specific Tokens (WCAG 2.2 AA) ===== */
+  --touch-target-min: 44px;           /* WCAG 2.5.5 minimum touch target */
+  --touch-spacing-min: 8px;           /* Minimum spacing between touch targets */
+  --mobile-padding: 16px;             /* Standard mobile content padding */
+  --mobile-padding-sm: 12px;          /* Compact mobile padding */
+  --mobile-padding-lg: 20px;          /* Generous mobile padding */
+  --mobile-sheet-width: 280px;        /* Mobile drawer/sheet width */
+  --mobile-header-height: 56px;       /* Mobile header height (14 * 4px) */
+
+  /* Safe Area Insets (iOS notch, Android gesture nav) */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
 }
 
 .dark {
@@ -680,6 +697,78 @@
   .focus\:border-glass:focus {
     border-color: var(--border-glass);
   }
+
+  /* ===== Mobile Touch Target Utilities ===== */
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+
+  .touch-spacing {
+    gap: var(--touch-spacing-min);
+  }
+
+  /* ===== Mobile Padding Utilities ===== */
+  .mobile-padding {
+    padding: var(--mobile-padding);
+  }
+
+  .mobile-padding-x {
+    padding-left: var(--mobile-padding);
+    padding-right: var(--mobile-padding);
+  }
+
+  .mobile-padding-y {
+    padding-top: var(--mobile-padding);
+    padding-bottom: var(--mobile-padding);
+  }
+
+  /* ===== Mobile-Optimized Glass (Reduced Blur) ===== */
+  @media (max-width: 767px) {
+    .glass-mobile {
+      backdrop-filter: blur(var(--blur-sm));
+      background: var(--glass-medium);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-glass-sm);
+    }
+
+    /* Reduce blur intensity on mobile for better performance */
+    .glass-panel {
+      backdrop-filter: blur(var(--blur-sm));
+    }
+
+    .glass-panel-strong {
+      backdrop-filter: blur(var(--blur-md));
+    }
+
+    .glass-overlay {
+      backdrop-filter: blur(var(--blur-lg)) saturate(120%);
+    }
+  }
+
+  /* ===== Safe Area Support ===== */
+  .safe-top {
+    padding-top: max(var(--mobile-padding), var(--safe-area-top));
+  }
+
+  .safe-bottom {
+    padding-bottom: max(var(--mobile-padding), var(--safe-area-bottom));
+  }
+
+  .safe-left {
+    padding-left: max(var(--mobile-padding), var(--safe-area-left));
+  }
+
+  .safe-right {
+    padding-right: max(var(--mobile-padding), var(--safe-area-right));
+  }
+
+  .safe-inset {
+    padding-top: max(var(--mobile-padding), var(--safe-area-top));
+    padding-right: max(var(--mobile-padding), var(--safe-area-right));
+    padding-bottom: max(var(--mobile-padding), var(--safe-area-bottom));
+    padding-left: max(var(--mobile-padding), var(--safe-area-left));
+  }
 }
 
 /* ===== AI-First Animation System ===== */
@@ -938,7 +1027,7 @@
   scrollbar-color: color-mix(in srgb, var(--glass-medium) 70%, transparent) color-mix(in srgb, var(--glass-subtle) 50%, transparent);
 }
 
-/* ===== Reduced Motion Support ===== */
+/* ===== Reduced Motion & Mobile Performance ===== */
 @media (prefers-reduced-motion: reduce) {
   .liquid-border,
   .animate-liquid,
@@ -948,5 +1037,21 @@
   .glass-panel-strong {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Mobile Performance: Disable expensive animations */
+@media (max-width: 767px) {
+  .animate-liquid,
+  .animate-liquid-float,
+  .animate-glass-shimmer {
+    animation-duration: 0s !important;
+    animation: none !important;
+  }
+
+  /* Reduce liquid background layers on mobile */
+  .animate-liquid-float {
+    transform: none !important;
+    opacity: 0.5;
   }
 }
