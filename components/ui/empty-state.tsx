@@ -94,6 +94,8 @@ export function EmptyState({
     <Card
       variant={variant}
       className={cn("p-12 md:p-16 text-center", className)}
+      role="status"
+      aria-live="polite"
     >
       <div className="max-w-md mx-auto space-y-6">
         {/* Icon or Emoji */}
