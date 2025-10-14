@@ -170,7 +170,6 @@ export function MobileFilterSheet({
       <SheetContent
         side="bottom"
         id="mobile-filter-sheet"
-        aria-describedby="filter-description"
         className={cn(
           "h-[80vh] max-h-[600px]",
           "flex flex-col",
@@ -179,18 +178,19 @@ export function MobileFilterSheet({
           className
         )}
       >
-        {/* Header */}
-        <SheetHeader className="flex-shrink-0 border-b border-glass pb-4">
-          <SheetTitle id="filter-title" className="heading-4 glass-text">
-            Filters
-          </SheetTitle>
-          <SheetDescription
-            id="filter-description"
-            className="text-sm text-muted-foreground glass-text"
-          >
+        {/* Title - Direct child for Radix accessibility */}
+        <SheetTitle className="sr-only">Filters</SheetTitle>
+        <SheetDescription className="sr-only">
+          Search and filter threads by status and tags
+        </SheetDescription>
+
+        {/* Header - Visual header with counts */}
+        <div className="flex-shrink-0 border-b border-glass pb-4 px-6 pt-6">
+          <h2 className="heading-4 glass-text">Filters</h2>
+          <p className="text-sm text-muted-foreground glass-text mt-1">
             {filteredThreads} of {totalThreads} threads
-          </SheetDescription>
-        </SheetHeader>
+          </p>
+        </div>
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto sidebar-scroll">
