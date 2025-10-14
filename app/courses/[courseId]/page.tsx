@@ -11,7 +11,7 @@ import { AskQuestionModal } from "@/components/course/ask-question-modal";
 import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
 import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
-import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
+import { ThreadModal } from "@/components/course/thread-modal";
 import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
@@ -211,39 +211,43 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
     <>
       {/* Conditional Rendering: Threads View or Overview */}
       {activeTab === "threads" ? (
-        /* Gmail-Style Double Sidebar Layout */
-        <SidebarLayout
-          courseId={courseId}
-          initialThreadId={selectedThreadId}
-          selectedThreadId={selectedThreadId}
-          filterSidebar={
-            <FilterSidebar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              tags={tagsWithCounts}
-              selectedTags={selectedTags}
-              onTagsChange={setSelectedTags}
-              totalThreads={threads?.length || 0}
-              filteredThreads={filteredThreads.length}
-            />
-          }
-          threadListSidebar={
-            <ThreadListSidebar
-              threads={filteredThreads}
-              selectedThreadId={selectedThreadId}
-              onThreadSelect={handleThreadSelect}
-              isLoading={threadsLoading}
-              currentUserId={user?.id}
-            />
-          }
-        >
-          {/* Main Content: Only render when thread selected */}
-          {selectedThreadId ? (
-            <ThreadDetailPanel
-              threadId={selectedThreadId}
-              onClose={() => {
+        <>
+          {/* Gmail-Style Double Sidebar Layout */}
+          <SidebarLayout
+            courseId={courseId}
+            initialThreadId={selectedThreadId}
+            selectedThreadId={selectedThreadId}
+            filterSidebar={
+              <FilterSidebar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                tags={tagsWithCounts}
+                selectedTags={selectedTags}
+                onTagsChange={setSelectedTags}
+                totalThreads={threads?.length || 0}
+                filteredThreads={filteredThreads.length}
+              />
+            }
+            threadListSidebar={
+              <ThreadListSidebar
+                threads={filteredThreads}
+                selectedThreadId={selectedThreadId}
+                onThreadSelect={handleThreadSelect}
+                isLoading={threadsLoading}
+                currentUserId={user?.id}
+              />
+            }
+          >
+            {/* Empty - thread detail now shown in modal */}
+          </SidebarLayout>
+
+          {/* Thread Detail Modal */}
+          <ThreadModal
+            open={!!selectedThreadId}
+            onOpenChange={(open) => {
+              if (!open) {
                 setSelectedThreadId(null);
                 // Remove thread param from URL
                 const params = new URLSearchParams(searchParams.toString());
@@ -252,10 +256,11 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
                   ? `/courses/${courseId}?${params.toString()}`
                   : `/courses/${courseId}`;
                 window.history.replaceState(null, '', newUrl);
-              }}
-            />
-          ) : null}
-        </SidebarLayout>
+              }
+            }}
+            threadId={selectedThreadId}
+          />
+        </>
       ) : (
         /* Overview Tab: Course stats, resources, activity */
         <div className="min-h-screen">

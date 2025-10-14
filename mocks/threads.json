@@ -9,7 +9,8 @@
     "tags": [
       "algorithms",
       "binary-search",
-      "debugging"
+      "debugging",
+      "assignment-1"
     ],
     "views": 52,
     "createdAt": "2025-09-13T17:12:26.013Z",
@@ -45,7 +46,8 @@
     "tags": [
       "loops",
       "recursion",
-      "design"
+      "design",
+      "assignment-1"
     ],
     "views": 70,
     "createdAt": "2025-09-15T19:12:26.013Z",
@@ -135,7 +137,8 @@
     "tags": [
       "graphs",
       "algorithms",
-      "dfs-bfs"
+      "dfs-bfs",
+      "assignment-2"
     ],
     "views": 28,
     "createdAt": "2025-09-20T19:12:26.013Z",
@@ -189,7 +192,8 @@
     "tags": [
       "integration",
       "calculus",
-      "integration-by-parts"
+      "integration-by-parts",
+      "assignment-3"
     ],
     "views": 52,
     "createdAt": "2025-09-23T17:12:26.013Z",
@@ -351,7 +355,8 @@
     "tags": [
       "circuits",
       "kirchhoff",
-      "current"
+      "current",
+      "assignment-4"
     ],
     "views": 57,
     "createdAt": "2025-10-02T18:12:26.013Z",
@@ -387,7 +392,8 @@
     "tags": [
       "writing",
       "research",
-      "structure"
+      "structure",
+      "assignment-5"
     ],
     "views": 43,
     "createdAt": "2025-10-04T17:12:26.013Z",

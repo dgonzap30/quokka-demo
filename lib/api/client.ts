@@ -47,6 +47,9 @@ import {
   calculateAICoverage,
 } from "@/lib/utils/dashboard-calculations";
 
+import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
+import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
+
 import {
   seedData,
   getAuthSession,
@@ -79,6 +82,7 @@ import {
   addResponseTemplate,
   deleteResponseTemplate as deleteResponseTemplateFromStore,
   incrementTemplateUsage,
+  getAssignments,
 } from "@/lib/store/localStore";
 
 // ============================================
@@ -1032,6 +1036,20 @@ export const api = {
 
     const unreadCount = notifications.filter((n) => !n.read).length;
 
+    // Calculate Quokka Points
+    const quokkaPoints = calculateQuokkaPoints(userId, userThreads, userPosts);
+
+    // Calculate Assignment Q&A Opportunities
+    const assignments = getAssignments();
+    const assignmentQA = calculateAllAssignmentQA(
+      assignments,
+      allThreads,
+      allPosts,
+      users,
+      userId,
+      enrolledCourses.map(c => ({ id: c.id, name: c.name }))
+    );
+
     return {
       enrolledCourses,
       recentActivity,
@@ -1039,6 +1057,8 @@ export const api = {
       unreadCount,
       stats,
       goals,
+      quokkaPoints,
+      assignmentQA,
     };
   },
 

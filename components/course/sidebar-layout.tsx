@@ -30,9 +30,9 @@ export interface SidebarLayoutProps {
   threadListSidebar: ReactNode;
 
   /**
-   * Main content (thread detail view)
+   * Main content (optional - thread detail now handled by modal)
    */
-  children: ReactNode;
+  children?: ReactNode;
 
   /**
    * Optional className for composition
@@ -186,17 +186,13 @@ export function SidebarLayout({
           {threadListSidebar}
         </aside>
 
-        {/* Main Content Area - Only render when thread is selected */}
-        {selectedThreadId && (
+        {/* Main Content Area - Simplified (thread detail now in modal) */}
+        {children && (
           <main
             className={cn(
-              "relative h-full overflow-y-auto sidebar-scroll transition-all duration-300 ease-in-out",
-              // Mobile: Fixed full-screen overlay
-              isMobile && "fixed inset-0 z-50 bg-background",
-              // Tablet/Desktop: Grid column
-              !isMobile && "relative"
+              "relative h-full overflow-hidden transition-all duration-300 ease-in-out"
             )}
-            aria-label="Thread content"
+            aria-label="Main content"
           >
             {children}
           </main>

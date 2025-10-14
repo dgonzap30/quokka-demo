@@ -395,7 +395,7 @@ const prefersReducedMotion = useReducedMotion();
 **Hover transitions:**
 - Glass cards: `hover:glass-panel-strong` (intensify blur)
 - Scale: `hover:scale-[1.02]` or `hover:scale-[1.03]` (subtle lift)
-- Glow: Add `hover:shadow-[var(--glow-*)]` on interactive cards
+- Glow: Add `hover:shadow-[var(--glow-variant)]` on interactive cards
 
 **Duration standards:**
 - Quick feedback: `duration-[180ms]` (hover, focus)

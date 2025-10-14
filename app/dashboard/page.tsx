@@ -130,12 +130,11 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
 
   return (
     <>
-      <main id="main-content" className="min-h-screen p-4 md:p-6">
-        <div className="container-wide space-y-6">
-          {/* Hero Section - Reduced Padding */}
-          <section aria-labelledby="welcome-heading" className="py-2 md:py-4 space-y-3">
-            <div className="space-y-2">
-              <h1 id="welcome-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold glass-text">Welcome back, {user.name}!</h1>
+      <div id="main-content" className="container-wide space-y-6 p-4 md:p-6">
+        {/* Hero Section */}
+        <section aria-labelledby="welcome-heading" className="space-y-3">
+          <div className="space-y-2">
+            <h1 id="welcome-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold glass-text">Welcome back, {user.name}!</h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
               Your Q&A companion - ask questions, help peers, and collaborate with AI
             </p>
@@ -250,8 +249,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
             />
           </div>
         </section>
-        </div>
-      </main>
+      </div>
     </>
   );
 }
@@ -345,10 +343,9 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
 
   return (
     <>
-      <main id="main-content" className="min-h-screen p-4 md:p-6">
-        <div className="container-wide space-y-8">
-          {/* Hero Section with Search */}
-          <section aria-labelledby="dashboard-heading" className="py-2 md:py-4 space-y-6">
+      <div id="main-content" className="container-wide space-y-8 p-4 md:p-6">
+        {/* Hero Section with Search */}
+        <section aria-labelledby="dashboard-heading" className="space-y-6">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-3 flex-1">
                 <h1 id="dashboard-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold glass-text">
@@ -528,8 +525,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
             />
           </div>
         </section>
-        </div>
-      </main>
+      </div>
     </>
   );
 }

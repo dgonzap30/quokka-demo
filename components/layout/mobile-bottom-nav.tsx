@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, MessageSquarePlus, Sparkles, HelpCircle } from "lucide-react";
+import { Home, MessageSquarePlus, Sparkles, HelpCircle, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface MobileBottomNavProps {
@@ -10,8 +10,11 @@ export interface MobileBottomNavProps {
   /** Navigate to home/dashboard */
   onNavigateHome: () => void;
 
-  /** Ask Question handler - opens modal/page */
+  /** Ask Question handler - opens modal/page (CONDITIONAL - only in course context) */
   onAskQuestion?: () => void;
+
+  /** Open Courses modal handler (NEW - CONDITIONAL - only outside course context) */
+  onOpenCourses?: () => void;
 
   /** AI Assistant handler - opens AI chat */
   onOpenAIAssistant?: () => void;
@@ -46,6 +49,7 @@ export function MobileBottomNav({
   currentPath,
   onNavigateHome,
   onAskQuestion,
+  onOpenCourses,
   onOpenAIAssistant,
   onOpenSupport,
 }: MobileBottomNavProps) {
@@ -85,7 +89,38 @@ export function MobileBottomNav({
             <span className="text-xs font-medium">Home</span>
           </button>
 
-          {/* Ask Question */}
+          {/* Courses Button - Show when outside course context */}
+          {onOpenCourses && (
+            <button
+              onClick={onOpenCourses}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 py-2 px-3 min-h-[44px]",
+                "transition-all duration-300 ease-out",
+                "hover:bg-secondary/5 active:bg-secondary/10",
+                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary/60",
+                "group"
+              )}
+              aria-label="Select Course"
+              aria-haspopup="dialog"
+            >
+              <BookOpen
+                className={cn(
+                  "h-6 w-6 text-secondary/70",
+                  "transition-all duration-300 ease-out",
+                  "group-hover:text-secondary",
+                  "group-hover:scale-110",
+                  "group-active:scale-105",
+                  "motion-reduce:group-hover:scale-100 motion-reduce:group-active:scale-100"
+                )}
+                aria-hidden="true"
+              />
+              <span className="text-xs font-medium text-secondary dark:text-secondary">
+                Courses
+              </span>
+            </button>
+          )}
+
+          {/* Ask Question - Show when in course context */}
           {onAskQuestion && (
             <button
               onClick={onAskQuestion}

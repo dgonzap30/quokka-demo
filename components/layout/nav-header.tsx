@@ -7,6 +7,7 @@ import { GlobalNavBar } from "@/components/layout/global-nav-bar";
 import { CourseContextBar } from "@/components/layout/course-context-bar";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { QuokkaAssistantModal } from "@/components/ai/quokka-assistant-modal";
+import { CourseSelectionModal } from "@/components/course/course-selection-modal";
 import { getNavContext } from "@/lib/utils/nav-config";
 
 export function NavHeader() {
@@ -18,6 +19,9 @@ export function NavHeader() {
 
   // AI Assistant Modal state
   const [aiModalOpen, setAiModalOpen] = useState(false);
+
+  // Courses Modal state (NEW)
+  const [coursesModalOpen, setCoursesModalOpen] = useState(false);
 
   // Detect navigation context (must be before early returns for hook)
   const navContext = getNavContext(pathname || '');
@@ -91,7 +95,6 @@ export function NavHeader() {
         onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
         onOpenAIAssistant={() => setAiModalOpen(true)}
         onOpenSupport={() => router.push("/support")}
-        onOpenSettings={() => router.push("/settings")}
         quokkaPoints={dashboardData?.quokkaPoints}
         onViewPointsDetails={() => router.push("/dashboard?section=points")}
       />
@@ -126,8 +129,16 @@ export function NavHeader() {
         currentPath={pathname || ""}
         onNavigateHome={() => router.push("/dashboard")}
         onAskQuestion={inCourseContext ? () => router.push(`/courses/${course.id}?modal=ask`) : undefined}
+        onOpenCourses={!inCourseContext ? () => setCoursesModalOpen(true) : undefined}
         onOpenAIAssistant={() => setAiModalOpen(true)}
         onOpenSupport={() => router.push("/support")}
+      />
+
+      {/* Courses Selection Modal */}
+      <CourseSelectionModal
+        open={coursesModalOpen}
+        onOpenChange={setCoursesModalOpen}
+        courses={dashboardData?.enrolledCourses || []}
       />
     </div>
   );

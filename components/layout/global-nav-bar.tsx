@@ -5,22 +5,12 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/ui/global-search";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   MessageSquarePlus,
   Sparkles,
   HelpCircle,
-  Settings,
-  User,
-  Menu,
 } from "lucide-react";
 import { QuokkaPointsBadge } from "@/components/navbar/quokka-points-badge";
+import { ProfileSettingsDropdown } from "@/components/navbar/profile-settings-dropdown";
 import { cn } from "@/lib/utils";
 import type { QuokkaPointsData } from "@/lib/models/types";
 
@@ -50,9 +40,6 @@ export interface GlobalNavBarProps {
   /** Support handler - navigates to support/help page */
   onOpenSupport?: () => void;
 
-  /** Settings handler - navigates to settings page */
-  onOpenSettings?: () => void;
-
   /** Optional Quokka Points data for navbar badge */
   quokkaPoints?: QuokkaPointsData;
 
@@ -61,9 +48,6 @@ export interface GlobalNavBarProps {
 
   /** Optional className for composition */
   className?: string;
-
-  /** Mobile menu handler - opens mobile navigation drawer */
-  onMenuClick?: () => void;
 }
 
 export function GlobalNavBar({
@@ -73,11 +57,9 @@ export function GlobalNavBar({
   onAskQuestion,
   onOpenAIAssistant,
   onOpenSupport,
-  onOpenSettings,
   quokkaPoints,
   onViewPointsDetails,
   className,
-  onMenuClick,
 }: GlobalNavBarProps) {
   const router = useRouter();
 
@@ -94,29 +76,8 @@ export function GlobalNavBar({
       >
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-14 items-center justify-between gap-4">
-          {/* Left Section: Mobile Menu + Logo + Breadcrumb */}
+          {/* Left Section: Logo + Breadcrumb */}
           <div className="flex items-center gap-3 min-w-0">
-            {/* Mobile Menu Button (visible on mobile only) */}
-            {onMenuClick && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onMenuClick}
-                className={cn(
-                  "md:hidden min-h-[44px] min-w-[44px] h-11 w-11",
-                  "transition-all duration-300 ease-out",
-                  "hover:bg-primary/5 hover:scale-[1.08]",
-                  "motion-reduce:hover:scale-100",
-                  "focus-visible:ring-4 focus-visible:ring-accent/60"
-                )}
-                aria-label="Open mobile menu"
-                aria-haspopup="true"
-              >
-                <Menu className="h-5 w-5" aria-hidden="true" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            )}
-
             {/* Logo */}
             <Link
               href="/dashboard"
@@ -156,7 +117,7 @@ export function GlobalNavBar({
 
           {/* Right Section: Icon Actions + Avatar */}
           <div className="flex items-center gap-3">
-            {/* Icon Actions Group (Desktop Only) */}
+            {/* Desktop-only Actions Group */}
             <div className="hidden md:flex items-center gap-3">
               {/* Ask Question Icon */}
               {onAskQuestion && (
@@ -223,7 +184,7 @@ export function GlobalNavBar({
               )}
 
               {/* Visual Divider */}
-              {(onOpenSupport || onOpenSettings) && (
+              {onOpenSupport && (
                 <div className="h-6 w-px bg-border" aria-hidden="true" />
               )}
 
@@ -250,95 +211,30 @@ export function GlobalNavBar({
                   <span className="sr-only">Support</span>
                 </Button>
               )}
-
-              {/* Settings Icon */}
-              {onOpenSettings && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onOpenSettings}
-                  className={cn(
-                    "min-h-[44px] min-w-[44px] h-11 w-11",
-                    "transition-all duration-300 ease-out",
-                    "hover:bg-primary/5 hover:scale-[1.08]",
-                    "motion-reduce:hover:scale-100",
-                    "focus-visible:ring-4 focus-visible:ring-accent/60",
-                    "group"
-                  )}
-                  aria-label="Settings"
-                >
-                  <Settings
-                    className="h-5 w-5 text-foreground/80 transition-all duration-300 ease-out group-hover:text-primary group-hover:scale-110 group-hover:rotate-45 motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0"
-                    aria-hidden="true"
-                  />
-                  <span className="sr-only">Settings</span>
-                </Button>
-              )}
             </div>
 
-            {/* Quokka Points Badge (Desktop Only) */}
+            {/* Quokka Points Badge (Always Visible) */}
             {quokkaPoints && (
               <>
-                <div className="h-6 w-px bg-border" aria-hidden="true" />
+                <div className="h-6 w-px bg-border hidden md:block" aria-hidden="true" />
                 <QuokkaPointsBadge
                   {...quokkaPoints}
                   onViewDetails={onViewPointsDetails}
-                  className="hidden md:flex"
+                  className="flex"
                 />
               </>
             )}
 
-            {/* User Account Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "min-h-[44px] min-w-[44px] h-11 w-11",
-                    "transition-all duration-300 ease-out",
-                    "hover:bg-secondary/5 hover:scale-[1.08]",
-                    "motion-reduce:hover:scale-100",
-                    "focus-visible:ring-4 focus-visible:ring-accent/60",
-                    "group"
-                  )}
-                  aria-label="Account menu"
-                  aria-haspopup="true"
-                >
-                  <User
-                    className="h-5 w-5 text-foreground/80 transition-all duration-300 ease-out group-hover:text-secondary group-hover:scale-110 motion-reduce:group-hover:scale-100"
-                    aria-hidden="true"
-                  />
-                  <span className="sr-only">Account</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {user.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground capitalize">
-                      {user.role}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={onLogout}
-                  className="text-danger cursor-pointer"
-                >
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Profile & Settings Dropdown */}
+            <ProfileSettingsDropdown
+              user={user}
+              onLogout={onLogout}
+              onNavigateProfile={() => router.push("/profile")}
+              onNavigateNotifications={() => router.push("/settings/notifications")}
+              onNavigateAppearance={() => router.push("/settings/appearance")}
+              onNavigatePrivacy={() => router.push("/settings/privacy")}
+              onNavigateHelp={() => router.push("/settings/help")}
+            />
           </div>
         </div>
       </div>

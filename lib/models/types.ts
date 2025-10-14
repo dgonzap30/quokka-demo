@@ -215,6 +215,10 @@ export interface Post {
   flagged: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // Enhanced endorsement tracking (for Quokka Points system)
+  endorsedBy?: string[];          // Array of user IDs who endorsed
+  instructorEndorsed?: boolean;   // Flag if any instructor endorsed
 }
 
 // ============================================
@@ -434,6 +438,12 @@ export interface StudentDashboardData {
     endorsedPosts: StatWithTrend;
   };
   goals: GoalProgress[];
+
+  // NEW: Quokka Points gamification data
+  quokkaPoints: QuokkaPointsData;
+
+  // NEW: Assignment Q&A opportunities (sorted by due date, nearest first)
+  assignmentQA: AssignmentQAMetrics[];
 }
 
 /**
@@ -1087,6 +1097,150 @@ export function isQuestionSearchResult(obj: unknown): obj is QuestionSearchResul
     searchResult.relevanceScore <= 100 &&
     Array.isArray(searchResult.matchedKeywords)
   );
+}
+
+// ============================================
+// Quokka Points Types (Dashboard Q&A Gamification)
+// ============================================
+
+/**
+ * Point source for Quokka Points breakdown
+ *
+ * Represents a category of actions that earn points.
+ * Used to show users how they earned their points.
+ */
+export interface PointSource {
+  /** Unique identifier for this point source type */
+  id: string;
+
+  /** Display label (e.g., "Peer Endorsements", "Helpful Answers") */
+  label: string;
+
+  /** Icon component from lucide-react */
+  icon: React.ComponentType<{ className?: string }>;
+
+  /** Total points earned from this source */
+  points: number;
+
+  /** Number of times this action occurred */
+  count: number;
+
+  /** Points awarded per action (e.g., 5 points per endorsement) */
+  pointsPerAction: number;
+}
+
+/**
+ * Milestone for Quokka Points progression
+ *
+ * Educational gamification - milestones celebrate progress
+ * without creating competitive pressure.
+ */
+export interface PointMilestone {
+  /** Milestone point threshold (e.g., 100, 500, 1000) */
+  threshold: number;
+
+  /** Milestone label (e.g., "Active Contributor") */
+  label: string;
+
+  /** Whether user has achieved this milestone */
+  achieved: boolean;
+
+  /** Optional badge icon */
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+/**
+ * Quokka Points data for student dashboard
+ *
+ * Complete point system data including balance, breakdown,
+ * milestones, and sparkline visualization.
+ */
+export interface QuokkaPointsData {
+  /** Total Quokka Points balance (lifetime) */
+  totalPoints: number;
+
+  /** Points earned this week */
+  weeklyPoints: number;
+
+  /** Breakdown of points by source type (sorted by points DESC) */
+  pointSources: PointSource[];
+
+  /** Milestone progression (sorted by threshold ASC) */
+  milestones: PointMilestone[];
+
+  /** Optional 7-day sparkline data (points earned per day) */
+  sparklineData?: number[];
+}
+
+// ============================================
+// Assignment Q&A Types (Course-Specific Opportunities)
+// ============================================
+
+/**
+ * Assignment for Q&A opportunity tracking
+ *
+ * Minimal assignment metadata needed for dashboard.
+ * Full assignment details would come from LMS integration.
+ */
+export interface Assignment {
+  /** Unique assignment identifier */
+  id: string;
+
+  /** Course ID this assignment belongs to */
+  courseId: string;
+
+  /** Assignment title */
+  title: string;
+
+  /** Due date (ISO 8601) */
+  dueDate: string;
+
+  /** Creation date (ISO 8601) */
+  createdAt: string;
+}
+
+/**
+ * Q&A metrics for a specific assignment
+ *
+ * Aggregated metrics showing Q&A activity and engagement
+ * for assignment-related threads. Used to identify
+ * opportunities for students to ask or answer questions.
+ */
+export interface AssignmentQAMetrics {
+  /** Assignment unique ID */
+  assignmentId: string;
+
+  /** Assignment title */
+  title: string;
+
+  /** Course ID */
+  courseId: string;
+
+  /** Course name for display */
+  courseName: string;
+
+  /** Assignment due date (ISO 8601) */
+  dueDate: string;
+
+  /** Q&A Engagement Metrics */
+  totalQuestions: number;
+  unansweredQuestions: number;
+  yourQuestions: number;
+  yourAnswers: number;
+  aiAnswersAvailable: number;
+  activeStudents: number;
+
+  /** Recent activity summary (human-readable, optional) */
+  recentActivity?: string;
+
+  /** Suggested action based on metrics */
+  suggestedAction: "ask" | "answer" | "review";
+
+  /** Reason for suggested action (explainable AI) */
+  actionReason: string;
+
+  /** Optional link to assignment Q&A page */
+  link?: string;
 }
 
 // ============================================

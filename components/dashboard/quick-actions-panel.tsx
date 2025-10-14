@@ -5,6 +5,12 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { QuickActionButton } from "@/lib/models/types";
 
@@ -60,36 +66,60 @@ export function QuickActionsPanel({
 // Internal QuickActionButton component
 function QuickActionButtonItem({ action }: { action: QuickActionButton }) {
   const Icon = action.icon;
+  const isPrimary = action.variant === "primary";
+
   const variantClasses = {
     default: "hover:bg-muted hover:border-primary/30",
-    primary: "hover:bg-primary/10 hover:border-primary",
+    primary: "hover:bg-primary/10 hover:border-primary hover:shadow-[0_0_0_3px_rgba(138,107,61,0.15)]",
     success: "hover:bg-success/10 hover:border-success",
   };
 
   const content = (
     <>
       <div className="relative">
-        <div className="flex items-center justify-center h-12 w-12 mx-auto rounded-full bg-muted">
-          <Icon className="h-6 w-6 text-foreground" aria-hidden="true" />
+        <div className={cn(
+          "flex items-center justify-center mx-auto rounded-full transition-all",
+          isPrimary ? "h-14 w-14 bg-primary/20" : "h-12 w-12 bg-muted"
+        )}>
+          <Icon
+            className={cn(
+              "transition-all",
+              isPrimary ? "h-7 w-7 text-primary" : "h-6 w-6 text-foreground"
+            )}
+            aria-hidden="true"
+          />
         </div>
         {action.badgeCount && action.badgeCount > 0 && (
-          <Badge
-            variant="destructive"
-            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-            aria-label={`${action.badgeCount} ${action.label.toLowerCase()}`}
-          >
-            {action.badgeCount}
-          </Badge>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                  aria-label={`${action.badgeCount} ${action.label.toLowerCase()}`}
+                >
+                  {action.badgeCount}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{action.badgeCount} {action.label.toLowerCase()}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
-      <span className="text-sm font-medium text-center leading-tight">
+      <span className={cn(
+        "text-sm text-center leading-tight",
+        isPrimary ? "font-semibold" : "font-medium"
+      )}>
         {action.label}
       </span>
     </>
   );
 
   const baseClasses = cn(
-    "flex flex-col items-center justify-center gap-3 p-4 rounded-lg border bg-card transition-all",
+    "flex flex-col items-center justify-center rounded-lg border bg-card transition-all",
+    isPrimary ? "gap-3 p-5" : "gap-3 p-4",
     variantClasses[action.variant || "default"]
   );
 

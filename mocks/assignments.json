@@ -1,0 +1,39 @@
+{
+  "assignments": [
+    {
+      "id": "assignment-1",
+      "courseId": "course-cs101",
+      "title": "Assignment 3: Binary Search Trees",
+      "dueDate": "2025-10-15T23:59:00Z",
+      "createdAt": "2025-10-01T00:00:00Z"
+    },
+    {
+      "id": "assignment-2",
+      "courseId": "course-cs201",
+      "title": "Assignment 4: Graph Algorithms",
+      "dueDate": "2025-10-20T23:59:00Z",
+      "createdAt": "2025-10-05T00:00:00Z"
+    },
+    {
+      "id": "assignment-3",
+      "courseId": "course-math221",
+      "title": "Assignment 2: Integration by Parts",
+      "dueDate": "2025-10-18T23:59:00Z",
+      "createdAt": "2025-10-03T00:00:00Z"
+    },
+    {
+      "id": "assignment-4",
+      "courseId": "course-phys201",
+      "title": "Lab 5: Circuit Analysis",
+      "dueDate": "2025-10-22T23:59:00Z",
+      "createdAt": "2025-10-08T00:00:00Z"
+    },
+    {
+      "id": "assignment-5",
+      "courseId": "course-eng101",
+      "title": "Essay 1: Research Paper Structure",
+      "dueDate": "2025-10-25T23:59:00Z",
+      "createdAt": "2025-10-10T00:00:00Z"
+    }
+  ]
+}

@@ -923,7 +923,7 @@ All components use consistent hover behavior:
 // Card hover
 <Card
   variant="glass-hover"
-  className="transition-all duration-200 hover:shadow-[var(--glow-*)]"
+  className="transition-all duration-200 hover:shadow-[var(--glow-variant)]"
 />
 
 // Icon color transition

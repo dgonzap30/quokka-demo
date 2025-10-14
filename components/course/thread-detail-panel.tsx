@@ -158,7 +158,7 @@ export function ThreadDetailPanel({
   };
 
   return (
-    <div className={cn("space-y-8 p-4 md:p-6 lg:p-8 max-w-full overflow-hidden", className)}>
+    <div className={cn("space-y-8 p-4 md:p-6 lg:p-8 max-w-full", className)}>
       {/* Back Button */}
       {onClose && (
         <div className="flex items-center gap-4">
