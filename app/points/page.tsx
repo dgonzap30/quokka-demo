@@ -8,6 +8,7 @@ import { QuokkaPointsHero } from "@/components/points/quokka-points-hero";
 import { MilestonesTimeline } from "@/components/points/milestones-timeline";
 import { PointSourcesBreakdown } from "@/components/points/point-sources-breakdown";
 import { PointsActivityFeed } from "@/components/points/points-activity-feed";
+import { BackButton } from "@/components/navigation/back-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,9 @@ export default function PointsPage() {
   return (
     <div className="min-h-screen">
       <div className="container-wide space-y-8 p-4 md:p-6">
+        {/* Back Navigation */}
+        <BackButton />
+
         {/* Hero Section */}
         <QuokkaPointsHero
           totalPoints={pointsData.totalPoints}
