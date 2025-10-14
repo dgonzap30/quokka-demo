@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CircleUserRound, User, LogOut, Bell, Moon, Shield, HelpCircle } from "lucide-react";
+import { CircleUserRound, LogOut, Bell, Moon, Shield, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
