@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { SidebarThreadCard } from "@/components/course/sidebar-thread-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import type { Thread } from "@/lib/models/types";
 import { cn } from "@/lib/utils";
-import { Inbox } from "lucide-react";
+import { Inbox, SlidersHorizontal } from "lucide-react";
 
 export interface ThreadListSidebarProps {
   /**
@@ -32,6 +34,16 @@ export interface ThreadListSidebarProps {
    * Current user ID (for unread tracking)
    */
   currentUserId?: string;
+
+  /**
+   * Mobile filter button click handler (mobile only)
+   */
+  onMobileFilterClick?: () => void;
+
+  /**
+   * Active filter count for badge display
+   */
+  activeFilterCount?: number;
 
   /**
    * Optional className for composition
@@ -82,6 +94,8 @@ export function ThreadListSidebar({
   onThreadSelect,
   isLoading = false,
   currentUserId: _currentUserId,
+  onMobileFilterClick,
+  activeFilterCount,
   className,
 }: ThreadListSidebarProps) {
   // Track viewed thread IDs for unread indicators
@@ -103,11 +117,41 @@ export function ThreadListSidebar({
     >
       {/* Header */}
       <div className="flex-shrink-0 border-b border-glass p-4">
-        <div>
-          <h2 className="heading-4 glass-text">Threads</h2>
-          <p className="text-xs text-muted-foreground glass-text mt-1">
-            {threads.length} {threads.length === 1 ? "thread" : "threads"}
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="heading-4 glass-text">Threads</h2>
+            <p className="text-xs text-muted-foreground glass-text mt-1">
+              {threads.length} {threads.length === 1 ? "thread" : "threads"}
+            </p>
+          </div>
+
+          {/* Mobile Filter Trigger - Only visible on mobile */}
+          {onMobileFilterClick && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden touch-target h-10 w-10 relative"
+              onClick={onMobileFilterClick}
+              aria-label={
+                activeFilterCount && activeFilterCount > 0
+                  ? `Open filters (${activeFilterCount} active)`
+                  : "Open filters"
+              }
+              aria-controls="mobile-filter-sheet"
+              title="Open filters"
+            >
+              <SlidersHorizontal className="h-5 w-5" aria-hidden="true" />
+              {activeFilterCount && activeFilterCount > 0 && (
+                <Badge
+                  variant="default"
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
+                  aria-hidden="true"
+                >
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 

@@ -15,6 +15,7 @@ import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
 import { ThreadModal } from "@/components/course/thread-modal";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
 import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
+import { MobileFilterSheet } from "@/components/course/mobile-filter-sheet";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
 
@@ -39,6 +40,9 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // Mobile filter sheet state
+  const [mobileFilterSheetOpen, setMobileFilterSheetOpen] = useState(false);
 
   // Viewport detection for responsive thread display
   // Mobile (< 768px): Thread detail in modal
@@ -254,6 +258,12 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
                 onThreadSelect={handleThreadSelect}
                 isLoading={threadsLoading}
                 currentUserId={user?.id}
+                onMobileFilterClick={() => setMobileFilterSheetOpen(true)}
+                activeFilterCount={
+                  (searchQuery ? 1 : 0) +
+                  (activeFilter !== "all" ? 1 : 0) +
+                  selectedTags.length
+                }
               />
             }
           >
@@ -294,6 +304,23 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
                 }
               }}
               threadId={selectedThreadId}
+            />
+          )}
+
+          {/* Mobile Filter Sheet (Mobile Only - < 768px) */}
+          {shouldUseModal && (
+            <MobileFilterSheet
+              open={mobileFilterSheetOpen}
+              onOpenChange={setMobileFilterSheetOpen}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              tags={tagsWithCounts}
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              totalThreads={threads?.length || 0}
+              filteredThreads={filteredThreads.length}
             />
           )}
         </>
