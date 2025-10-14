@@ -86,10 +86,10 @@ export function SidebarLayout({
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile viewport
+  // Detect mobile viewport (< 768px = mobile, ≥ 768px = tablet/desktop)
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 1024; // lg breakpoint
+      const mobile = window.innerWidth < 768; // md breakpoint
       setIsMobile(mobile);
       // Auto-close filter sidebar on mobile initially
       if (mobile) {
@@ -105,22 +105,27 @@ export function SidebarLayout({
   // Toggle filter sidebar handler
   const toggleFilterSidebar = () => setIsFilterSidebarOpen((prev) => !prev);
 
-  // Calculate grid columns based on filter state and thread selection
-  // Thread list is always visible (no collapse)
-  // When no thread selected: 2-column grid, thread list expands to fill space
-  // When thread selected: 3-column grid, thread list responsive width with minmax
+  // Calculate grid columns based on viewport, filter state, and thread selection
+  // Mobile (< 768px): Single column, overlays for filter/detail
+  // Tablet (768-1023px): Two-pane (threads + detail), filter as overlay
+  // Desktop (1024px+): Three-pane full layout
   const gridCols = (() => {
-    // No thread selected: 2-column grid, threads expand to fill space
-    if (!selectedThreadId) {
-      return isFilterSidebarOpen
-        ? "lg:grid-cols-[minmax(200px,220px)_1fr]"      // Filter open, threads expand
-        : "lg:grid-cols-[minmax(48px,56px)_1fr]";       // Filter compact, threads expand
+    // Mobile: Single column (thread list), filter/detail as sheets
+    if (isMobile) {
+      return "grid-cols-1";
     }
 
-    // Thread selected: 3-column grid, threads responsive width
+    // No thread selected: 2-column grid (filter + threads)
+    if (!selectedThreadId) {
+      return isFilterSidebarOpen
+        ? "md:grid-cols-[minmax(200px,220px)_1fr] lg:grid-cols-[minmax(200px,220px)_1fr]"
+        : "md:grid-cols-[minmax(48px,56px)_1fr] lg:grid-cols-[minmax(48px,56px)_1fr]";
+    }
+
+    // Thread selected: 3-column grid (filter + threads + detail)
     return isFilterSidebarOpen
-      ? "lg:grid-cols-[minmax(200px,220px)_minmax(280px,400px)_1fr]"  // All responsive
-      : "lg:grid-cols-[minmax(48px,56px)_minmax(280px,400px)_1fr]";   // All responsive
+      ? "md:grid-cols-[minmax(200px,220px)_minmax(280px,400px)_1fr]"
+      : "md:grid-cols-[minmax(48px,56px)_minmax(280px,400px)_1fr]";
   })();
 
   return (
@@ -134,7 +139,7 @@ export function SidebarLayout({
       {/* Mobile Overlay (when filter sidebar is open) */}
       {isMobile && isFilterSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm md:hidden"
           onClick={() => setIsFilterSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -152,11 +157,11 @@ export function SidebarLayout({
           className={cn(
             "relative h-full overflow-hidden transition-all duration-300 ease-in-out",
             // Mobile: Fixed overlay drawer
-            "fixed left-0 top-0 z-50 w-[220px] h-screen lg:relative lg:z-0 lg:w-full lg:h-full",
+            "fixed left-0 top-0 z-50 w-[220px] h-screen md:relative md:z-0 md:w-full md:h-full",
             // Transform for mobile drawer
             isFilterSidebarOpen
               ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
+              : "-translate-x-full md:translate-x-0"
           )}
           aria-label="Filter sidebar"
           aria-hidden={!isFilterSidebarOpen}
@@ -169,12 +174,12 @@ export function SidebarLayout({
             : filterSidebar}
         </aside>
 
-        {/* Thread List Sidebar (Middle - Always visible, responsive width) */}
+        {/* Thread List Sidebar (Middle - Always visible on mobile, responsive on tablet/desktop) */}
         <aside
           className={cn(
             "relative h-full overflow-hidden transition-all duration-300 ease-in-out",
-            // Always visible on all screen sizes
-            "lg:w-full"
+            // Mobile: Full width, Tablet/Desktop: Responsive width
+            "w-full"
           )}
           aria-label="Thread list sidebar"
         >
@@ -185,8 +190,11 @@ export function SidebarLayout({
         {selectedThreadId && (
           <main
             className={cn(
-              "relative h-full overflow-y-auto sidebar-scroll",
-              "transition-all duration-300 ease-in-out"
+              "relative h-full overflow-y-auto sidebar-scroll transition-all duration-300 ease-in-out",
+              // Mobile: Fixed full-screen overlay
+              isMobile && "fixed inset-0 z-50 bg-background",
+              // Tablet/Desktop: Grid column
+              !isMobile && "relative"
             )}
             aria-label="Thread content"
           >
