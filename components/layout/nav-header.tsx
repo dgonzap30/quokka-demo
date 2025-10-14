@@ -96,7 +96,7 @@ export function NavHeader() {
         onOpenAIAssistant={() => setAiModalOpen(true)}
         onOpenSupport={() => router.push("/support")}
         quokkaPoints={dashboardData?.quokkaPoints}
-        onViewPointsDetails={() => router.push("/dashboard?section=points")}
+        onViewPointsDetails={() => router.push("/points")}
       />
 
       {/* AI Assistant Modal */}
