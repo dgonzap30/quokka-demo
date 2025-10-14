@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { User, LogOut, Bell, Moon, Shield, HelpCircle } from "lucide-react";
+import { CircleUserRound, User, LogOut, Bell, Moon, Shield, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -100,7 +100,7 @@ export function ProfileSettingsDropdown({
           aria-haspopup="dialog"
           aria-expanded="false"
         >
-          <User
+          <CircleUserRound
             className="h-5 w-5 text-foreground/70"
             aria-hidden="true"
           />
