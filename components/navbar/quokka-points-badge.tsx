@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { QuokkaIcon } from "@/components/ui/quokka-icon";
 import { cn } from "@/lib/utils";
 import type { QuokkaPointsData } from "@/lib/models/types";
 
@@ -86,9 +87,7 @@ export function QuokkaPointsBadge({
           )}
           aria-label={`${totalPoints} Quokka Points`}
         >
-          <span className="text-lg" aria-hidden="true">
-            🦘
-          </span>
+          <QuokkaIcon size="sm" variant="filled" />
           <span className="font-semibold text-primary tabular-nums">
             {totalPoints.toLocaleString()}
           </span>
@@ -103,9 +102,7 @@ export function QuokkaPointsBadge({
           {/* Header */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-2xl" aria-hidden="true">
-                🦘
-              </span>
+              <QuokkaIcon size="md" variant="filled" />
               <h3 className="text-lg font-semibold">Quokka Points</h3>
             </div>
             <p className="text-sm text-muted-foreground glass-text">

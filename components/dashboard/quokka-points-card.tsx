@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { QuokkaIcon } from "@/components/ui/quokka-icon";
 import { cn } from "@/lib/utils";
 import type { QuokkaPointsData } from "@/lib/models/types";
 
@@ -108,8 +109,8 @@ export function QuokkaPointsCard({
     return (
       <Card variant="glass" className={cn(className)}>
         <CardContent className="p-6 text-center space-y-3">
-          <div className="text-4xl" aria-hidden="true">
-            🦘
+          <div className="flex justify-center">
+            <QuokkaIcon size="lg" variant="outline" />
           </div>
           <div className="space-y-1">
             <h3 className="text-lg font-semibold">Start Earning Quokka Points!</h3>
@@ -132,16 +133,14 @@ export function QuokkaPointsCard({
         className="absolute top-4 right-4 opacity-10 select-none"
         aria-hidden="true"
       >
-        <span className="text-[96px] leading-none">🦘</span>
+        <QuokkaIcon size="xl" variant="outline" />
       </div>
 
       <CardContent className="p-6 relative z-10 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl" aria-hidden="true">
-              🦘
-            </span>
+            <QuokkaIcon size="md" variant="filled" animate="pulse" />
             <h3 className="text-sm font-medium text-muted-foreground glass-text">
               Quokka Points
             </h3>
