@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
+import { GlobalSearch } from "@/components/ui/global-search";
 import {
   Menu,
   LogOut,
@@ -114,6 +115,14 @@ export function MobileNav({
               QuokkAQ
             </SheetTitle>
           </SheetHeader>
+
+          {/* Global Search - Mobile */}
+          <div className="mt-6">
+            <GlobalSearch
+              placeholder="Search threads..."
+              className="w-full"
+            />
+          </div>
 
           {/* Course Back Button - only render if in course context */}
           {courseContext && (
