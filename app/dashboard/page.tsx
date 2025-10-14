@@ -70,105 +70,19 @@ export default function DashboardPage() {
 // Student Dashboard Component
 // ============================================
 
-import type { StudentDashboardData, User, QuickActionButton, Deadline, RecommendedThread } from "@/lib/models/types";
+import type { StudentDashboardData, User, RecommendedThread } from "@/lib/models/types";
 import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TimelineActivity } from "@/components/dashboard/timeline-activity";
 import { EnhancedCourseCard } from "@/components/dashboard/enhanced-course-card";
-import { StudyStreakCard } from "@/components/dashboard/study-streak-card";
-import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
-import { UpcomingDeadlines } from "@/components/dashboard/upcoming-deadlines";
+import { AssignmentQAOpportunities } from "@/components/dashboard/assignment-qa-opportunities";
 import { StudentRecommendations } from "@/components/dashboard/student-recommendations";
-import { BookOpen, MessageSquare, ThumbsUp, MessageSquarePlus, Bell, Search } from "lucide-react";
+import { BookOpen, MessageSquare, ThumbsUp } from "lucide-react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 
 function StudentDashboard({ data, user }: { data: StudentDashboardData; user: User }) {
-  // Compute streak from activity
-  const streakData = useMemo(() => {
-    const sortedActivity = [...data.recentActivity].sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
-    let streakDays = 0;
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    for (const activity of sortedActivity) {
-      const activityDate = new Date(activity.timestamp);
-      activityDate.setHours(0, 0, 0, 0);
-      const diffDays = Math.floor(
-        (currentDate.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (diffDays === streakDays) {
-        streakDays++;
-        currentDate = new Date(activityDate);
-      } else {
-        break;
-      }
-    }
-
-    const weeklyActivity = sortedActivity.filter((activity) => {
-      const activityDate = new Date(activity.timestamp);
-      const diffDays = Math.floor(
-        (Date.now() - activityDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      return diffDays <= 7;
-    }).length;
-
-    return {
-      streakDays,
-      weeklyActivity,
-      goalTarget: data.goals[0]?.target || 5,
-    };
-  }, [data.recentActivity, data.goals]);
-
-  // Quick actions with dynamic counts
-  const quickActions = useMemo<QuickActionButton[]>(() => [
-    {
-      id: "ask",
-      label: "Ask Question",
-      icon: MessageSquarePlus,
-      href: "/ask",
-      variant: "primary",
-    },
-    {
-      id: "browse",
-      label: "Browse Threads",
-      icon: BookOpen,
-      href: "/",
-    },
-    {
-      id: "notifications",
-      label: "Notifications",
-      icon: Bell,
-      badgeCount: data.unreadCount,
-      href: "/notifications",
-    },
-    {
-      id: "search",
-      label: "Search",
-      icon: Search,
-      href: "/search",
-    },
-  ], [data.unreadCount]);
-
-  // Upcoming deadlines (mock data for now)
-  const upcomingDeadlines = useMemo<Deadline[]>(() => {
-    return data.enrolledCourses.flatMap((course, index) => [
-      {
-        id: `${course.id}-deadline-${index}-1`,
-        title: "Assignment 3 Due",
-        courseId: course.id,
-        courseName: course.name,
-        type: "assignment" as const,
-        dueDate: new Date(Date.now() + (2 + index) * 24 * 60 * 60 * 1000).toISOString(),
-      },
-    ]).sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()).slice(0, 5);
-  }, [data.enrolledCourses]);
-
   // Fetch recommendations (all threads from enrolled courses)
   const { data: allThreads } = useQuery({
     queryKey: ["studentRecommendations", user.id],
@@ -217,29 +131,22 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
   return (
     <>
       <main id="main-content" className="min-h-screen p-4 md:p-6">
-        <div className="container-wide space-y-8">
-          {/* Hero Section */}
-          <section aria-labelledby="welcome-heading" className="py-4 md:py-6 space-y-4">
-            <div className="space-y-3">
-              <h1 id="welcome-heading" className="text-4xl md:text-5xl font-bold glass-text">Welcome back, {user.name}!</h1>
-            <p className="text-xl text-muted-foreground max-w-3xl leading-relaxed">
-              Your academic dashboard - track your courses, recent activity, and stay updated
+        <div className="container-wide space-y-6">
+          {/* Hero Section - Reduced Padding */}
+          <section aria-labelledby="welcome-heading" className="py-2 md:py-4 space-y-3">
+            <div className="space-y-2">
+              <h1 id="welcome-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold glass-text">Welcome back, {user.name}!</h1>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
+              Your Q&A companion - ask questions, help peers, and collaborate with AI
             </p>
           </div>
         </section>
 
-        {/* Engagement Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <StudyStreakCard {...streakData} />
-          <QuickActionsPanel actions={quickActions} />
-          <UpcomingDeadlines deadlines={upcomingDeadlines} maxItems={3} />
-        </div>
-
-        {/* Main Content - Courses First */}
+        {/* Main Content - Courses FIRST */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Courses - 2 columns on large screens */}
           <section aria-labelledby="courses-heading" className="lg:col-span-2 space-y-4">
-            <h2 id="courses-heading" className="text-2xl md:text-3xl font-bold glass-text">My Courses</h2>
+            <h2 id="courses-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">My Courses</h2>
             {data.enrolledCourses.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {data.enrolledCourses.map((course) => (
@@ -265,7 +172,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
 
           {/* Activity Feed - 1 column on large screens */}
           <aside aria-labelledby="activity-heading" className="space-y-4">
-            <h2 id="activity-heading" className="text-2xl md:text-3xl font-bold glass-text">Recent Activity</h2>
+            <h2 id="activity-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">Recent Activity</h2>
             <TimelineActivity
               activities={data.recentActivity}
               maxItems={5}
@@ -274,9 +181,20 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
           </aside>
         </div>
 
+        {/* Assignment Q&A Opportunities - Full Width */}
+        <section aria-labelledby="assignments-heading" className="space-y-4">
+          <h2 id="assignments-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">
+            Assignment Q&A Opportunities
+          </h2>
+          <AssignmentQAOpportunities
+            assignments={data.assignmentQA}
+            maxItems={5}
+          />
+        </section>
+
         {/* Recommendations Section */}
         <section aria-labelledby="recommendations-heading" className="space-y-4">
-          <h2 id="recommendations-heading" className="text-2xl md:text-3xl font-bold glass-text">
+          <h2 id="recommendations-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">
             Recommended for You
           </h2>
           <StudentRecommendations recommendations={recommendations} maxItems={6} />
@@ -284,7 +202,7 @@ function StudentDashboard({ data, user }: { data: StudentDashboardData; user: Us
 
         {/* Stats Overview */}
         <section aria-labelledby="stats-heading" className="space-y-6">
-          <h2 id="stats-heading" className="text-2xl md:text-3xl font-bold glass-text">Your Statistics</h2>
+          <h2 id="stats-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">Your Statistics</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
               label={data.stats.totalCourses.label}
@@ -430,13 +348,13 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
       <main id="main-content" className="min-h-screen p-4 md:p-6">
         <div className="container-wide space-y-8">
           {/* Hero Section with Search */}
-          <section aria-labelledby="dashboard-heading" className="py-4 md:py-6 space-y-6">
+          <section aria-labelledby="dashboard-heading" className="py-2 md:py-4 space-y-6">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-3 flex-1">
-                <h1 id="dashboard-heading" className="text-4xl md:text-5xl font-bold glass-text">
+                <h1 id="dashboard-heading" className="text-3xl sm:text-4xl md:text-5xl font-bold glass-text">
                   Instructor Dashboard
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-3xl leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
                   Triage questions, endorse AI answers, and monitor class engagement
                 </p>
               </div>
@@ -461,7 +379,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
         {/* Priority Queue with Bulk Actions */}
         <section aria-labelledby="priority-queue-heading" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 id="priority-queue-heading" className="text-2xl md:text-3xl font-bold glass-text">
+            <h2 id="priority-queue-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">
               Priority Queue
             </h2>
             <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
@@ -524,7 +442,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
           {/* FAQ Clusters */}
           <section aria-labelledby="faq-heading" className="space-y-6">
             <div className="flex items-center justify-between gap-4">
-              <h2 id="faq-heading" className="text-2xl md:text-3xl font-bold glass-text">
+              <h2 id="faq-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">
                 Frequently Asked Questions
               </h2>
               {!faqsLoading && faqs && faqs.length > 0 && (
@@ -542,7 +460,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
           {/* Trending Topics */}
           <section aria-labelledby="trending-heading" className="space-y-6">
             <div className="flex items-center justify-between gap-4">
-              <h2 id="trending-heading" className="text-2xl md:text-3xl font-bold glass-text">
+              <h2 id="trending-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">
                 Trending Topics
               </h2>
               <Badge variant="outline" className="flex items-center gap-1.5 shrink-0">
@@ -561,7 +479,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
 
         {/* Stats Overview */}
         <section aria-labelledby="instructor-stats-heading" className="space-y-6">
-          <h2 id="instructor-stats-heading" className="text-2xl md:text-3xl font-bold glass-text">Your Statistics</h2>
+          <h2 id="instructor-stats-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">Your Statistics</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <StatCard
               label={data.stats.totalCourses.label}
