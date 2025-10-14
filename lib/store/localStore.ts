@@ -1,4 +1,4 @@
-import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer, ResponseTemplate } from "@/lib/models/types";
+import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer, ResponseTemplate, Assignment } from "@/lib/models/types";
 
 import usersData from "@/mocks/users.json";
 import coursesData from "@/mocks/courses.json";
@@ -7,12 +7,13 @@ import threadsData from "@/mocks/threads.json";
 import postsData from "@/mocks/posts.json";
 import notificationsData from "@/mocks/notifications.json";
 import aiAnswersData from "@/mocks/ai-answers.json";
+import assignmentsData from "@/mocks/assignments.json";
 
 /**
  * Mock data version - increment when mock data changes to force re-seed
  * This allows localStorage to update when we add/modify mock data
  */
-const SEED_VERSION = 'v2.0.0';
+const SEED_VERSION = 'v2.1.0';
 
 const KEYS = {
   users: "quokkaq.users",
@@ -24,6 +25,7 @@ const KEYS = {
   notifications: "quokkaq.notifications",
   aiAnswers: "quokkaq.aiAnswers",
   responseTemplates: "quokkaq.responseTemplates",
+  assignments: "quokkaq.assignments",
   seedVersion: "quokkaq.seedVersion",
   initialized: "quokkaq.initialized",
 } as const;
@@ -46,9 +48,41 @@ export function seedData(): void {
     const courses = coursesData as Course[];
     const enrollments = enrollmentsData as Enrollment[];
     const threads = threadsData as Thread[];
-    const posts = postsData as Post[];
+    let posts = postsData as Post[];
     const notifications = notificationsData as Notification[];
     const aiAnswers = aiAnswersData as unknown as AIAnswer[];
+    const assignments = assignmentsData.assignments as Assignment[];
+
+    // Backfill endorsement data for existing posts
+    posts = posts.map(post => {
+      if (post.endorsed && !post.endorsedBy) {
+        // Randomly assign endorser (instructor or peer)
+        const isInstructorEndorsement = Math.random() > 0.7;
+        if (isInstructorEndorsement) {
+          return {
+            ...post,
+            endorsedBy: ['user-instructor-1'],
+            instructorEndorsed: true,
+          };
+        } else {
+          // Random peer endorsers (1-3 students)
+          const endorserCount = 1 + Math.floor(Math.random() * 3);
+          const endorsers: string[] = [];
+          for (let i = 0; i < endorserCount; i++) {
+            const endorserId = `user-student-${2 + i}`;
+            if (endorserId !== post.authorId) {
+              endorsers.push(endorserId);
+            }
+          }
+          return {
+            ...post,
+            endorsedBy: endorsers,
+            instructorEndorsed: false,
+          };
+        }
+      }
+      return post;
+    });
 
     localStorage.setItem(KEYS.users, JSON.stringify(users));
     localStorage.setItem(KEYS.courses, JSON.stringify(courses));
@@ -57,6 +91,7 @@ export function seedData(): void {
     localStorage.setItem(KEYS.posts, JSON.stringify(posts));
     localStorage.setItem(KEYS.notifications, JSON.stringify(notifications));
     localStorage.setItem(KEYS.aiAnswers, JSON.stringify(aiAnswers));
+    localStorage.setItem(KEYS.assignments, JSON.stringify(assignments));
     localStorage.setItem(KEYS.seedVersion, SEED_VERSION);
     localStorage.setItem(KEYS.initialized, "true");
   } catch (error) {
@@ -548,4 +583,40 @@ export function incrementTemplateUsage(templateId: string): void {
     template.lastUsed = new Date().toISOString();
     localStorage.setItem(KEYS.responseTemplates, JSON.stringify(templates));
   }
+}
+
+// ============================================
+// Assignment Data Access
+// ============================================
+
+/**
+ * Get all assignments from localStorage
+ */
+export function getAssignments(): Assignment[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.assignments);
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data) as Assignment[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get assignment by ID
+ */
+export function getAssignment(assignmentId: string): Assignment | null {
+  const assignments = getAssignments();
+  return assignments.find((a) => a.id === assignmentId) ?? null;
+}
+
+/**
+ * Get assignments by course ID
+ */
+export function getAssignmentsByCourse(courseId: string): Assignment[] {
+  const assignments = getAssignments();
+  return assignments.filter((a) => a.courseId === courseId);
 }
