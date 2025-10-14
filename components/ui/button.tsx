@@ -27,10 +27,10 @@ const buttonVariants = cva(
         glass: "backdrop-blur-md bg-glass-medium hover:bg-glass-strong border border-[var(--border-glass)] text-foreground",
       },
       size: {
-        default: "h-10 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-9 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-11 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-10",
+        default: "h-11 lg:h-10 px-4 py-2 has-[>svg]:px-3",
+        sm: "h-10 lg:h-9 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+        lg: "h-12 lg:h-11 rounded-md px-6 has-[>svg]:px-4",
+        icon: "h-11 w-11 lg:h-10 lg:w-10",
       },
     },
     defaultVariants: {
