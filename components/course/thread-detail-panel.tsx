@@ -25,6 +25,14 @@ export interface ThreadDetailPanelProps {
   onClose?: () => void;
 
   /**
+   * Rendering context for accessibility
+   * - "modal": Rendered in modal dialog (mobile)
+   * - "inline": Rendered inline in page layout (desktop)
+   * @default "modal"
+   */
+  context?: "modal" | "inline";
+
+  /**
    * Optional className for composition
    */
   className?: string;
@@ -59,6 +67,7 @@ export interface ThreadDetailPanelProps {
 export function ThreadDetailPanel({
   threadId,
   onClose,
+  context = "modal",
   className,
 }: ThreadDetailPanelProps) {
   const { data: user } = useCurrentUser();
@@ -158,7 +167,11 @@ export function ThreadDetailPanel({
   };
 
   return (
-    <div className={cn("space-y-8 p-4 md:p-6 lg:p-8 max-w-full", className)}>
+    <div
+      className={cn("space-y-8 p-4 md:p-6 lg:p-8 max-w-full", className)}
+      role={context === "inline" ? "region" : undefined}
+      aria-label={context === "inline" ? "Thread detail" : undefined}
+    >
       {/* Back Button */}
       {onClose && (
         <div className="flex items-center gap-4">

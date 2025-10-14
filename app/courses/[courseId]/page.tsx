@@ -4,6 +4,7 @@ import { use, useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
+import { useMediaQuery } from "@/lib/hooks/use-media-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +13,7 @@ import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
 import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
 import { ThreadModal } from "@/components/course/thread-modal";
+import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
 import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
@@ -37,6 +39,16 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // Viewport detection for responsive thread display
+  // Mobile (< 768px): Thread detail in modal
+  // Desktop (≥ 768px): Thread detail inline in third column (Gmail-style)
+  const [isMounted, setIsMounted] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 767px)');
+
+  // Determine rendering mode: modal (mobile) or inline (desktop)
+  // During SSR and first render, default to desktop (inline) to prevent hydration mismatch
+  const shouldUseModal = isMounted && isMobile;
 
   // Extract tags with counts from all threads
   const tagsWithCounts = useMemo<TagWithCount[]>(() => {
@@ -104,6 +116,11 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }, [threads, searchQuery, activeFilter, selectedTags, user?.id]);
+
+  // Set mounted state for hydration safety
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Detect modal and thread query parameters
   useEffect(() => {
@@ -240,26 +257,45 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
               />
             }
           >
-            {/* Empty - thread detail now shown in modal */}
+            {/* Thread Detail (Desktop Inline - Gmail Style, ≥ 768px) */}
+            {!shouldUseModal && selectedThreadId && (
+              <ThreadDetailPanel
+                threadId={selectedThreadId}
+                onClose={() => {
+                  setSelectedThreadId(null);
+                  // Remove thread param from URL
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.delete('thread');
+                  const newUrl = params.toString()
+                    ? `/courses/${courseId}?${params.toString()}`
+                    : `/courses/${courseId}`;
+                  window.history.replaceState(null, '', newUrl);
+                }}
+                context="inline"
+                className="animate-in fade-in duration-200"
+              />
+            )}
           </SidebarLayout>
 
-          {/* Thread Detail Modal */}
-          <ThreadModal
-            open={!!selectedThreadId}
-            onOpenChange={(open) => {
-              if (!open) {
-                setSelectedThreadId(null);
-                // Remove thread param from URL
-                const params = new URLSearchParams(searchParams.toString());
-                params.delete('thread');
-                const newUrl = params.toString()
-                  ? `/courses/${courseId}?${params.toString()}`
-                  : `/courses/${courseId}`;
-                window.history.replaceState(null, '', newUrl);
-              }
-            }}
-            threadId={selectedThreadId}
-          />
+          {/* Thread Detail Modal (Mobile Only - < 768px) */}
+          {shouldUseModal && (
+            <ThreadModal
+              open={!!selectedThreadId}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedThreadId(null);
+                  // Remove thread param from URL
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.delete('thread');
+                  const newUrl = params.toString()
+                    ? `/courses/${courseId}?${params.toString()}`
+                    : `/courses/${courseId}`;
+                  window.history.replaceState(null, '', newUrl);
+                }
+              }}
+              threadId={selectedThreadId}
+            />
+          )}
         </>
       ) : (
         /* Overview Tab: Course stats, resources, activity */
