@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { BackButton } from "@/components/navigation/back-button";
 
 /**
  * Support Page - Help resources, FAQs, and contact options
@@ -40,6 +41,9 @@ export default function SupportPage() {
       aria-label="Support and Help"
     >
       <div className="container-wide space-y-8 md:space-y-12">
+        {/* Back Navigation */}
+        <BackButton />
+
         {/* Hero Section */}
         <section
           aria-labelledby="support-heading"
