@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/navigation/back-button";
 import { Bell, Moon, Shield, HelpCircle, ChevronRight } from "lucide-react";
 
 const settingsCategories = [
@@ -36,6 +37,9 @@ export default function SettingsPage() {
   return (
     <div className="container mx-auto px-6 py-4">
       <div className="max-w-3xl mx-auto space-y-6">
+        {/* Back Navigation */}
+        <BackButton />
+
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>

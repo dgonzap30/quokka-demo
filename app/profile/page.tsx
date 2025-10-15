@@ -3,6 +3,7 @@
 import { useCurrentUser } from "@/lib/api/hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/navigation/back-button";
 import { Mail, Calendar, Shield, Edit, User } from "lucide-react";
 
 export default function ProfilePage() {
@@ -40,6 +41,9 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto px-6 py-4">
       <div className="max-w-3xl mx-auto space-y-6">
+        {/* Back Navigation */}
+        <BackButton />
+
         {/* Profile Header */}
         <Card className="glass-panel">
           <CardContent className="pt-6">

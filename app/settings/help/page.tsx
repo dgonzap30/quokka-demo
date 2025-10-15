@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, BookOpen, MessageCircle, Mail, ExternalLink } from "lucide-react";
+import { BackButton } from "@/components/navigation/back-button";
+import { BookOpen, MessageCircle, Mail, ExternalLink } from "lucide-react";
 
 const helpResources = [
   {
@@ -52,20 +53,15 @@ export default function HelpSettingsPage() {
   return (
     <div className="container mx-auto px-6 py-12">
       <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header with back button */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/settings">
-              <ChevronLeft className="h-5 w-5" />
-              <span className="sr-only">Back to Settings</span>
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Help & Support</h1>
-            <p className="text-muted-foreground mt-2">
-              Get help and learn how to use QuokkAQ
-            </p>
-          </div>
+        {/* Back Navigation */}
+        <BackButton />
+
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Help & Support</h1>
+          <p className="text-muted-foreground mt-2">
+            Get help and learn how to use QuokkAQ
+          </p>
         </div>
 
         {/* Help Resources */}

@@ -55,34 +55,23 @@ export function BackButton({
       onClick={handleBack}
       className={cn(
         // Base styles
-        "inline-flex items-center gap-2",
-        "px-4 py-2 rounded-lg",
+        "inline-flex items-center gap-1.5",
+        "px-2 py-2 rounded-md",
         "text-sm font-medium",
-        "transition-all duration-300 ease-out",
+        "transition-all duration-200 ease-out",
+        "group",
 
-        // Glass panel styling (QDS)
-        "glass-panel backdrop-blur-md",
-        "border border-glass",
-        "shadow-[var(--shadow-glass-sm)]",
+        // Subtle text color
+        "text-muted-foreground",
 
-        // Text and icon color
-        "text-foreground/80",
-
-        // Hover state
+        // Hover state - subtle color change only
         "hover:text-foreground",
-        "hover:border-accent/20",
-        "hover:shadow-[var(--shadow-glass-md)]",
-        "hover:scale-[1.02]",
-        "active:scale-[0.98]",
-
-        // Motion reduce
-        "motion-reduce:hover:scale-100",
-        "motion-reduce:active:scale-100",
 
         // Focus state (accessibility)
         "focus-visible:outline-none",
-        "focus-visible:ring-4",
+        "focus-visible:ring-2",
         "focus-visible:ring-accent/60",
+        "focus-visible:ring-offset-2",
 
         // Minimum touch target (44x44px)
         "min-h-[44px]",
@@ -96,7 +85,7 @@ export function BackButton({
       <ChevronLeft
         className={cn(
           "h-4 w-4",
-          "transition-transform duration-300 ease-out",
+          "transition-transform duration-200 ease-out",
           "group-hover:-translate-x-0.5"
         )}
         aria-hidden="true"
