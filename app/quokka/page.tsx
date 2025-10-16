@@ -14,7 +14,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: Date;
+  timestamp: string; // ISO 8601 timestamp
 }
 
 // Simple keyword-based responses (mock AI)
@@ -60,7 +60,7 @@ export default function QuokkaPage() {
       id: "welcome",
       role: "assistant",
       content: "Hi! I'm Quokka, your AI study assistant. Ask me anything about your courses! 🎓",
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     },
   ]);
   const [input, setInput] = useState("");
@@ -86,7 +86,7 @@ export default function QuokkaPage() {
       id: `user-${Date.now()}`,
       role: "user",
       content: input.trim(),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -100,7 +100,7 @@ export default function QuokkaPage() {
       id: `ai-${Date.now()}`,
       role: "assistant",
       content: getAIResponse(userMessage.content),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, aiResponse]);
@@ -166,7 +166,7 @@ export default function QuokkaPage() {
                     {message.content}
                   </p>
                   <p className="text-xs text-subtle mt-3">
-                    {message.timestamp.toLocaleTimeString()}
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
               </div>

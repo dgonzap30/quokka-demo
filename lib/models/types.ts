@@ -186,6 +186,187 @@ export interface CourseMetrics {
 }
 
 // ============================================
+// Course Material Types (Context-Aware AI)
+// ============================================
+
+/**
+ * Types of course materials for AI context
+ *
+ * Extends CitationSourceType pattern for consistency.
+ * Used for structured course content that AI can reference.
+ */
+export type CourseMaterialType =
+  | "lecture"
+  | "slide"
+  | "assignment"
+  | "reading"
+  | "lab"
+  | "textbook";
+
+/**
+ * Structured course material for AI context
+ *
+ * Represents educational content that can be searched,
+ * referenced, and cited by the AI assistant. Materials
+ * are linked to courses and categorized by type.
+ *
+ * @example
+ * ```typescript
+ * const lecture: CourseMaterial = {
+ *   id: "mat-123",
+ *   courseId: "cs-101",
+ *   type: "lecture",
+ *   title: "Binary Search Trees",
+ *   content: "A binary search tree is...",
+ *   keywords: ["bst", "trees", "algorithms"],
+ *   metadata: { week: 5 },
+ *   createdAt: "2025-10-16T00:00:00Z",
+ *   updatedAt: "2025-10-16T00:00:00Z",
+ * };
+ * ```
+ *
+ * @see MaterialReference - Lightweight reference to materials
+ * @see CourseMaterialType - Available material types
+ */
+export interface CourseMaterial {
+  /** Unique material identifier */
+  id: string;
+
+  /** Course this material belongs to */
+  courseId: string;
+
+  /** Type of material */
+  type: CourseMaterialType;
+
+  /** Material title (e.g., "Lecture 5: Binary Search Trees") */
+  title: string;
+
+  /** Full text content for semantic search */
+  content: string;
+
+  /** Keywords for fast filtering and matching */
+  keywords: string[];
+
+  /** Structured metadata (extensible) */
+  metadata: {
+    /** Week number in course (optional) */
+    week?: number;
+
+    /** Material date (ISO 8601, optional) */
+    date?: string;
+
+    /** Chapter/section reference (optional) */
+    chapter?: string;
+
+    /** Page range for readings (optional) */
+    pageRange?: string;
+
+    /** Instructor who created it (optional) */
+    authorId?: string;
+  };
+
+  /** ISO 8601 creation timestamp */
+  createdAt: string;
+
+  /** ISO 8601 last update timestamp */
+  updatedAt: string;
+}
+
+/**
+ * Lightweight reference to course material
+ *
+ * Used in AI responses to cite specific materials
+ * without embedding full content. Similar to Citation
+ * but references CourseMaterial entities.
+ */
+export interface MaterialReference {
+  /** Referenced material ID */
+  materialId: string;
+
+  /** Material type (for display/icon) */
+  type: CourseMaterialType;
+
+  /** Material title */
+  title: string;
+
+  /** Relevant excerpt from content */
+  excerpt: string;
+
+  /** Relevance score 0-100 (higher = more relevant) */
+  relevanceScore: number;
+
+  /** Optional link to full material */
+  link?: string;
+}
+
+/**
+ * Page context for AI assistant
+ *
+ * Determines which features and content are available.
+ */
+export type PageContext = "dashboard" | "course" | "instructor";
+
+/**
+ * AI context information
+ *
+ * Tracks current page, user, and available courses
+ * for context-aware AI responses.
+ *
+ * Replaces scattered optional props in component interfaces.
+ */
+export interface AIContext {
+  /** Current page type */
+  pageType: PageContext;
+
+  /** Current user ID */
+  userId: string;
+
+  /** Currently selected course (if on course page) */
+  currentCourseId?: string;
+
+  /** Course name for display */
+  currentCourseName?: string;
+
+  /** Course code for display */
+  currentCourseCode?: string;
+
+  /** All enrolled course IDs (for multi-course awareness) */
+  enrolledCourseIds: string[];
+
+  /** Optional session ID for conversation threading */
+  sessionId?: string;
+
+  /** Context creation timestamp (ISO 8601) */
+  timestamp: string;
+}
+
+/**
+ * Enhanced AI response with material references
+ *
+ * Extends basic message structure with course material
+ * citations and confidence scoring.
+ */
+export interface EnhancedAIResponse {
+  /** Response unique ID */
+  id: string;
+
+  /** Response text content */
+  content: string;
+
+  /** Course materials referenced in response */
+  materialReferences: MaterialReference[];
+
+  /** Confidence score 0-100 */
+  confidenceScore: number;
+
+  /** Context used to generate response */
+  context: AIContext;
+
+  /** ISO 8601 generation timestamp */
+  generatedAt: string;
+}
+
+// ============================================
 // Thread & Post Types
 // ============================================
 
@@ -592,6 +773,220 @@ export function hasAIAnswer(thread: Thread): thread is Required<Pick<Thread, 'ha
 }
 
 // ============================================
+// Course Material Type Guards
+// ============================================
+
+/**
+ * Type guard to check if object is a valid CourseMaterial
+ */
+export function isCourseMaterial(obj: unknown): obj is CourseMaterial {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const material = obj as Record<string, unknown>;
+
+  return (
+    typeof material.id === "string" &&
+    typeof material.courseId === "string" &&
+    typeof material.type === "string" &&
+    ["lecture", "slide", "assignment", "reading", "lab", "textbook"].includes(material.type as string) &&
+    typeof material.title === "string" &&
+    typeof material.content === "string" &&
+    Array.isArray(material.keywords) &&
+    material.keywords.every((k: unknown) => typeof k === "string") &&
+    typeof material.metadata === "object" &&
+    material.metadata !== null &&
+    typeof material.createdAt === "string" &&
+    typeof material.updatedAt === "string"
+  );
+}
+
+/**
+ * Type guard to check if object is a valid MaterialReference
+ */
+export function isMaterialReference(obj: unknown): obj is MaterialReference {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const ref = obj as Record<string, unknown>;
+
+  return (
+    typeof ref.materialId === "string" &&
+    typeof ref.type === "string" &&
+    ["lecture", "slide", "assignment", "reading", "lab", "textbook"].includes(ref.type as string) &&
+    typeof ref.title === "string" &&
+    typeof ref.excerpt === "string" &&
+    typeof ref.relevanceScore === "number" &&
+    ref.relevanceScore >= 0 &&
+    ref.relevanceScore <= 100
+  );
+}
+
+/**
+ * Type guard to check if AIContext is valid and complete
+ */
+export function isValidAIContext(obj: unknown): obj is AIContext {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const context = obj as Record<string, unknown>;
+
+  return (
+    typeof context.pageType === "string" &&
+    ["dashboard", "course", "instructor"].includes(context.pageType as string) &&
+    typeof context.userId === "string" &&
+    Array.isArray(context.enrolledCourseIds) &&
+    context.enrolledCourseIds.every((id: unknown) => typeof id === "string") &&
+    typeof context.timestamp === "string"
+  );
+}
+
+/**
+ * Type guard to check if object is a valid EnhancedAIResponse
+ */
+export function isEnhancedAIResponse(obj: unknown): obj is EnhancedAIResponse {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const response = obj as Record<string, unknown>;
+
+  return (
+    typeof response.id === "string" &&
+    typeof response.content === "string" &&
+    Array.isArray(response.materialReferences) &&
+    response.materialReferences.every((ref: unknown) => isMaterialReference(ref)) &&
+    typeof response.confidenceScore === "number" &&
+    response.confidenceScore >= 0 &&
+    response.confidenceScore <= 100 &&
+    typeof response.context === "object" &&
+    isValidAIContext(response.context) &&
+    typeof response.generatedAt === "string"
+  );
+}
+
+/**
+ * Validation: Check if material has sufficient content for AI
+ */
+export function hasSufficientContent(material: CourseMaterial): boolean {
+  return (
+    material.content.length >= 50 &&
+    material.keywords.length >= 1 &&
+    material.title.length >= 3
+  );
+}
+
+/**
+ * Validation: Check if material reference is high quality
+ */
+export function isHighQualityReference(ref: MaterialReference): boolean {
+  return (
+    ref.relevanceScore >= 70 &&
+    ref.excerpt.length >= 50 &&
+    ref.excerpt.length <= 500
+  );
+}
+
+// ============================================
+// Course Material Input Types
+// ============================================
+
+/**
+ * Input for creating new course material
+ */
+export interface CreateCourseMaterialInput {
+  courseId: string;
+  type: CourseMaterialType;
+  title: string;
+  content: string;
+  keywords: string[];
+  metadata?: {
+    week?: number;
+    date?: string;
+    chapter?: string;
+    pageRange?: string;
+    authorId?: string;
+  };
+}
+
+/**
+ * Input for updating existing course material
+ */
+export interface UpdateCourseMaterialInput {
+  materialId: string;
+  title?: string;
+  content?: string;
+  keywords?: string[];
+  metadata?: Partial<CourseMaterial["metadata"]>;
+}
+
+/**
+ * Input for searching course materials
+ */
+export interface SearchCourseMaterialsInput {
+  /** Course to search within (required) */
+  courseId: string;
+
+  /** Search query (natural language or keywords) */
+  query: string;
+
+  /** Optional material type filter */
+  types?: CourseMaterialType[];
+
+  /** Maximum results to return */
+  limit?: number;
+
+  /** Minimum relevance score threshold (0-100) */
+  minRelevance?: number;
+}
+
+/**
+ * Search result with relevance scoring
+ */
+export interface CourseMaterialSearchResult {
+  /** The matching material */
+  material: CourseMaterial;
+
+  /** Relevance score 0-100 */
+  relevanceScore: number;
+
+  /** Keywords that matched the query */
+  matchedKeywords: string[];
+
+  /** Snippet preview with highlights */
+  snippet: string;
+}
+
+// ============================================
+// AI Context Utility Types
+// ============================================
+
+/**
+ * Lightweight course summary for context
+ */
+export type CourseSummary = Pick<Course, "id" | "code" | "name" | "term">;
+
+/**
+ * Material summary for quick reference
+ */
+export type MaterialSummary = Pick<CourseMaterial, "id" | "courseId" | "type" | "title">;
+
+/**
+ * Input for generating AI response with context
+ */
+export interface GenerateAIResponseInput {
+  /** User question */
+  query: string;
+
+  /** AI context */
+  context: AIContext;
+
+  /** Conversation history (for multi-turn) */
+  conversationHistory?: Message[];
+
+  /** Whether to include material references */
+  includeMaterials?: boolean;
+
+  /** Maximum materials to reference */
+  maxMaterials?: number;
+}
+
+// ============================================
 // Conversation & Message Types
 // ============================================
 
@@ -608,8 +1003,8 @@ export interface Message {
   /** Message text content */
   content: string;
 
-  /** Message timestamp */
-  timestamp: Date;
+  /** Message timestamp (ISO 8601 string) */
+  timestamp: string;
 }
 
 /**
@@ -625,11 +1020,11 @@ export interface ConversationMetadata {
   /** Number of assistant messages */
   assistantMessageCount: number;
 
-  /** First message timestamp */
-  startedAt: Date;
+  /** First message timestamp (ISO 8601 string) */
+  startedAt: string;
 
-  /** Last message timestamp */
-  lastMessageAt: Date;
+  /** Last message timestamp (ISO 8601 string) */
+  lastMessageAt: string;
 }
 
 /**
@@ -702,7 +1097,7 @@ export function isMessage(obj: unknown): obj is Message {
     typeof msg.id === "string" &&
     (msg.role === "user" || msg.role === "assistant") &&
     typeof msg.content === "string" &&
-    msg.timestamp instanceof Date
+    typeof msg.timestamp === "string"
   );
 }
 
@@ -1323,4 +1718,582 @@ export interface RecommendedThread {
 
   /** Reason for recommendation */
   reason: "high-engagement" | "trending" | "unanswered" | "similar-interests";
+}
+
+// ============================================
+// AI Conversation Types (LLM Integration)
+// ============================================
+
+/**
+ * AI conversation session
+ *
+ * Represents a private conversation between a user and the AI assistant.
+ * Conversations are stored per-user and can be converted to public threads.
+ *
+ * @see ConversationMessage - Individual messages in conversation
+ * @see ConversationSession - Conversation with embedded messages
+ */
+export interface AIConversation {
+  /** Unique conversation identifier */
+  id: string;
+
+  /** User who owns this conversation */
+  userId: string;
+
+  /** Optional course context (null = multi-course general view) */
+  courseId: string | null;
+
+  /** Conversation title (generated from first message) */
+  title: string;
+
+  /** ISO 8601 timestamp of creation */
+  createdAt: string;
+
+  /** ISO 8601 timestamp of last update */
+  updatedAt: string;
+
+  /** Number of messages in conversation */
+  messageCount: number;
+
+  /** Whether conversation has been converted to thread */
+  convertedToThread?: boolean;
+
+  /** Thread ID if converted */
+  threadId?: string;
+}
+
+/**
+ * Message in an AI conversation
+ *
+ * Individual message sent by user or assistant in a conversation.
+ * Different from `Message` type (FloatingQuokka) - this is for stored conversations.
+ */
+export interface AIMessage {
+  /** Unique message identifier */
+  id: string;
+
+  /** Conversation this message belongs to */
+  conversationId: string;
+
+  /** Message sender role */
+  role: "user" | "assistant";
+
+  /** Message text content */
+  content: string;
+
+  /** ISO 8601 timestamp (Breaking change: was Date in Message type) */
+  timestamp: string;
+
+  /** Optional material references (for assistant messages) */
+  materialReferences?: MaterialReference[];
+
+  /** Optional confidence score (for assistant messages) */
+  confidenceScore?: number;
+}
+
+/**
+ * Conversation with embedded messages
+ *
+ * Complete conversation data including all messages.
+ * Used for display and conversion to threads.
+ */
+export interface ConversationSession {
+  /** The conversation metadata */
+  conversation: AIConversation;
+
+  /** All messages in chronological order */
+  messages: AIMessage[];
+}
+
+/**
+ * Input for creating a new conversation
+ */
+export interface CreateConversationInput {
+  /** User ID */
+  userId: string;
+
+  /** Optional course ID (null = general) */
+  courseId?: string | null;
+
+  /** Optional initial title */
+  title?: string;
+}
+
+/**
+ * Input for sending a message
+ */
+export interface SendMessageInput {
+  /** Conversation ID */
+  conversationId: string;
+
+  /** Message content */
+  content: string;
+
+  /** Message role */
+  role: "user" | "assistant";
+
+  /** Optional material references */
+  materialReferences?: MaterialReference[];
+
+  /** Optional confidence score */
+  confidenceScore?: number;
+}
+
+/**
+ * Input for converting conversation to thread
+ */
+export interface ConvertConversationInput {
+  /** Conversation ID to convert */
+  conversationId: string;
+
+  /** User ID (must own conversation) */
+  userId: string;
+
+  /** Target course ID */
+  courseId: string;
+}
+
+/**
+ * Result of conversation conversion
+ */
+export interface ConvertConversationResult {
+  /** The created thread */
+  thread: Thread;
+
+  /** The AI answer (if generated) */
+  aiAnswer?: AIAnswer;
+
+  /** Updated conversation (marked as converted) */
+  conversation: AIConversation;
+}
+
+// ============================================
+// AI Conversation Type Guards
+// ============================================
+
+/**
+ * Type guard for AIConversation
+ */
+export function isAIConversation(obj: unknown): obj is AIConversation {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const conv = obj as Record<string, unknown>;
+
+  return (
+    typeof conv.id === "string" &&
+    typeof conv.userId === "string" &&
+    (conv.courseId === null || typeof conv.courseId === "string") &&
+    typeof conv.title === "string" &&
+    typeof conv.createdAt === "string" &&
+    typeof conv.updatedAt === "string" &&
+    typeof conv.messageCount === "number"
+  );
+}
+
+/**
+ * Type guard for AIMessage
+ */
+export function isAIMessage(obj: unknown): obj is AIMessage {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  const msg = obj as Record<string, unknown>;
+
+  return (
+    typeof msg.id === "string" &&
+    typeof msg.conversationId === "string" &&
+    (msg.role === "user" || msg.role === "assistant") &&
+    typeof msg.content === "string" &&
+    typeof msg.timestamp === "string"
+  );
+}
+
+// ============================================
+// LLM Provider Types
+// ============================================
+
+/**
+ * LLM provider type
+ */
+export type LLMProviderType = "openai" | "anthropic";
+
+/**
+ * LLM provider configuration
+ */
+export interface LLMConfig {
+  /** Provider type */
+  provider: LLMProviderType;
+
+  /** API key */
+  apiKey: string;
+
+  /** Model name */
+  model: string;
+
+  /** Temperature (0-1) */
+  temperature: number;
+
+  /** Top P (0-1) */
+  topP: number;
+
+  /** Maximum tokens to generate */
+  maxTokens: number;
+}
+
+/**
+ * LLM generation request
+ */
+export interface LLMRequest {
+  /** System prompt */
+  systemPrompt: string;
+
+  /** User prompt */
+  userPrompt: string;
+
+  /** Optional conversation history */
+  conversationHistory?: AIMessage[];
+
+  /** Maximum tokens */
+  maxTokens?: number;
+
+  /** Temperature override */
+  temperature?: number;
+
+  /** Top P override */
+  topP?: number;
+}
+
+/**
+ * Token usage tracking
+ */
+export interface TokenUsage {
+  /** Prompt tokens */
+  promptTokens: number;
+
+  /** Completion tokens */
+  completionTokens: number;
+
+  /** Total tokens */
+  totalTokens: number;
+
+  /** Estimated cost in USD */
+  estimatedCost: number;
+}
+
+/**
+ * Successful LLM response
+ */
+export interface LLMResponseSuccess {
+  /** Success flag */
+  success: true;
+
+  /** Generated content */
+  content: string;
+
+  /** Model used */
+  model: string;
+
+  /** Provider used */
+  provider: LLMProviderType;
+
+  /** Token usage */
+  usage: TokenUsage;
+
+  /** Generation timestamp */
+  generatedAt: string;
+}
+
+/**
+ * Failed LLM response
+ */
+export interface LLMResponseError {
+  /** Success flag */
+  success: false;
+
+  /** Error message */
+  error: string;
+
+  /** Error code */
+  code: string;
+
+  /** Provider that failed */
+  provider: LLMProviderType;
+
+  /** Whether to retry with different provider */
+  retryable: boolean;
+}
+
+/**
+ * LLM response (discriminated union)
+ */
+export type LLMResponse = LLMResponseSuccess | LLMResponseError;
+
+/**
+ * LLM streaming chunk
+ */
+export interface LLMStreamChunk {
+  /** Chunk content */
+  content: string;
+
+  /** Whether this is the final chunk */
+  done: boolean;
+
+  /** Optional token usage (final chunk only) */
+  usage?: TokenUsage;
+}
+
+// ============================================
+// LLM Provider Type Guards
+// ============================================
+
+/**
+ * Type guard for successful LLM response
+ */
+export function isLLMSuccess(response: LLMResponse): response is LLMResponseSuccess {
+  return response.success === true;
+}
+
+/**
+ * Type guard for failed LLM response
+ */
+export function isLLMError(response: LLMResponse): response is LLMResponseError {
+  return response.success === false;
+}
+
+// ============================================
+// Course Context Types (LLM Context Building)
+// ============================================
+
+/**
+ * Ranked course material with relevance score
+ *
+ * Material selected for LLM context with relevance ranking.
+ */
+export interface RankedMaterial extends CourseMaterial {
+  /** Relevance score (0-100) */
+  relevanceScore: number;
+
+  /** Matched keywords from query */
+  matchedKeywords: string[];
+}
+
+/**
+ * Built context for single course
+ *
+ * Aggregated course materials formatted for LLM prompt.
+ */
+export interface CourseContext {
+  /** Course ID */
+  courseId: string;
+
+  /** Course code */
+  courseCode: string;
+
+  /** Course name */
+  courseName: string;
+
+  /** Selected materials for context */
+  materials: RankedMaterial[];
+
+  /** Formatted context text for LLM */
+  contextText: string;
+
+  /** Total tokens (estimated) */
+  estimatedTokens: number;
+
+  /** Build timestamp */
+  builtAt: string;
+}
+
+/**
+ * Multi-course context
+ *
+ * Aggregated context from multiple enrolled courses.
+ */
+export interface MultiCourseContext {
+  /** User ID */
+  userId: string;
+
+  /** All enrolled course IDs */
+  courseIds: string[];
+
+  /** Individual course contexts */
+  courseContexts: CourseContext[];
+
+  /** Combined context text */
+  combinedContextText: string;
+
+  /** Total tokens (estimated) */
+  estimatedTokens: number;
+
+  /** Build timestamp */
+  builtAt: string;
+}
+
+/**
+ * Course detection result
+ *
+ * Auto-detected relevant course from query.
+ */
+export interface CourseDetectionResult {
+  /** Detected course ID */
+  courseId: string;
+
+  /** Course code */
+  courseCode: string;
+
+  /** Course name */
+  courseName: string;
+
+  /** Confidence score (0-100) */
+  confidence: number;
+
+  /** Matched keywords */
+  matchedKeywords: string[];
+
+  /** Whether confidence exceeds threshold for auto-selection */
+  autoSelect: boolean;
+}
+
+/**
+ * Context building options
+ */
+export interface ContextBuildOptions {
+  /** Maximum materials to include */
+  maxMaterials?: number;
+
+  /** Minimum relevance score (0-100) */
+  minRelevance?: number;
+
+  /** Maximum tokens allowed */
+  maxTokens?: number;
+
+  /** Material types to prioritize */
+  priorityTypes?: CourseMaterialType[];
+}
+
+// ============================================
+// LMS Integration Types
+// ============================================
+
+/**
+ * LMS provider type
+ */
+export type LMSProviderType = "canvas" | "blackboard" | "moodle" | "mock";
+
+/**
+ * Generic LMS content
+ */
+export interface LMSContent {
+  /** Unique identifier */
+  id: string;
+
+  /** Content type */
+  type: "syllabus" | "schedule" | "assignment" | "announcement" | "module";
+
+  /** Title */
+  title: string;
+
+  /** Content body */
+  content: string;
+
+  /** ISO 8601 timestamp */
+  publishedAt: string;
+
+  /** ISO 8601 timestamp */
+  updatedAt: string;
+
+  /** Optional metadata */
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Syllabus data from LMS
+ */
+export interface SyllabusData {
+  /** Course ID */
+  courseId: string;
+
+  /** Syllabus content (HTML or markdown) */
+  content: string;
+
+  /** Extracted sections */
+  sections: {
+    title: string;
+    content: string;
+  }[];
+
+  /** Sync timestamp */
+  syncedAt: string;
+}
+
+/**
+ * Schedule entry from LMS
+ */
+export interface ScheduleEntry {
+  /** Entry ID */
+  id: string;
+
+  /** Course ID */
+  courseId: string;
+
+  /** Event title */
+  title: string;
+
+  /** Event type */
+  type: "lecture" | "lab" | "exam" | "office-hours" | "deadline";
+
+  /** Start time (ISO 8601) */
+  startTime: string;
+
+  /** End time (ISO 8601) */
+  endTime: string;
+
+  /** Optional description */
+  description?: string;
+
+  /** Optional location */
+  location?: string;
+}
+
+/**
+ * LMS sync result
+ */
+export interface LMSSyncResult {
+  /** Success flag */
+  success: boolean;
+
+  /** Provider used */
+  provider: LMSProviderType;
+
+  /** Course ID synced */
+  courseId: string;
+
+  /** Number of items synced */
+  itemsSynced: number;
+
+  /** Sync timestamp */
+  syncedAt: string;
+
+  /** Optional error message */
+  error?: string;
+}
+
+/**
+ * LMS webhook payload
+ */
+export interface LMSWebhookPayload {
+  /** Event type */
+  event: "content_updated" | "assignment_created" | "announcement_posted";
+
+  /** Course ID */
+  courseId: string;
+
+  /** Content ID */
+  contentId: string;
+
+  /** Event timestamp */
+  timestamp: string;
+
+  /** Event data */
+  data: Record<string, unknown>;
 }

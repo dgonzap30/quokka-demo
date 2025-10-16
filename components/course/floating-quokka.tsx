@@ -58,7 +58,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
         id: "welcome",
         role: "assistant",
         content: `Hi! I'm Quokka, your AI study assistant for ${courseCode}. Ask me anything about the course material! 🎓`,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       }]);
     } else if (!firstVisit) {
       setIsFirstVisit(true);
@@ -103,7 +103,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
         id: "welcome",
         role: "assistant",
         content: `Hi! I'm Quokka, your AI study assistant for ${courseCode}. Ask me anything about the course material! 🎓`,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       }]);
     }
   };
@@ -151,7 +151,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
       id: `user-${Date.now()}`,
       role: "user",
       content: input.trim(),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -165,7 +165,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
       id: `ai-${Date.now()}`,
       role: "assistant",
       content: getAIResponse(userMessage.content),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, aiResponse]);
@@ -205,7 +205,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
       id: "welcome",
       role: "assistant",
       content: `Hi! I'm Quokka, your AI study assistant for ${courseCode}. Ask me anything about the course material! 🎓`,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     }]);
     setShowClearConfirm(false);
   };
@@ -335,7 +335,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   <p className="text-xs text-subtle mt-2">
                     <span className="sr-only">{message.role === "user" ? "Sent" : "Received"} at </span>
-                    {message.timestamp.toLocaleTimeString()}
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
               </div>

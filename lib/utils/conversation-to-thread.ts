@@ -80,7 +80,7 @@ export function formatMessagesForPreview(
   return messages.map((message) => ({
     roleLabel: message.role === "user" ? "You" : "Quokka",
     content: message.content.trim(),
-    timestamp: message.timestamp.toISOString(),
+    timestamp: message.timestamp, // Already an ISO string
   }));
 }
 
