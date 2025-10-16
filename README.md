@@ -35,7 +35,60 @@ Deployed on Netlify with continuous deployment from the `main` branch.
 
 ---
 
-## 🤖 New: Agentic Development Workflow
+## 🧠 LLM Integration (Optional)
+
+By default, QuokkaQ uses **template-based AI responses** with keyword matching. You can optionally enable **real LLM integration** with OpenAI or Anthropic for production-quality AI answers powered by course materials.
+
+### Quick Setup
+
+1. **Copy environment template:**
+```bash
+cp .env.local.example .env.local
+```
+
+2. **Add your API key** (choose one):
+```bash
+# Option A: OpenAI (recommended for cost/speed)
+NEXT_PUBLIC_OPENAI_API_KEY=sk-proj-your-key-here
+NEXT_PUBLIC_LLM_PROVIDER=openai
+
+# Option B: Anthropic (alternative provider)
+NEXT_PUBLIC_ANTHROPIC_API_KEY=sk-ant-your-key-here
+NEXT_PUBLIC_LLM_PROVIDER=anthropic
+```
+
+3. **Enable LLM mode:**
+```bash
+NEXT_PUBLIC_USE_LLM=true
+```
+
+4. **Restart dev server:**
+```bash
+npm run dev
+```
+
+### How It Works
+
+When LLM is enabled:
+- AI answers are generated using GPT-4o-mini or Claude 3 Haiku
+- Course materials (lectures, slides, assignments) provide context
+- Citations reference actual course content
+- Confidence scores based on material relevance
+- Automatic fallback to templates on errors
+
+**Security Warning:** This demo uses client-side API keys (`NEXT_PUBLIC_*`) for simplicity. **Production apps should use server-side API routes** to protect keys. See `.env.local.example` for details.
+
+### Configuration Options
+
+See `.env.local.example` for full configuration including:
+- Model selection (GPT-4o-mini, Claude Haiku, etc.)
+- Temperature and token limits
+- Cost monitoring and rate limiting
+- Context size and relevance thresholds
+
+---
+
+## 🤖 Agentic Development Workflow
 
 This project includes a **production-ready agentic workflow** with 8 specialized AI agents for systematic development.
 
