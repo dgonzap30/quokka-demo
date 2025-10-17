@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Send, Sparkles, Trash2, Share2, MoreVertical } from "lucide-react";
+import { Send, Sparkles, Trash2, Share2, MoreVertical, Copy, RefreshCcw, ArrowDown } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -82,9 +82,11 @@ export function QuokkaAssistantModal({
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [showPostConfirm, setShowPostConfirm] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Conversation hooks
   const { data: conversations } = useAIConversations(user?.id);
@@ -162,6 +164,27 @@ export function QuokkaAssistantModal({
       }, 100);
     }
   }, [isOpen]);
+
+  // Track scroll position to show/hide scroll button
+  useEffect(() => {
+    const element = messagesEndRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Hide button when bottom is visible
+        setShowScrollButton(!entry.isIntersecting);
+      },
+      {
+        root: scrollContainerRef.current,
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [messages]);
 
   // Handle message submission
   const handleSubmit = async (e: FormEvent) => {
@@ -311,6 +334,38 @@ export function QuokkaAssistantModal({
     setActiveConversationId(null);
   };
 
+  // Handle copy message content
+  const handleCopy = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      // Optional: Show toast notification "Copied to clipboard"
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  // Handle retry (regenerate last AI response)
+  const handleRetry = () => {
+    if (!messages.length || !activeConversationId || !user || sendMessage.isPending) return;
+
+    // Find the last user message
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUserMessage) return;
+
+    // Resend the last user message
+    sendMessage.mutate({
+      conversationId: activeConversationId,
+      content: lastUserMessage.content,
+      userId: user.id,
+      role: "user",
+    });
+  };
+
+  // Handle scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -358,7 +413,7 @@ export function QuokkaAssistantModal({
             </DialogHeader>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 relative">
               <div
                 role="log"
                 aria-live="polite"
@@ -376,34 +431,68 @@ export function QuokkaAssistantModal({
                   </div>
                 )}
 
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex mb-4 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
+                {messages.map((message, index) => (
+                  <div key={message.id} className="mb-4">
                     <div
-                      className={`max-w-[85%] p-3 ${
-                        message.role === "user" ? "message-user" : "message-assistant"
-                      }`}
-                      aria-label={message.role === "user" ? "You said" : "Quokka said"}
+                      className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                      <p className="text-xs text-subtle mt-2">
-                        <span className="sr-only">{message.role === "user" ? "Sent" : "Received"} at </span>
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </p>
+                      <div
+                        className={`max-w-[85%] p-3 ${
+                          message.role === "user" ? "message-user" : "message-assistant"
+                        }`}
+                        aria-label={message.role === "user" ? "You said" : "Quokka said"}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-xs text-subtle mt-2">
+                          <span className="sr-only">{message.role === "user" ? "Sent" : "Received"} at </span>
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
                     </div>
+
+                    {/* Action Buttons for Assistant Messages */}
+                    {message.role === "assistant" && (
+                      <div className="flex items-center gap-1 mt-1 ml-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopy(message.content)}
+                          className="h-8 px-2 text-xs hover:bg-[var(--glass-hover)]"
+                          aria-label="Copy message"
+                        >
+                          <Copy className="h-3 w-3 mr-1" />
+                          Copy
+                        </Button>
+
+                        {/* Only show Retry on the last assistant message */}
+                        {index === messages.length - 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRetry}
+                            disabled={sendMessage.isPending}
+                            className="h-8 px-2 text-xs hover:bg-[var(--glass-hover)]"
+                            aria-label="Retry generation"
+                          >
+                            <RefreshCcw className="h-3 w-3 mr-1" />
+                            Retry
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
 
                 {sendMessage.isPending && (
                   <div className="flex justify-start" role="status" aria-live="polite">
                     <div className="message-assistant p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-pulse" aria-hidden="true">
-                          💭
+                      <div className="flex items-center gap-3">
+                        <div className="flex gap-1" aria-hidden="true">
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                          <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
                         </div>
-                        <p className="text-sm">Quokka is thinking...</p>
+                        <p className="text-sm glass-text">Quokka is thinking...</p>
                       </div>
                     </div>
                   </div>
@@ -411,6 +500,19 @@ export function QuokkaAssistantModal({
               </div>
 
               <div ref={messagesEndRef} />
+
+              {/* Scroll to Bottom Button */}
+              {showScrollButton && (
+                <Button
+                  variant="glass-primary"
+                  size="sm"
+                  onClick={scrollToBottom}
+                  className="absolute bottom-4 right-4 rounded-full w-10 h-10 p-0 shadow-e2 z-10"
+                  aria-label="Scroll to bottom"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+              )}
             </div>
 
             {/* Input */}

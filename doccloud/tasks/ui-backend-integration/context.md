@@ -229,6 +229,15 @@ If critical issues arise:
 
 ## Changelog
 
+### 2025-10-17 - AI Assistant UX Enhancements Complete
+- ✅ Enhanced QuokkaAssistantModal with modern AI chat UX patterns
+- Added Copy and Retry action buttons to AI messages (industry standard)
+- Implemented scroll-to-bottom button with auto-hide (IntersectionObserver)
+- Enhanced loading states with animated typing indicator (3 bouncing dots)
+- All features tested with live LLM integration (OpenAI GPT-4o-mini)
+- TypeScript compilation clean, lint passed (0 errors, 25 pre-existing warnings)
+- All existing functionality preserved (course context, persistence, post-to-thread)
+
 ### 2025-10-17 - Redundant Interface Cleanup & Environment Fix Complete
 - ✅ Deleted redundant `/app/quokka/page.tsx` (252 lines) per user feedback
 - Fixed environment variable loading in `lib/utils/env.ts` - changed from dynamic `process.env[key]` to explicit mapping for Next.js static replacement
