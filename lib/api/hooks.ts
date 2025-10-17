@@ -859,7 +859,7 @@ export function useAIConversations(userId: string | undefined) {
  *
  * Returns all messages (user + AI) for a specific conversation.
  * Messages are sorted chronologically.
- * Polls every 5 seconds to detect new messages.
+ * Relies on mutation-triggered invalidations instead of polling.
  */
 export function useConversationMessages(conversationId: string | undefined) {
   return useQuery({
@@ -868,7 +868,6 @@ export function useConversationMessages(conversationId: string | undefined) {
     enabled: !!conversationId,
     staleTime: 30 * 1000,         // 30 seconds
     gcTime: 5 * 60 * 1000,        // 5 minutes
-    refetchInterval: 5 * 1000,    // Poll every 5 seconds
   });
 }
 
@@ -957,15 +956,10 @@ export function useSendMessage() {
         queryKey: queryKeys.conversationMessages(context.conversationId)
       });
 
-      // Invalidate conversations list (to update timestamp)
-      const conversation = queryClient.getQueryData<AIConversation[]>(
-        queryKeys.aiConversations(result.userMessage.conversationId)
-      );
-      if (conversation) {
-        queryClient.invalidateQueries({
-          queryKey: ["aiConversations"]
-        });
-      }
+      // Invalidate conversations list for this user only (surgical invalidation)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiConversations(variables.userId)
+      });
     },
   });
 }
@@ -1055,9 +1049,13 @@ export function useConvertConversationToThread() {
         queryKey: queryKeys.aiConversations(variables.userId)
       });
 
-      // Invalidate dashboards (activity feed needs update)
-      queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+      // Invalidate dashboards for this user only (surgical invalidation)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.studentDashboard(variables.userId)
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.instructorDashboard(variables.userId)
+      });
 
       // OPTIONAL: Pre-populate thread cache with AI answer
       if (aiAnswer) {

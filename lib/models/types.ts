@@ -1829,6 +1829,9 @@ export interface SendMessageInput {
   /** Message content */
   content: string;
 
+  /** User ID (required for surgical cache invalidation) */
+  userId: string;
+
   /** Message role */
   role: "user" | "assistant";
 
