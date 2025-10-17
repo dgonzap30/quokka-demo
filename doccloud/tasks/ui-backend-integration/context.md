@@ -229,6 +229,15 @@ If critical issues arise:
 
 ## Changelog
 
+### 2025-10-17 - Redundant Interface Cleanup & Environment Fix Complete
+- ✅ Deleted redundant `/app/quokka/page.tsx` (252 lines) per user feedback
+- Fixed environment variable loading in `lib/utils/env.ts` - changed from dynamic `process.env[key]` to explicit mapping for Next.js static replacement
+- Updated `floating-quokka.tsx` comments to clarify template-based responses vs LLM modal
+- Verified LLM integration working: OpenAI GPT-4o-mini generating real responses
+- Production build succeeds without `/quokka` route
+- Modal LLM integration tested successfully: conversation persistence, real-time responses, course context selector functional
+- Debug logs confirm: `[ENV] LLM Configuration` and `[AI] LLM response generated`
+
 ### 2025-10-17 - QDS Compliance Fixes & Quality Verification Complete
 - ✅ Applied all 7 QDS compliance fixes to Quokka page
 - Created `.shadow-glass-*` utility classes for design system

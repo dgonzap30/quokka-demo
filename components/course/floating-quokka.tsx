@@ -31,7 +31,10 @@ interface FloatingQuokkaProps {
  *
  * Course-context-aware AI assistant that appears on course pages.
  * Three states: hidden (dismissed), minimized (default), expanded (active chat)
- * Persists state to localStorage, reuses AI logic from /quokka page
+ * Persists state to localStorage, uses template-based AI responses
+ *
+ * Note: This component uses template responses. For full LLM integration,
+ * see QuokkaAssistantModal which provides real AI responses with course materials.
  */
 export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuokkaProps) {
   const [state, setState] = useState<"hidden" | "minimized" | "expanded">("minimized");
@@ -108,7 +111,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
     }
   };
 
-  // AI response logic (reused from /quokka page, course-context aware)
+  // Template-based AI response logic (course-context aware)
   const getAIResponse = (question: string): string => {
     const q = question.toLowerCase();
     const courseContext = `[Course: ${courseCode} - ${courseName}]\n\n`;
