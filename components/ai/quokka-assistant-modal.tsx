@@ -18,15 +18,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useCurrentUser, useCreateThread } from "@/lib/api/hooks";
-import type { Message, Citation, CourseSummary } from "@/lib/models/types";
-
-// Enhanced message type with citations
-interface EnhancedMessage extends Message {
-  citations?: Citation[];
-  courseId?: string;
-  courseCode?: string;
-}
+import {
+  useCurrentUser,
+  useCreateThread,
+  useAIConversations,
+  useConversationMessages,
+  useCreateConversation,
+  useSendMessage,
+  useDeleteConversation,
+  useConvertConversationToThread,
+} from "@/lib/api/hooks";
+import type { CourseSummary } from "@/lib/models/types";
 
 export interface QuokkaAssistantModalProps {
   /** Whether the modal is open */
@@ -52,68 +54,14 @@ export interface QuokkaAssistantModalProps {
 }
 
 /**
- * Detects relevant course from user query based on keyword matching
- */
-function detectCourseFromQuery(
-  query: string,
-  availableCourses: CourseSummary[]
-): CourseSummary | null {
-  if (!query || query.trim().length < 3) return null;
-
-  const queryLower = query.toLowerCase();
-  let bestMatch: CourseSummary | null = null;
-  let bestScore = 0;
-
-  availableCourses.forEach((course) => {
-    let score = 0;
-
-    // RULE 1: Exact course code mention (e.g., "CS101", "MATH 221")
-    const codeVariants = [
-      course.code.toLowerCase(),
-      course.code.replace(/(\d+)/, ' $1').toLowerCase(), // "CS 101"
-    ];
-
-    if (codeVariants.some((variant) => queryLower.includes(variant))) {
-      score += 10;
-    }
-
-    // RULE 2: Course name keywords
-    const nameKeywords = course.name
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter((word) => word.length > 3);
-
-    nameKeywords.forEach((keyword) => {
-      if (queryLower.includes(keyword)) {
-        score += 2;
-      }
-    });
-
-    // RULE 3: Subject area keywords (CS, MATH, etc.)
-    const subjectPrefix = course.code.replace(/\d+/g, '').toLowerCase();
-    if (queryLower.includes(subjectPrefix)) {
-      score += 3;
-    }
-
-    // Update best match if score is high enough
-    if (score > bestScore && score >= 5) {
-      bestScore = score;
-      bestMatch = course;
-    }
-  });
-
-  return bestMatch;
-}
-
-/**
- * Quokka Assistant Modal - Multi-course aware AI chat
+ * Quokka Assistant Modal - Multi-course aware AI chat with LLM backend
  *
- * Enhanced with:
- * - Course detection from user queries
+ * Features:
+ * - Real LLM integration with course material context
+ * - Persistent conversations across modal sessions
  * - Manual course selection (dashboard)
- * - Material citations in responses
- * - Context-aware posting
+ * - Conversation → thread conversion
+ * - Material citations in AI responses
  */
 export function QuokkaAssistantModal({
   isOpen,
@@ -126,27 +74,28 @@ export function QuokkaAssistantModal({
 }: QuokkaAssistantModalProps) {
   const router = useRouter();
   const { data: user } = useCurrentUser();
-  const createThreadMutation = useCreateThread();
 
-  // Existing state
-  const [messages, setMessages] = useState<EnhancedMessage[]>([]);
+  // Local state
   const [input, setInput] = useState("");
-  const [isThinking, setIsThinking] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [isPostingThread, setIsPostingThread] = useState(false);
   const [showPostSuccess, setShowPostSuccess] = useState(false);
   const [postedThreadId, setPostedThreadId] = useState<string | null>(null);
-
-  // New state for multi-course awareness
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [detectedCourseId, setDetectedCourseId] = useState<string | null>(null);
-  const [debouncedQuery, setDebouncedQuery] = useState<string>("");
   const [showPostConfirm, setShowPostConfirm] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
 
-  // Determine active course ID (priority: course page > manual > detected > null)
+  // Conversation hooks
+  const { data: conversations } = useAIConversations(user?.id);
+  const { data: messages = [] } = useConversationMessages(activeConversationId || undefined);
+  const createConversation = useCreateConversation();
+  const sendMessage = useSendMessage();
+  const deleteConversation = useDeleteConversation();
+  const convertToThread = useConvertConversationToThread();
+
+  // Determine active course ID (priority: course page > manual selection > null)
   const activeCourseId = useMemo(() => {
     if (pageContext === "course" && currentCourseId) {
       return currentCourseId;
@@ -154,11 +103,8 @@ export function QuokkaAssistantModal({
     if (selectedCourseId) {
       return selectedCourseId;
     }
-    if (detectedCourseId) {
-      return detectedCourseId;
-    }
     return null;
-  }, [pageContext, currentCourseId, selectedCourseId, detectedCourseId]);
+  }, [pageContext, currentCourseId, selectedCourseId]);
 
   // Get active course details
   const activeCourse = useMemo(() => {
@@ -171,55 +117,38 @@ export function QuokkaAssistantModal({
     return null;
   }, [pageContext, currentCourseId, currentCourseCode, currentCourseName, activeCourseId, availableCourses]);
 
-  // Debounce user input for course detection
+  // Auto-load or create conversation when modal opens
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(input);
-    }, 500);
+    if (!isOpen || !user || activeConversationId) return;
 
-    return () => clearTimeout(timer);
-  }, [input]);
+    // Try to find existing conversation for this context
+    if (conversations && conversations.length > 0) {
+      // Filter by courseId if in course context
+      const contextConversations = activeCourseId
+        ? conversations.filter((c) => c.courseId === activeCourseId)
+        : conversations.filter((c) => c.courseId === null);
 
-  // Run course detection when debounced query changes
-  useEffect(() => {
-    if (
-      pageContext === "dashboard" &&
-      availableCourses &&
-      availableCourses.length > 0 &&
-      debouncedQuery.trim().length >= 3 &&
-      !selectedCourseId // Don't override manual selection
-    ) {
-      const detected = detectCourseFromQuery(debouncedQuery, availableCourses);
-      setDetectedCourseId(detected?.id || null);
+      if (contextConversations.length > 0) {
+        // Load most recent matching conversation
+        setActiveConversationId(contextConversations[0].id);
+        return;
+      }
     }
-  }, [debouncedQuery, availableCourses, pageContext, selectedCourseId]);
 
-  // Get context-aware welcome message
-  const getWelcomeMessage = useCallback((): string => {
-    switch (pageContext) {
-      case "course":
-        return `Hi! I'm Quokka, your AI study assistant for ${currentCourseCode || currentCourseName || "this course"}. Ask me anything about the course material! 🎓`;
-      case "instructor":
-        return `Hi! I'm Quokka for instructors. I can help with student questions, course management, and teaching strategies. How can I assist you today? 👨‍🏫`;
-      case "dashboard":
-      default:
-        return `Hi! I'm Quokka, your AI study assistant. I can help you with course material, study strategies, and academic questions. What can I help you with today? 📚`;
-    }
-  }, [pageContext, currentCourseCode, currentCourseName]);
-
-  // Initialize with welcome message when modal opens
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([
-        {
-          id: "welcome",
-          role: "assistant",
-          content: getWelcomeMessage(),
-          timestamp: new Date().toISOString(),
+    // Create new conversation if none exists for this context
+    createConversation.mutate(
+      {
+        userId: user.id,
+        courseId: activeCourseId || null,
+        title: `Quokka Chat - ${activeCourse?.code || "General"}`,
+      },
+      {
+        onSuccess: (newConversation) => {
+          setActiveConversationId(newConversation.id);
         },
-      ]);
-    }
-  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+      }
+    );
+  }, [isOpen, user, conversations, activeCourseId, activeConversationId, activeCourse, createConversation]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -235,118 +164,56 @@ export function QuokkaAssistantModal({
     }
   }, [isOpen]);
 
-  // AI response logic (context-aware)
-  const getAIResponse = (question: string): string => {
-    const q = question.toLowerCase();
-    const courseCode = activeCourse?.code || currentCourseCode;
-    const courseName = activeCourse?.name || currentCourseName;
-    const contextPrefix =
-      pageContext === "course" && courseCode
-        ? `[Course: ${courseCode}${courseName ? ` - ${courseName}` : ""}]\n\n`
-        : "";
-
-    // Course-specific responses
-    if (pageContext === "course" && courseCode?.startsWith("CS")) {
-      if (q.includes("binary search")) {
-        return (
-          contextPrefix +
-          "Binary search is an efficient algorithm for finding an item in a sorted array. It works by repeatedly dividing the search interval in half:\n\n1. Compare the target value to the middle element\n2. If equal, return the position\n3. If target is less, search the left half\n4. If target is greater, search the right half\n\nTime complexity: O(log n)\n\n**Important:** The array must be sorted first!"
-        );
-      }
-      if (q.includes("linked list") || q.includes("array")) {
-        return (
-          contextPrefix +
-          "**Arrays vs Linked Lists:**\n\n**Arrays:**\n- Fixed size\n- O(1) random access\n- O(n) insertion/deletion\n- Contiguous memory\n\n**Linked Lists:**\n- Dynamic size\n- O(n) access by index\n- O(1) insertion/deletion at known position\n- Non-contiguous memory\n\nUse arrays when you need fast lookups, linked lists when you need frequent insertions/deletions."
-        );
-      }
-    }
-
-    if (pageContext === "course" && courseCode?.startsWith("MATH")) {
-      if (q.includes("integration") || q.includes("integral")) {
-        return (
-          contextPrefix +
-          "**Integration Techniques:**\n\n1. **Substitution** (u-substitution)\n2. **Integration by parts**: ∫u dv = uv - ∫v du\n3. **Partial fractions**\n4. **Trigonometric substitution**\n\n**LIATE rule** for choosing u:\nL - Logarithmic\nI - Inverse trig\nA - Algebraic\nT - Trigonometric\nE - Exponential\n\nWhat specific problem are you working on?"
-        );
-      }
-    }
-
-    // Instructor-specific responses
-    if (pageContext === "instructor") {
-      if (q.includes("engagement") || q.includes("participation")) {
-        return "**Boosting Student Engagement:**\n\n1. **Active Learning**: Use think-pair-share, polling, and problem-solving activities\n2. **Real-World Examples**: Connect concepts to practical applications\n3. **Timely Feedback**: Respond to questions within 24 hours\n4. **Discussion Prompts**: Post thought-provoking questions weekly\n5. **Office Hours**: Offer flexible virtual office hours\n\nWould you like specific strategies for online vs in-person classes?";
-      }
-      if (q.includes("grade") || q.includes("assessment")) {
-        return "**Assessment Best Practices:**\n\n1. **Varied Formats**: Mix quizzes, projects, and exams\n2. **Rubrics**: Provide clear grading criteria upfront\n3. **Formative Assessment**: Use low-stakes checks throughout\n4. **Timely Feedback**: Return grades within one week\n5. **Revision Opportunities**: Allow resubmissions for major assignments\n\nNeed help creating rubrics or designing assessments?";
-      }
-    }
-
-    // General responses
-    if (q.includes("hello") || q.includes("hi")) {
-      return contextPrefix + `Hello! 👋 How can I help you today?`;
-    }
-
-    if (q.includes("help") || q.includes("what can you do")) {
-      if (pageContext === "instructor") {
-        return "I can help you with:\n\n- **Student Questions**: Analyze common questions and suggest FAQ topics\n- **Engagement**: Strategies to boost participation\n- **Assessment**: Create rubrics and design effective tests\n- **Course Management**: Organize materials and track progress\n\nWhat would you like assistance with?";
-      } else if (pageContext === "course") {
-        return contextPrefix + `I can help with:\n\n- Course concepts and explanations\n- Problem-solving strategies\n- Study tips and exam prep\n- Clarifying assignments\n\nWhat would you like to know?`;
-      } else {
-        return "I can help you with:\n\n- **Course Material**: Explanations of concepts across your courses\n- **Study Strategies**: Time management, note-taking, test prep\n- **Academic Questions**: General questions about topics you're learning\n\nWhat can I help you with today?";
-      }
-    }
-
-    // Default response
-    return (
-      contextPrefix +
-      `I'd be happy to help with "${question}"!\n\nCould you provide more details? For example:\n- What specific concept are you asking about?\n- Any problems you're working on?\n- What you've tried so far?\n\nThe more context you provide, the better I can assist you!`
-    );
-  };
-
+  // Handle message submission
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isThinking) return;
+    if (!input.trim() || !activeConversationId || !user || sendMessage.isPending) return;
 
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: input.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const messageContent = input.trim();
     setInput("");
-    setIsThinking(true);
 
-    // Simulate AI thinking
-    await new Promise((resolve) => setTimeout(resolve, 800 + Math.random() * 800));
-
-    const aiResponse: Message = {
-      id: `ai-${Date.now()}`,
-      role: "assistant",
-      content: getAIResponse(userMessage.content),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, aiResponse]);
-    setIsThinking(false);
+    // Send message via mutation (includes optimistic update)
+    sendMessage.mutate({
+      conversationId: activeConversationId,
+      content: messageContent,
+      userId: user.id,
+      role: "user",
+    });
   };
 
   // Handle clear conversation
   const handleClearConversation = () => {
-    setMessages([
+    if (!activeConversationId || !user) return;
+
+    // Delete current conversation
+    deleteConversation.mutate(
       {
-        id: "welcome",
-        role: "assistant",
-        content: getWelcomeMessage(),
-        timestamp: new Date().toISOString(),
+        conversationId: activeConversationId,
+        userId: user.id,
       },
-    ]);
-    setShowClearConfirm(false);
+      {
+        onSuccess: () => {
+          // Create new conversation for this context
+          setActiveConversationId(null);
+          setShowClearConfirm(false);
+
+          createConversation.mutate({
+            userId: user.id,
+            courseId: activeCourseId || null,
+            title: `Quokka Chat - ${activeCourse?.code || "General"}`,
+          }, {
+            onSuccess: (newConversation) => {
+              setActiveConversationId(newConversation.id);
+            },
+          });
+        },
+      }
+    );
   };
 
   // Handle close modal
   const handleClose = () => {
-    if (!isThinking) {
+    if (!sendMessage.isPending) {
       onClose();
     }
   };
@@ -395,31 +262,10 @@ export function QuokkaAssistantModal({
     ];
   };
 
-  // Convert conversation to thread content
-  const formatConversationAsThread = (): { title: string; content: string } => {
-    // Get first user message as title (excluding welcome message)
-    const firstUserMsg = messages.find((m) => m.role === "user");
-    const title = firstUserMsg
-      ? firstUserMsg.content.slice(0, 200)
-      : "AI Conversation - " + new Date().toLocaleDateString();
-
-    // Format all messages as Q&A
-    const content = messages
-      .filter((m) => m.id !== "welcome") // Exclude welcome
-      .map((m) =>
-        m.role === "user"
-          ? `**Q:** ${m.content}`
-          : `**A (Quokka):** ${m.content}`
-      )
-      .join("\n\n---\n\n");
-
-    return { title, content };
-  };
-
-  // Post conversation as thread
-  const handlePostAsThread = async () => {
+  // Post conversation as thread using native conversion
+  const handlePostAsThread = () => {
     const targetCourseId = activeCourseId || currentCourseId;
-    if (!targetCourseId || !user || messages.length <= 1) return;
+    if (!targetCourseId || !user || !activeConversationId || messages.length === 0) return;
 
     // Show confirmation if on dashboard
     if (pageContext === "dashboard" && !showPostConfirm) {
@@ -427,29 +273,25 @@ export function QuokkaAssistantModal({
       return;
     }
 
-    setIsPostingThread(true);
-    try {
-      const { title, content } = formatConversationAsThread();
-      const result = await createThreadMutation.mutateAsync({
-        input: {
-          courseId: targetCourseId,
-          title,
-          content,
-          tags: ["ai-conversation", activeCourse?.code || currentCourseCode || ""].filter(Boolean),
+    // Use native conversation-to-thread conversion
+    convertToThread.mutate(
+      {
+        conversationId: activeConversationId,
+        userId: user.id,
+        courseId: targetCourseId,
+      },
+      {
+        onSuccess: (result) => {
+          setPostedThreadId(result.thread.id);
+          setShowPostSuccess(true);
+          setShowPostConfirm(false);
         },
-        authorId: user.id,
-      });
-
-      // Success: Show styled success dialog
-      setPostedThreadId(result.thread.id);
-      setShowPostSuccess(true);
-      setShowPostConfirm(false);
-    } catch (error) {
-      console.error("Failed to post thread:", error);
-      alert("Failed to post conversation. Please try again.");
-    } finally {
-      setIsPostingThread(false);
-    }
+        onError: (error) => {
+          console.error("Failed to post thread:", error);
+          alert("Failed to post conversation. Please try again.");
+        },
+      }
+    );
   };
 
   // Handle viewing posted thread
@@ -465,7 +307,8 @@ export function QuokkaAssistantModal({
   // Handle course selection change
   const handleCourseSelect = (courseId: string) => {
     setSelectedCourseId(courseId);
-    setDetectedCourseId(null); // Clear auto-detection when manually selecting
+    // Clear current conversation when switching courses
+    setActiveConversationId(null);
   };
 
   return (
@@ -510,16 +353,6 @@ export function QuokkaAssistantModal({
                       ))}
                     </SelectContent>
                   </Select>
-
-                  {/* Auto-detected course indicator */}
-                  {detectedCourseId && !selectedCourseId && activeCourse && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <GraduationCap className="h-4 w-4" />
-                      <span>
-                        Auto-detected: <strong>{activeCourse.code}</strong>
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
             </DialogHeader>
@@ -533,6 +366,16 @@ export function QuokkaAssistantModal({
                 aria-relevant="additions"
                 aria-label="Chat message history"
               >
+                {messages.length === 0 && (
+                  <div className="flex justify-start">
+                    <div className="message-assistant p-3">
+                      <p className="text-sm leading-relaxed">
+                        Hi! I'm Quokka, your AI study assistant. How can I help you today? 🎓
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -553,7 +396,7 @@ export function QuokkaAssistantModal({
                   </div>
                 ))}
 
-                {isThinking && (
+                {sendMessage.isPending && (
                   <div className="flex justify-start" role="status" aria-live="polite">
                     <div className="message-assistant p-3">
                       <div className="flex items-center gap-2">
@@ -572,8 +415,8 @@ export function QuokkaAssistantModal({
 
             {/* Input */}
             <div className="border-t border-[var(--border-glass)] p-4">
-              {/* Quick prompts (only show for first message) */}
-              {messages.length === 1 && (
+              {/* Quick prompts (only show when no messages) */}
+              {messages.length === 0 && (
                 <div className="mb-3">
                   <p className="text-xs font-semibold text-muted-foreground mb-2">Quick prompts:</p>
                   <div className="flex flex-wrap gap-2">
@@ -595,7 +438,7 @@ export function QuokkaAssistantModal({
               )}
 
               {/* Action Buttons - Clear & Post Thread */}
-              {messages.length > 1 && (
+              {messages.length > 0 && (
                 <div className="mb-3 flex items-center justify-between gap-2">
                   {/* Post as Thread - show when course is active */}
                   {(activeCourseId || currentCourseId) && (
@@ -603,7 +446,7 @@ export function QuokkaAssistantModal({
                       variant="outline"
                       size="sm"
                       onClick={handlePostAsThread}
-                      disabled={isThinking || isPostingThread}
+                      disabled={sendMessage.isPending || convertToThread.isPending}
                       className="gap-2"
                     >
                       <Share2 className="h-4 w-4" />
@@ -620,7 +463,7 @@ export function QuokkaAssistantModal({
                       <Button
                         variant="ghost"
                         size="sm"
-                        disabled={isThinking}
+                        disabled={sendMessage.isPending}
                         className="gap-2"
                         aria-label="Conversation actions"
                       >
@@ -646,7 +489,7 @@ export function QuokkaAssistantModal({
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask me anything..."
-                  disabled={isThinking}
+                  disabled={sendMessage.isPending || !activeConversationId}
                   className="flex-1 text-sm"
                   aria-label="Message input"
                 />
@@ -654,7 +497,7 @@ export function QuokkaAssistantModal({
                   type="submit"
                   variant="glass-primary"
                   size="sm"
-                  disabled={isThinking || !input.trim()}
+                  disabled={sendMessage.isPending || !input.trim() || !activeConversationId}
                   className="shrink-0 min-h-[44px] min-w-[44px]"
                 >
                   <Send className="h-4 w-4" />
@@ -700,10 +543,10 @@ export function QuokkaAssistantModal({
             <AlertDialogCancel onClick={() => setShowPostConfirm(false)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handlePostAsThread}
-              disabled={isPostingThread}
+              disabled={convertToThread.isPending}
               className="bg-primary hover:bg-primary-hover"
             >
-              {isPostingThread ? "Posting..." : "Post Thread"}
+              {convertToThread.isPending ? "Posting..." : "Post Thread"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
