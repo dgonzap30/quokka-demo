@@ -1,4 +1,4 @@
-import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer, ResponseTemplate, Assignment } from "@/lib/models/types";
+import type { User, AuthSession, Course, Enrollment, Thread, Notification, Post, AIAnswer, ResponseTemplate, Assignment, CourseMaterial, AIConversation, AIMessage } from "@/lib/models/types";
 
 import usersData from "@/mocks/users.json";
 import coursesData from "@/mocks/courses.json";
@@ -8,6 +8,7 @@ import postsData from "@/mocks/posts.json";
 import notificationsData from "@/mocks/notifications.json";
 import aiAnswersData from "@/mocks/ai-answers.json";
 import assignmentsData from "@/mocks/assignments.json";
+import courseMaterialsData from "@/mocks/course-materials.json";
 
 /**
  * Mock data version - increment when mock data changes to force re-seed
@@ -24,8 +25,11 @@ const KEYS = {
   posts: "quokkaq.posts",
   notifications: "quokkaq.notifications",
   aiAnswers: "quokkaq.aiAnswers",
+  aiConversations: "quokkaq.aiConversations",
+  conversationMessages: "quokkaq.conversationMessages",
   responseTemplates: "quokkaq.responseTemplates",
   assignments: "quokkaq.assignments",
+  courseMaterials: "quokkaq.courseMaterials",
   seedVersion: "quokkaq.seedVersion",
   initialized: "quokkaq.initialized",
 } as const;
@@ -52,6 +56,7 @@ export function seedData(): void {
     const notifications = notificationsData as Notification[];
     const aiAnswers = aiAnswersData as unknown as AIAnswer[];
     const assignments = assignmentsData.assignments as Assignment[];
+    const courseMaterials = courseMaterialsData as CourseMaterial[];
 
     // Backfill endorsement data for existing posts
     posts = posts.map(post => {
@@ -92,6 +97,7 @@ export function seedData(): void {
     localStorage.setItem(KEYS.notifications, JSON.stringify(notifications));
     localStorage.setItem(KEYS.aiAnswers, JSON.stringify(aiAnswers));
     localStorage.setItem(KEYS.assignments, JSON.stringify(assignments));
+    localStorage.setItem(KEYS.courseMaterials, JSON.stringify(courseMaterials));
     localStorage.setItem(KEYS.seedVersion, SEED_VERSION);
     localStorage.setItem(KEYS.initialized, "true");
   } catch (error) {
@@ -493,6 +499,155 @@ export function updateAIAnswer(aiAnswerId: string, updates: Partial<AIAnswer>): 
 }
 
 // ============================================
+// AI Conversations Data Access
+// ============================================
+
+/**
+ * Get all AI conversations from localStorage
+ */
+export function getAIConversations(): AIConversation[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.aiConversations);
+  if (!data) {
+    // Initialize empty array on first access
+    localStorage.setItem(KEYS.aiConversations, JSON.stringify([]));
+    return [];
+  }
+
+  try {
+    return JSON.parse(data) as AIConversation[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get AI conversations for a specific user
+ */
+export function getUserConversations(userId: string): AIConversation[] {
+  const conversations = getAIConversations();
+  return conversations
+    .filter((c) => c.userId === userId)
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+}
+
+/**
+ * Get conversation by ID
+ */
+export function getConversationById(conversationId: string): AIConversation | null {
+  const conversations = getAIConversations();
+  return conversations.find((c) => c.id === conversationId) ?? null;
+}
+
+/**
+ * Add new conversation
+ */
+export function addConversation(conversation: AIConversation): void {
+  if (typeof window === "undefined") return;
+
+  const conversations = getAIConversations();
+  conversations.push(conversation);
+  localStorage.setItem(KEYS.aiConversations, JSON.stringify(conversations));
+}
+
+/**
+ * Update conversation
+ */
+export function updateConversation(conversationId: string, updates: Partial<AIConversation>): void {
+  if (typeof window === "undefined") return;
+
+  const conversations = getAIConversations();
+  const index = conversations.findIndex((c) => c.id === conversationId);
+
+  if (index !== -1) {
+    conversations[index] = { ...conversations[index], ...updates };
+    localStorage.setItem(KEYS.aiConversations, JSON.stringify(conversations));
+  }
+}
+
+/**
+ * Delete conversation
+ */
+export function deleteConversation(conversationId: string): void {
+  if (typeof window === "undefined") return;
+
+  const conversations = getAIConversations();
+  const filtered = conversations.filter((c) => c.id !== conversationId);
+  localStorage.setItem(KEYS.aiConversations, JSON.stringify(filtered));
+
+  // Also delete associated messages
+  const messages = getConversationMessages(conversationId);
+  const allMessages = getAllConversationMessages();
+  const filteredMessages = allMessages.filter(
+    (m) => !messages.find((msg) => msg.id === m.id)
+  );
+  localStorage.setItem(KEYS.conversationMessages, JSON.stringify(filteredMessages));
+}
+
+/**
+ * Get all conversation messages from localStorage
+ */
+export function getAllConversationMessages(): AIMessage[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.conversationMessages);
+  if (!data) {
+    // Initialize empty array on first access
+    localStorage.setItem(KEYS.conversationMessages, JSON.stringify([]));
+    return [];
+  }
+
+  try {
+    return JSON.parse(data) as AIMessage[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get messages for a specific conversation
+ */
+export function getConversationMessages(conversationId: string): AIMessage[] {
+  const messages = getAllConversationMessages();
+  return messages
+    .filter((m) => m.conversationId === conversationId)
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+}
+
+/**
+ * Add message to conversation
+ */
+export function addMessage(message: AIMessage): void {
+  if (typeof window === "undefined") return;
+
+  const messages = getAllConversationMessages();
+  messages.push(message);
+  localStorage.setItem(KEYS.conversationMessages, JSON.stringify(messages));
+
+  // Update conversation's updatedAt and messageCount
+  const conversation = getConversationById(message.conversationId);
+  if (conversation) {
+    const currentCount = conversation.messageCount || 0;
+    updateConversation(message.conversationId, {
+      updatedAt: message.timestamp,
+      messageCount: currentCount + 1,
+    });
+  }
+}
+
+/**
+ * Delete message from conversation
+ */
+export function deleteMessage(messageId: string): void {
+  if (typeof window === "undefined") return;
+
+  const messages = getAllConversationMessages();
+  const filtered = messages.filter((m) => m.id !== messageId);
+  localStorage.setItem(KEYS.conversationMessages, JSON.stringify(filtered));
+}
+
+// ============================================
 // Response Template Data Access (Instructor-Specific)
 // ============================================
 
@@ -619,4 +774,40 @@ export function getAssignment(assignmentId: string): Assignment | null {
 export function getAssignmentsByCourse(courseId: string): Assignment[] {
   const assignments = getAssignments();
   return assignments.filter((a) => a.courseId === courseId);
+}
+
+// ============================================
+// Course Materials Data Access
+// ============================================
+
+/**
+ * Get all course materials from localStorage
+ */
+export function getCourseMaterials(): CourseMaterial[] {
+  if (typeof window === "undefined") return [];
+
+  const data = localStorage.getItem(KEYS.courseMaterials);
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data) as CourseMaterial[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get course materials by course ID
+ */
+export function getCourseMaterialsByCourse(courseId: string): CourseMaterial[] {
+  const materials = getCourseMaterials();
+  return materials.filter((m) => m.courseId === courseId);
+}
+
+/**
+ * Get course material by ID
+ */
+export function getCourseMaterialById(materialId: string): CourseMaterial | null {
+  const materials = getCourseMaterials();
+  return materials.find((m) => m.id === materialId) ?? null;
 }

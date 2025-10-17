@@ -38,6 +38,12 @@ import type {
   CourseMaterial,
   SearchCourseMaterialsInput,
   CourseMaterialSearchResult,
+  AIConversation,
+  AIMessage,
+  CreateConversationInput,
+  SendMessageInput,
+  ConversationToThreadInput,
+  ConversationToThreadResult,
 } from "@/lib/models/types";
 
 import {
@@ -93,6 +99,13 @@ import {
   incrementTemplateUsage,
   getAssignments,
   getCourseMaterialsByCourse,
+  getUserConversations,
+  getConversationById,
+  addConversation,
+  updateConversation,
+  deleteConversation,
+  getConversationMessages,
+  addMessage,
 } from "@/lib/store/localStore";
 
 // ============================================
@@ -2194,5 +2207,223 @@ export const api = {
     seedData();
 
     deleteResponseTemplateFromStore(templateId);
+  },
+
+  // ============================================
+  // AI Conversation API Methods
+  // ============================================
+
+  /**
+   * Create new AI conversation
+   */
+  async createConversation(input: CreateConversationInput): Promise<AIConversation> {
+    await delay(100 + Math.random() * 50); // 100-150ms
+    seedData();
+
+    const newConversation: AIConversation = {
+      id: generateId('conv'),
+      userId: input.userId,
+      courseId: input.courseId || null,
+      title: input.title || 'New Conversation',
+      messageCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    addConversation(newConversation);
+
+    return newConversation;
+  },
+
+  /**
+   * Get all conversations for a user
+   */
+  async getAIConversations(userId: string): Promise<AIConversation[]> {
+    await delay(200 + Math.random() * 100); // 200-300ms
+    seedData();
+
+    return getUserConversations(userId);
+  },
+
+  /**
+   * Get messages for a conversation
+   */
+  async getConversationMessages(conversationId: string): Promise<AIMessage[]> {
+    await delay(100 + Math.random() * 100); // 100-200ms
+    seedData();
+
+    return getConversationMessages(conversationId);
+  },
+
+  /**
+   * Send message in conversation (with LLM response)
+   */
+  async sendMessage(input: SendMessageInput): Promise<{ userMessage: AIMessage; aiMessage: AIMessage }> {
+    await delay(800 + Math.random() * 400); // 800-1200ms (LLM latency)
+    seedData();
+
+    // Validate conversation exists
+    const conversation = getConversationById(input.conversationId);
+    if (!conversation) {
+      throw new Error(`Conversation not found: ${input.conversationId}`);
+    }
+
+    // Create user message
+    const userMessage: AIMessage = {
+      id: generateId('msg'),
+      conversationId: input.conversationId,
+      role: 'user',
+      content: input.content,
+      timestamp: new Date().toISOString(),
+    };
+
+    addMessage(userMessage);
+
+    // Generate AI response
+    let aiContent = '';
+    try {
+      // If conversation has a course, use course context
+      if (conversation.courseId) {
+        const course = await this.getCourse(conversation.courseId);
+        if (course) {
+          const { content } = await generateAIResponseWithMaterials(
+            conversation.courseId,
+            course.code,
+            input.content,
+            '',
+            []
+          );
+          aiContent = content;
+        }
+      } else {
+        // General conversation without course context
+        const { content } = generateAIResponse('GENERAL', input.content, '', []);
+        aiContent = content;
+      }
+    } catch (error) {
+      console.error('Failed to generate AI response:', error);
+      aiContent = "I apologize, but I'm having trouble generating a response right now. Please try again.";
+    }
+
+    // Create AI message
+    const aiMessage: AIMessage = {
+      id: generateId('msg'),
+      conversationId: input.conversationId,
+      role: 'assistant',
+      content: aiContent,
+      timestamp: new Date().toISOString(),
+    };
+
+    addMessage(aiMessage);
+
+    return { userMessage, aiMessage };
+  },
+
+  /**
+   * Delete conversation and all messages
+   */
+  async deleteAIConversation(conversationId: string): Promise<void> {
+    await delay(100); // Quick action
+    seedData();
+
+    deleteConversation(conversationId);
+  },
+
+  /**
+   * Convert conversation to thread
+   */
+  async convertConversationToThread(
+    conversationId: string,
+    userId: string,
+    courseId: string
+  ): Promise<{ thread: Thread; aiAnswer: AIAnswer | null }> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    // Validate conversation exists
+    const conversation = getConversationById(conversationId);
+    if (!conversation) {
+      throw new Error(`Conversation not found: ${conversationId}`);
+    }
+
+    // Get all messages
+    const messages = getConversationMessages(conversationId);
+    if (messages.length === 0) {
+      throw new Error('Cannot convert empty conversation to thread');
+    }
+
+    // Extract first user message as thread title
+    const firstUserMessage = messages.find(m => m.role === 'user');
+    const threadTitle = firstUserMessage
+      ? firstUserMessage.content.substring(0, 100) + (firstUserMessage.content.length > 100 ? '...' : '')
+      : conversation.title;
+
+    // Combine all messages into thread content
+    const threadContent = messages
+      .map(msg => {
+        const role = msg.role === 'user' ? 'Student' : 'AI Assistant';
+        return `**${role}:** ${msg.content}`;
+      })
+      .join('\n\n---\n\n');
+
+    // Create thread
+    const newThread: Thread = {
+      id: generateId('thread'),
+      courseId,
+      title: threadTitle,
+      content: threadContent,
+      authorId: userId,
+      status: 'open',
+      tags: ['from-conversation'],
+      views: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    addThread(newThread);
+
+    // Check if there's an AI response to preserve as AIAnswer
+    const aiMessages = messages.filter(m => m.role === 'assistant');
+    let aiAnswer: AIAnswer | null = null;
+
+    if (aiMessages.length > 0) {
+      // Use the last AI message as the thread's AI answer
+      const lastAIMessage = aiMessages[aiMessages.length - 1];
+
+      const aiAnswerData: AIAnswer = {
+        id: generateId('ai'),
+        threadId: newThread.id,
+        courseId,
+        content: lastAIMessage.content,
+        confidenceLevel: 'medium',
+        confidenceScore: 65,
+        citations: [],
+        studentEndorsements: 0,
+        instructorEndorsements: 0,
+        totalEndorsements: 0,
+        endorsedBy: [],
+        instructorEndorsed: false,
+        generatedAt: lastAIMessage.timestamp,
+        updatedAt: new Date().toISOString(),
+      };
+
+      addAIAnswer(aiAnswerData);
+      updateThread(newThread.id, {
+        hasAIAnswer: true,
+        aiAnswerId: aiAnswerData.id,
+      });
+
+      aiAnswer = aiAnswerData;
+    }
+
+    // Mark conversation as converted (optional: could add flag to conversation type)
+    updateConversation(conversationId, {
+      updatedAt: new Date().toISOString(),
+    });
+
+    return {
+      thread: newThread,
+      aiAnswer,
+    };
   },
 };
