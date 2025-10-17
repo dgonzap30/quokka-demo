@@ -246,6 +246,7 @@ npm run seed
 | `/` | Threads List | Browse all threads, filter by status, view metadata |
 | `/threads/[id]` | Thread Detail | View question, AI answer, replies, post new responses |
 | `/ask` | New Question | Submit question, see similar threads, preview AI answer |
+| `/quokka` | AI Chat | Private LLM conversations with course context, persistence |
 | `/instructor` | Dashboard | View metrics, unanswered queue, moderation tools |
 
 ---
@@ -346,6 +347,199 @@ useInstructorMetrics()    // Dashboard metrics
 useUnansweredThreads()    // Open threads
 useCurrentUser()          // Current user
 ```
+
+---
+
+## LLM Integration Architecture
+
+**Status:** ✅ Complete (2025-10-17)
+
+### Overview
+
+The application supports two modes:
+1. **LLM Mode** - Real AI responses using OpenAI/Anthropic/Google APIs (requires `.env.local`)
+2. **Fallback Mode** - Template-based responses (default, no setup required)
+
+### Conversation System
+
+**Core Concept:** Private, persistent conversations stored in localStorage with automatic course context detection.
+
+#### Key Hooks (lib/api/hooks.ts)
+
+```typescript
+// Conversation management
+useAIConversations(userId)              // List all user conversations
+useConversationMessages(conversationId) // Get messages for conversation
+useCreateConversation()                 // Create new conversation
+useSendMessage()                        // Send message + get AI response
+useDeleteConversation()                 // Delete conversation
+useConvertConversationToThread()        // Convert to public thread
+
+// Course context
+useCourseMaterials(courseId)            // Get course materials for context
+```
+
+#### Implementation Pattern
+
+**Quokka Page (`/app/quokka/page.tsx`):**
+```typescript
+// 1. Auto-load or create conversation on mount
+useEffect(() => {
+  if (!user || activeConversationId) return;
+
+  if (conversations && conversations.length > 0) {
+    setActiveConversationId(conversations[0].id); // Load most recent
+  } else {
+    createConversation.mutate({
+      userId: user.id,
+      courseId: null, // null = multi-course context
+      title: "Quokka Chat",
+    });
+  }
+}, [user, conversations, activeConversationId]);
+
+// 2. Fetch messages for active conversation
+const { data: messages = [] } = useConversationMessages(activeConversationId);
+
+// 3. Send message with optimistic update
+sendMessage.mutate({
+  conversationId: activeConversationId,
+  content: messageContent,
+  userId: user.id,
+  role: "user",
+});
+```
+
+**Assistant Modal (`components/ai/quokka-assistant-modal.tsx`):**
+```typescript
+// 1. Course-specific conversation (separate per course)
+useEffect(() => {
+  if (!isOpen || !user || !courseId) return;
+
+  const existing = conversations?.find(c => c.courseId === courseId);
+  if (existing) {
+    setActiveConversationId(existing.id);
+  } else {
+    createConversation.mutate({
+      userId: user.id,
+      courseId: courseId, // Course-specific
+      title: `${courseName} - AI Assistant`,
+    });
+  }
+}, [isOpen, user, courseId, conversations]);
+```
+
+#### Performance Optimizations (Applied 2025-10-17)
+
+**1. Removed 5-second polling** - Eliminated 720 requests/hour per conversation
+```typescript
+// ❌ OLD (wasteful)
+refetchInterval: 5000
+
+// ✅ NEW (rely on invalidations)
+// No polling - mutations trigger invalidations
+```
+
+**2. Surgical cache invalidation** - Added `userId` field
+```typescript
+// lib/api/client.ts - Updated signature
+export async function sendMessage(input: SendMessageInput): Promise<void> {
+  // Now requires userId for targeted invalidation
+}
+
+// lib/api/hooks.ts - Targeted invalidation
+queryClient.invalidateQueries({
+  queryKey: ["aiConversations", userId]
+});
+```
+
+**3. Optimistic updates** - Already implemented
+```typescript
+useSendMessage() // Automatically adds user message to UI immediately
+```
+
+#### LLM Context Builders
+
+**Location:** `lib/llm/context/` (from Phase 1-8)
+
+The backend automatically:
+- Detects course from conversation's `courseId`
+- Loads relevant course materials from `mocks/course-materials.json`
+- Builds context with documents, topics, and metadata
+- Passes context to LLM provider (OpenAI/Anthropic/Google)
+
+**No client-side course detection needed** - Backend handles it.
+
+#### Environment Setup
+
+**Optional `.env.local`** (see `.env.local.example`):
+```bash
+# LLM Provider (choose one)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-...
+GOOGLE_GENERATIVE_AI_API_KEY=...
+
+# Provider selection
+NEXT_PUBLIC_LLM_PROVIDER=openai  # or anthropic, google
+NEXT_PUBLIC_USE_LLM=true
+```
+
+**Without `.env.local`:** Falls back to template-based responses.
+
+#### Conversation → Thread Conversion
+
+```typescript
+const convertToThread = useConvertConversationToThread();
+
+convertToThread.mutate({
+  conversationId: activeConversationId,
+  userId: user.id,
+});
+// Creates public thread with all messages
+// Maintains bi-directional link
+```
+
+### QDS Compliance Notes
+
+**Tailwind v4 Compatibility:**
+- Custom utilities **cannot** be used in `@apply`
+- Use direct CSS properties instead:
+
+```css
+/* ✅ GOOD: Direct properties */
+.message-assistant {
+  @apply backdrop-blur-md bg-glass-strong;
+  border-color: var(--border-glass);  /* Direct */
+  box-shadow: var(--shadow-glass-sm); /* Direct */
+}
+
+/* ❌ BAD: Custom utility in @apply */
+.message-assistant {
+  @apply backdrop-blur-md bg-glass-strong border-glass shadow-glass-sm;
+}
+```
+
+**Shadow Utilities:** Define outside `@layer utilities`:
+```css
+/* Outside @layer utilities block */
+.shadow-glass-sm {
+  box-shadow: var(--shadow-glass-sm);
+}
+```
+
+### Migration Notes
+
+**From Template System to LLM:**
+1. ✅ Old `getAIResponse()` function removed
+2. ✅ Local message state replaced with React Query
+3. ✅ Course detection moved to backend
+4. ✅ Conversation persistence added
+5. ✅ Optimistic updates implemented
+
+**Backward Compatibility:**
+- Template fallback still works without API keys
+- All existing UX flows preserved
+- No breaking changes to UI components
 
 ---
 
