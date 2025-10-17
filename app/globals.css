@@ -626,11 +626,14 @@
 
   /* Message Bubble Utilities */
   .message-user {
-    @apply backdrop-blur-md bg-accent/90 text-accent-foreground border border-accent/30 shadow-glass-sm rounded-2xl;
+    @apply backdrop-blur-md bg-accent/90 text-accent-foreground border border-accent/30 rounded-2xl;
+    box-shadow: var(--shadow-glass-sm);
   }
 
   .message-assistant {
-    @apply backdrop-blur-md bg-glass-strong border border-glass shadow-glass-sm text-foreground rounded-2xl;
+    @apply backdrop-blur-md bg-glass-strong border text-foreground rounded-2xl;
+    border-color: var(--border-glass);
+    box-shadow: var(--shadow-glass-sm);
   }
 
   /* Text Utilities */
@@ -769,39 +772,6 @@
     padding-bottom: max(var(--mobile-padding), var(--safe-area-bottom));
     padding-left: max(var(--mobile-padding), var(--safe-area-left));
   }
-
-  /* ===== Glass Shadow Utilities ===== */
-  .shadow-glass-xs {
-    box-shadow: 0 1px 8px rgba(15, 14, 12, 0.03);
-  }
-
-  .shadow-glass-sm {
-    box-shadow: var(--shadow-glass-sm);
-  }
-
-  .shadow-glass-md {
-    box-shadow: var(--shadow-glass-md);
-  }
-
-  .shadow-glass-lg {
-    box-shadow: var(--shadow-glass-lg);
-  }
-
-  .dark .shadow-glass-xs {
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .dark .shadow-glass-sm {
-    box-shadow: var(--shadow-glass-sm);
-  }
-
-  .dark .shadow-glass-md {
-    box-shadow: var(--shadow-glass-md);
-  }
-
-  .dark .shadow-glass-lg {
-    box-shadow: var(--shadow-glass-lg);
-  }
 }
 
 /* ===== AI-First Animation System ===== */
@@ -912,6 +882,39 @@
   border: 1px solid transparent;
   background: linear-gradient(var(--card), var(--card)) padding-box,
               var(--liquid-gradient-2) border-box;
+}
+
+/* ===== Glass Shadow Utilities ===== */
+.shadow-glass-xs {
+  box-shadow: 0 1px 8px rgba(15, 14, 12, 0.03);
+}
+
+.shadow-glass-sm {
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.shadow-glass-md {
+  box-shadow: var(--shadow-glass-md);
+}
+
+.shadow-glass-lg {
+  box-shadow: var(--shadow-glass-lg);
+}
+
+.dark .shadow-glass-xs {
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dark .shadow-glass-sm {
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.dark .shadow-glass-md {
+  box-shadow: var(--shadow-glass-md);
+}
+
+.dark .shadow-glass-lg {
+  box-shadow: var(--shadow-glass-lg);
 }
 
 /* Stronger shadow for glass-strong backgrounds */
