@@ -44,6 +44,8 @@ import type {
   SendMessageInput,
   ConversationToThreadInput,
   ConversationToThreadResult,
+  Endorsement,
+  Upvote,
 } from "@/lib/models/types";
 
 import {
@@ -71,6 +73,7 @@ import {
   setAuthSession,
   clearAuthSession,
   getUserByEmail,
+  getUserById,
   validateCredentials,
   createUser,
   getCourses,
@@ -539,7 +542,7 @@ async function generateAIResponseWithMaterials(
     const materials = await api.getCourseMaterials(courseId);
 
     // Build course context with ranked materials
-    const context = buildCourseContext(course, materials, questionText, {
+    const context = await buildCourseContext(course, materials, questionText, {
       maxMaterials: 5,
       minRelevance: 30,
       maxTokens: 2000,
@@ -2256,10 +2259,12 @@ export const api = {
   },
 
   /**
-   * Send message in conversation (with LLM response)
+   * Send message in conversation (with AI SDK streaming)
+   *
+   * Now uses AI SDK /api/chat route for streaming responses.
+   * Falls back to template system if AI SDK is unavailable.
    */
   async sendMessage(input: SendMessageInput): Promise<{ userMessage: AIMessage; aiMessage: AIMessage }> {
-    await delay(800 + Math.random() * 400); // 800-1200ms (LLM latency)
     seedData();
 
     // Validate conversation exists
@@ -2279,64 +2284,90 @@ export const api = {
 
     addMessage(userMessage);
 
-    // Generate AI response
+    // Generate AI response using AI SDK route
     let aiContent = '';
     try {
-      // If conversation has a course, use course context
-      if (conversation.courseId) {
-        const course = await this.getCourse(conversation.courseId);
-        if (course) {
-          const { content } = await generateAIResponseWithMaterials(
-            conversation.courseId,
-            course.code,
-            input.content,
-            '',
-            []
-          );
-          aiContent = content;
+      // Get conversation history for context
+      const messages = getConversationMessages(input.conversationId);
+
+      // Try AI SDK route first
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: messages.map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+          conversationId: input.conversationId,
+          userId: input.userId,
+          courseId: conversation.courseId,
+        }),
+      });
+
+      if (response.ok) {
+        // Read streaming response
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (reader) {
+          let accumulatedContent = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedContent += chunk;
+          }
+
+          // Extract text from AI SDK stream format
+          // AI SDK sends text chunks directly
+          aiContent = accumulatedContent;
+
+          console.log('[AI SDK] Response received via streaming');
+        } else {
+          throw new Error('No response body available');
         }
       } else {
-        // General conversation without course context - use LLM if available
-        if (isLLMProviderAvailable()) {
-          try {
-            const llmProvider = getLLMProvider();
-            const systemPrompt = buildSystemPrompt();
-            const userPrompt = `User question: ${input.content}`;
+        // API route returned error, fall back to template
+        console.warn('[AI SDK] Route returned error, falling back to template');
+        throw new Error('AI SDK route failed');
+      }
+    } catch (error) {
+      console.error('[AI SDK] Failed to generate response:', error);
 
-            const llmResponse = await llmProvider.generate({
-              systemPrompt,
-              userPrompt,
-              maxTokens: 1000,
-              temperature: 0.7,
-            });
-
-            if (llmResponse.success) {
-              aiContent = llmResponse.content;
-              console.log('[AI] LLM response generated for general conversation', {
-                provider: llmResponse.provider,
-                model: llmResponse.model,
-                tokens: llmResponse.usage.totalTokens,
-              });
-            } else {
-              // Fallback to template
-              const { content } = generateAIResponse('GENERAL', input.content, '', []);
-              aiContent = content;
-            }
-          } catch (llmError) {
-            console.error('[AI] LLM generation failed for general conversation:', llmError);
-            // Fallback to template
+      // Fall back to template system
+      try {
+        if (conversation.courseId) {
+          const course = await this.getCourse(conversation.courseId);
+          if (course) {
+            const { content } = await generateAIResponseWithMaterials(
+              conversation.courseId,
+              course.code,
+              input.content,
+              '',
+              []
+            );
+            aiContent = content;
+          } else {
+            // Course not found, use generic template
             const { content } = generateAIResponse('GENERAL', input.content, '', []);
             aiContent = content;
           }
         } else {
-          // LLM not available, use template fallback
+          // General conversation, use generic template
           const { content } = generateAIResponse('GENERAL', input.content, '', []);
           aiContent = content;
         }
+
+        console.log('[AI] Template fallback used');
+      } catch (fallbackError) {
+        console.error('[AI] Template fallback also failed:', fallbackError);
+        aiContent = "I apologize, but I'm having trouble generating a response right now. Please try again.";
       }
-    } catch (error) {
-      console.error('Failed to generate AI response:', error);
-      aiContent = "I apologize, but I'm having trouble generating a response right now. Please try again.";
     }
 
     // Create AI message
@@ -2459,5 +2490,118 @@ export const api = {
       thread: newThread,
       aiAnswer,
     };
+  },
+
+  /**
+   * Phase 3.1: Endorse a thread (Prof/TA only)
+   * Marks thread as 'endorsed' quality status
+   */
+  async endorseThread(threadId: string, userId: string): Promise<void> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    // Validate thread exists
+    const thread = getThreadById(threadId);
+    if (!thread) {
+      throw new Error(`Thread not found: ${threadId}`);
+    }
+
+    // Validate user has instructor or TA role
+    const user = getUserById(userId);
+    if (!user) {
+      throw new Error(`User not found: ${userId}`);
+    }
+    if (user.role !== 'instructor' && user.role !== 'ta') {
+      throw new Error('Only instructors and TAs can endorse threads');
+    }
+
+    // Check if already endorsed by this user
+    const existingEndorsement = thread.endorsements?.find(e => e.userId === userId);
+    if (existingEndorsement) {
+      // Already endorsed, do nothing (idempotent)
+      return;
+    }
+
+    // Add endorsement
+    const endorsement: Endorsement = {
+      userId,
+      role: user.role === 'instructor' ? 'instructor' : 'ta',
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedThread: Thread = {
+      ...thread,
+      endorsements: [...(thread.endorsements || []), endorsement],
+      qualityStatus: 'endorsed', // Mark as endorsed
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateThread(threadId, updatedThread);
+  },
+
+  /**
+   * Phase 3.1: Upvote a thread (all users)
+   * Student signal before endorsement
+   */
+  async upvoteThread(threadId: string, userId: string): Promise<void> {
+    await delay(100); // 100ms (fast operation)
+    seedData();
+
+    // Validate thread exists
+    const thread = getThreadById(threadId);
+    if (!thread) {
+      throw new Error(`Thread not found: ${threadId}`);
+    }
+
+    // Validate user exists
+    const user = getUserById(userId);
+    if (!user) {
+      throw new Error(`User not found: ${userId}`);
+    }
+
+    // Check if already upvoted by this user
+    const existingUpvote = thread.upvotes?.find(u => u.userId === userId);
+    if (existingUpvote) {
+      // Already upvoted, do nothing (idempotent)
+      return;
+    }
+
+    // Add upvote
+    const upvote: Upvote = {
+      userId,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedThread: Thread = {
+      ...thread,
+      upvotes: [...(thread.upvotes || []), upvote],
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateThread(threadId, updatedThread);
+  },
+
+  /**
+   * Phase 3.1: Remove upvote from a thread
+   * Allows users to toggle their upvote
+   */
+  async removeUpvote(threadId: string, userId: string): Promise<void> {
+    await delay(100); // 100ms (fast operation)
+    seedData();
+
+    // Validate thread exists
+    const thread = getThreadById(threadId);
+    if (!thread) {
+      throw new Error(`Thread not found: ${threadId}`);
+    }
+
+    // Remove upvote if exists
+    const updatedThread: Thread = {
+      ...thread,
+      upvotes: (thread.upvotes || []).filter(u => u.userId !== userId),
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateThread(threadId, updatedThread);
   },
 };

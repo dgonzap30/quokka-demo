@@ -1068,3 +1068,97 @@ export function useConvertConversationToThread() {
     },
   });
 }
+
+// ============================================
+// Phase 3.1: Thread Endorsement Hooks
+// ============================================
+
+/**
+ * Endorse a thread (Prof/TA only)
+ *
+ * Marks the thread as endorsed and updates qualityStatus to 'endorsed'.
+ * Only instructors and TAs can endorse threads.
+ *
+ * Invalidates:
+ * - thread (to update endorsement status)
+ * - courseThreads (to re-sort endorsed threads to top)
+ */
+export function useEndorseThread() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ threadId, userId }: { threadId: string; userId: string }) =>
+      api.endorseThread(threadId, userId),
+    onSuccess: (_data, variables) => {
+      // Invalidate specific thread
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.thread(variables.threadId)
+      });
+
+      // Invalidate all course threads lists (we don't know which course yet)
+      // This is acceptable because endorsed threads should appear immediately
+      queryClient.invalidateQueries({
+        queryKey: ["courseThreads"]
+      });
+    },
+  });
+}
+
+/**
+ * Upvote a thread (all users)
+ *
+ * Adds the user's upvote to the thread. Students use this to signal
+ * helpful threads before instructor endorsement.
+ *
+ * Invalidates:
+ * - thread (to update upvote count)
+ * - courseThreads (to show updated upvote counts in list)
+ */
+export function useUpvoteThread() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ threadId, userId }: { threadId: string; userId: string }) =>
+      api.upvoteThread(threadId, userId),
+    onSuccess: (_data, variables) => {
+      // Invalidate specific thread
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.thread(variables.threadId)
+      });
+
+      // Invalidate all course threads lists
+      queryClient.invalidateQueries({
+        queryKey: ["courseThreads"]
+      });
+    },
+  });
+}
+
+/**
+ * Remove upvote from a thread
+ *
+ * Allows users to toggle their upvote off.
+ *
+ * Invalidates:
+ * - thread (to update upvote count)
+ * - courseThreads (to show updated upvote counts in list)
+ */
+export function useRemoveUpvote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ threadId, userId }: { threadId: string; userId: string }) =>
+      api.removeUpvote(threadId, userId),
+    onSuccess: (_data, variables) => {
+      // Invalidate specific thread
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.thread(variables.threadId)
+      });
+
+      // Invalidate all course threads lists
+      queryClient.invalidateQueries({
+        queryKey: ["courseThreads"]
+      });
+    },
+  });
+}

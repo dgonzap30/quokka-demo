@@ -372,6 +372,22 @@ export interface EnhancedAIResponse {
 
 export type ThreadStatus = 'open' | 'answered' | 'resolved';
 
+// Phase 3: Thread quality status for endorsement system
+export type ThreadQualityStatus = 'proposed' | 'endorsed' | 'revised';
+
+// Phase 3: Endorsement by professor or TA
+export interface Endorsement {
+  userId: string;
+  role: 'instructor' | 'ta';
+  timestamp: string;
+}
+
+// Phase 3: Student upvote (signal before endorsement)
+export interface Upvote {
+  userId: string;
+  timestamp: string;
+}
+
 export interface Thread {
   id: string;
   courseId: string;
@@ -385,6 +401,15 @@ export interface Thread {
   updatedAt: string;
   hasAIAnswer?: boolean;
   aiAnswerId?: string;
+
+  // Phase 3: Endorsement system
+  endorsements?: Endorsement[];
+  upvotes?: Upvote[];
+  qualityStatus?: ThreadQualityStatus;
+
+  // Phase 3: Duplicate tracking
+  duplicatesOf?: string; // Thread ID if merged
+  mergedFrom?: string[]; // Array of merged thread IDs
 }
 
 export interface Post {
@@ -450,7 +475,7 @@ export interface Citation {
  *
  * Generated automatically when a thread is created.
  * Includes confidence scoring, citations to course materials,
- * and instructor/peer endorsement tracking.
+ * instructor/peer endorsement tracking, and optional Self-RAG routing metadata.
  */
 export interface AIAnswer {
   /** Unique identifier for the AI answer */
@@ -494,6 +519,34 @@ export interface AIAnswer {
 
   /** ISO 8601 timestamp when last updated */
   updatedAt: string;
+
+  // ============================================
+  // Self-RAG (Adaptive Routing) Metadata
+  // ============================================
+
+  /**
+   * Adaptive routing decision (if Self-RAG enabled)
+   * Contains confidence scoring and routing strategy metadata
+   */
+  routing?: {
+    /** Routing action taken */
+    action: "use-cache" | "retrieve-standard" | "retrieve-expanded" | "retrieve-aggressive";
+
+    /** Query confidence score (0-100) */
+    queryConfidence: number;
+
+    /** Confidence level classification */
+    confidenceLevel: "high" | "medium" | "low";
+
+    /** Whether result was from cache */
+    fromCache: boolean;
+
+    /** Human-readable retrieval strategy */
+    strategy: string;
+
+    /** Reasoning for routing decision */
+    reasoning?: string;
+  };
 }
 
 /**
@@ -1963,6 +2016,9 @@ export interface LLMRequest {
 
   /** Top P override */
   topP?: number;
+
+  /** Enable prompt caching (default: true for system prompts >1024 tokens) */
+  enableCaching?: boolean;
 }
 
 /**
@@ -1980,6 +2036,15 @@ export interface TokenUsage {
 
   /** Estimated cost in USD */
   estimatedCost: number;
+
+  /** Cached tokens (Anthropic prompt caching) */
+  cachedTokens?: number;
+
+  /** Cache creation tokens (first-time cache writes) */
+  cacheCreationTokens?: number;
+
+  /** Cache read tokens (subsequent cache hits) */
+  cacheReadTokens?: number;
 }
 
 /**
