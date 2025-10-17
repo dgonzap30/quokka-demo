@@ -284,6 +284,78 @@ If critical issues arise:
 
 ## Changelog
 
+### 2025-10-17 - Phase 8 Complete: Testing & Documentation
+- Updated README.md with expanded LLM integration details
+- Enhanced "How It Works" section with architecture details
+- Added conversation endpoints to API documentation
+- Created comprehensive MIGRATION-RUNBOOK.md (5 phases, 40 hours)
+- Migration runbook includes database schema, API routes, deployment checklist
+- All documentation finalized for production handoff
+
+### 2025-10-17 - Phase 7 Complete: React Query Hooks
+- Implemented 6 conversation hooks in lib/api/hooks.ts
+- useAIConversations(userId) - fetch conversations with 1-min stale time
+- useConversationMessages(conversationId) - fetch messages with 5s polling
+- useCreateConversation() - mutation with cache invalidation
+- useSendMessage() - mutation with optimistic updates
+- useDeleteConversation() - mutation with optimistic removal
+- useConvertConversationToThread() - convert to public thread
+- All hooks follow existing patterns (optimistic updates, proper invalidation)
+- TypeScript typecheck passes with no errors
+
+### 2025-10-17 - Phase 6 Complete: Conversation Storage
+- Extended localStore.ts with 10 new conversation functions
+- Added aiConversations and conversationMessages to localStorage
+- Implemented cascade delete (conversation → messages)
+- Auto-update messageCount and timestamps on message add
+- Updated client.ts with 6 new conversation API methods
+- Conversation-to-thread conversion preserves full context
+- TypeScript typecheck passes after fixing 3 type mismatches
+
+### 2025-10-17 - Phase 5 Complete: API Integration with LLM
+- Replaced generateAIResponseWithMaterials() with LLM-powered version
+- Integrated buildCourseContext() for material ranking
+- Call getLLMProvider().generate() with system/user prompts
+- Extract citations from ranked materials
+- Calculate confidence from material relevance scores
+- Graceful fallback to templates on any error
+- TypeScript typecheck passes after fixing materialId type
+
+### 2025-10-17 - Phase 4 Complete: Context Builder System
+- Created CourseContextBuilder (lib/context/CourseContextBuilder.ts - 213 lines)
+- Created MultiCourseContextBuilder (lib/context/MultiCourseContextBuilder.ts - 289 lines)
+- Created public API with convenience functions (lib/context/index.ts - 221 lines)
+- Course detection algorithm: code mention (100 pts), keywords (10 pts), content (5 pts)
+- Material ranking: 60% keyword matches, 40% content matches
+- Token budget management with proportional allocation
+- TypeScript typecheck passes after fixing builtAt and material type errors
+
+### 2025-10-17 - Phase 3 Complete: LLM Provider Layer
+- Created BaseLLMProvider abstract class (lib/llm/BaseLLMProvider.ts - 255 lines)
+- Created OpenAIProvider with GPT-4o-mini support (lib/llm/OpenAIProvider.ts - 172 lines)
+- Created AnthropicProvider with Claude 3 Haiku (lib/llm/AnthropicProvider.ts - 165 lines)
+- Implemented retry logic with exponential backoff (3 attempts: 1s, 2s, 4s)
+- Added rate limiting enforcement and cost tracking
+- Created prompt engineering utilities (lib/llm/utils.ts - 246 lines)
+- Created factory functions with fallback chain (lib/llm/index.ts - 155 lines)
+- TypeScript typecheck passes with no errors
+
+### 2025-10-17 - Phase 2 Complete: Type System Extension
+- Extended types.ts with 48 new types (1,722 → 2,100+ lines)
+- Added LLM provider types (LLMConfig, LLMRequest, LLMResponse)
+- Added context builder types (CourseContext, MultiCourseContext, ContextBuildOptions)
+- Added conversation types (AIConversation, AIMessage, SendMessageInput)
+- All types use discriminated unions with type guards
+- Zero breaking changes to existing types
+- TypeScript strict mode compliance throughout
+
+### 2025-10-17 - Phase 1 Complete: Environment Setup
+- Created .env.local.example with comprehensive LLM configuration
+- Added 20+ environment variables for LLM, context, cost tracking
+- Feature flags: NEXT_PUBLIC_USE_LLM, NEXT_PUBLIC_LLM_PROVIDER
+- Security warnings for client-side API keys documented
+- Configuration guide in README.md
+
 ### 2025-10-16 - Task Created
 - Initial task context created
 - Scope defined with clear in/out boundaries

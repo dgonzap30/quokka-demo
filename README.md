@@ -70,11 +70,21 @@ npm run dev
 ### How It Works
 
 When LLM is enabled:
-- AI answers are generated using GPT-4o-mini or Claude 3 Haiku
-- Course materials (lectures, slides, assignments) provide context
-- Citations reference actual course content
-- Confidence scores based on material relevance
-- Automatic fallback to templates on errors
+- **AI-Powered Responses:** Generates answers using GPT-4o-mini or Claude 3 Haiku
+- **Course Context:** Automatically builds context from course materials (lectures, slides, assignments)
+- **Multi-Course Awareness:** Detects relevant courses based on question keywords and content
+- **Smart Citations:** References actual course content with relevance scoring
+- **Confidence Scoring:** Confidence levels based on material relevance (0-100)
+- **Private Conversations:** Store AI chat sessions per-user with localStorage
+- **Conversation → Thread:** Convert private conversations to public threads
+- **Automatic Fallback:** Falls back to templates on LLM errors
+
+**Architecture:**
+- **Context Builder:** Ranks course materials by relevance (60% keyword, 40% content matching)
+- **Auto-Detection:** Scores courses by mentions (100 pts), keyword matches (10 pts), content matches (5 pts)
+- **Token Budget:** Proportional allocation across courses (default 2000 tokens)
+- **Retry Logic:** 3 attempts with exponential backoff (1s, 2s, 4s delays)
+- **Cost Tracking:** Token usage monitoring with per-model pricing
 
 **Security Warning:** This demo uses client-side API keys (`NEXT_PUBLIC_*`) for simplicity. **Production apps should use server-side API routes** to protect keys. See `.env.local.example` for details.
 
@@ -282,17 +292,40 @@ The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) 
 
 All API calls go through `/lib/api/client.ts`:
 
+### Thread Endpoints
 | Endpoint | Method | Description | Delay |
 |----------|--------|-------------|-------|
 | `getThreads()` | GET | Fetch all threads | 200-500ms |
 | `getThread(id)` | GET | Fetch single thread | 200-500ms |
-| `createThread()` | POST | Create new thread | 200-500ms |
+| `createThread()` | POST | Create new thread (auto-generates AI answer) | 200-500ms |
 | `createPost()` | POST | Add reply to thread | 200-500ms |
 | `endorsePost(id)` | PUT | Toggle endorsement | 100ms |
 | `flagPost(id)` | PUT | Toggle flag | 100ms |
 | `resolveThread(id)` | PUT | Mark resolved | 100ms |
-| `askQuestion()` | POST | Get AI answer | 800ms |
 | `getSimilarThreads()` | GET | Find similar questions | 300ms |
+
+### AI Endpoints
+| Endpoint | Method | Description | Delay |
+|----------|--------|-------------|-------|
+| `askQuestion()` | POST | Get AI answer preview | 800ms |
+| `generateAIPreview()` | POST | Generate answer without saving | 800ms |
+| `endorseAIAnswer()` | PUT | Toggle AI answer endorsement | 100ms |
+
+### Conversation Endpoints (Private AI Chat)
+| Endpoint | Method | Description | Delay |
+|----------|--------|-------------|-------|
+| `createConversation()` | POST | Create new private conversation | 100ms |
+| `getAIConversations()` | GET | Fetch user's conversations | 200-500ms |
+| `getConversationMessages()` | GET | Fetch messages for conversation | 100ms |
+| `sendMessage()` | POST | Send user message + generate AI response | 800ms |
+| `deleteAIConversation()` | DELETE | Delete conversation (cascade) | 100ms |
+| `convertConversationToThread()` | POST | Convert conversation to public thread | 300ms |
+
+### Course & Dashboard Endpoints
+| Endpoint | Method | Description | Delay |
+|----------|--------|-------------|-------|
+| `getCourse(id)` | GET | Fetch single course | 200-500ms |
+| `getCourseMaterials(id)` | GET | Fetch course materials for context | 200-500ms |
 | `getInstructorMetrics()` | GET | Dashboard stats | 200-500ms |
 
 ---
