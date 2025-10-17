@@ -2296,9 +2296,43 @@ export const api = {
           aiContent = content;
         }
       } else {
-        // General conversation without course context
-        const { content } = generateAIResponse('GENERAL', input.content, '', []);
-        aiContent = content;
+        // General conversation without course context - use LLM if available
+        if (isLLMProviderAvailable()) {
+          try {
+            const llmProvider = getLLMProvider();
+            const systemPrompt = buildSystemPrompt();
+            const userPrompt = `User question: ${input.content}`;
+
+            const llmResponse = await llmProvider.generate({
+              systemPrompt,
+              userPrompt,
+              maxTokens: 1000,
+              temperature: 0.7,
+            });
+
+            if (llmResponse.success) {
+              aiContent = llmResponse.content;
+              console.log('[AI] LLM response generated for general conversation', {
+                provider: llmResponse.provider,
+                model: llmResponse.model,
+                tokens: llmResponse.usage.totalTokens,
+              });
+            } else {
+              // Fallback to template
+              const { content } = generateAIResponse('GENERAL', input.content, '', []);
+              aiContent = content;
+            }
+          } catch (llmError) {
+            console.error('[AI] LLM generation failed for general conversation:', llmError);
+            // Fallback to template
+            const { content } = generateAIResponse('GENERAL', input.content, '', []);
+            aiContent = content;
+          }
+        } else {
+          // LLM not available, use template fallback
+          const { content } = generateAIResponse('GENERAL', input.content, '', []);
+          aiContent = content;
+        }
       }
     } catch (error) {
       console.error('Failed to generate AI response:', error);
