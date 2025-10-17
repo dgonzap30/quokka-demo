@@ -85,6 +85,7 @@ export function SourcesPanel({
           {citations.map((citation) => (
             <div
               key={citation.id}
+              data-citation-id={citation.id}
               role="listitem"
               className={cn(
                 "flex items-start gap-3 p-3 rounded-md",

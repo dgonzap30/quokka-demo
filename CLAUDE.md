@@ -470,6 +470,65 @@ The backend automatically:
 
 **No client-side course detection needed** - Backend handles it.
 
+#### Citation Display (Phase 2.6 - Added 2025-10-17)
+
+**Status:** ✅ Complete
+
+When AI responses reference course materials (via `kb_search` and `kb_fetch` tools), citations are automatically displayed with inline markers and a sources panel.
+
+**Features:**
+
+1. **Inline Citation Markers `[1] [2]`**
+   - Highlighted with QDS accent tokens (`bg-accent/20`)
+   - Clickable to scroll to source in panel
+   - Keyboard navigable (Tab, Enter, Space)
+   - Hover tooltip shows source title
+
+2. **Sources Panel**
+   - Collapsible panel below assistant messages
+   - Shows citation number, title, and type
+   - Links to inline markers via `data-citation-id` attributes
+   - Defaults to expanded state
+
+3. **Visual Indicators**
+   - Accent border (`border-l-2 border-accent`) on cited messages
+   - Sources section automatically stripped from message text
+   - Clean separation of content and citations
+
+**Implementation:**
+```typescript
+// Parse citations from AI response
+const parsed = parseCitations(messageText);
+
+// Render text with highlighted markers
+<div className="text-sm">
+  {renderTextWithCitations(parsed.contentWithoutSources, parsed.citations)}
+</div>
+
+// Display sources panel
+{parsed.citations.length > 0 && (
+  <SourcesPanel citations={parsed.citations} defaultExpanded={true} />
+)}
+```
+
+**Files:**
+- `lib/llm/utils/citations.ts` - Citation parser
+- `components/ai/sources-panel.tsx` - Sources UI
+- `components/ai/quokka-assistant-modal.tsx` - Integration
+
+**LLM Prompt Format:**
+
+The system prompt instructs the LLM to format citations as:
+```
+Binary search is O(log n) [1]. It divides the search space [2].
+
+**Sources:**
+1. Lecture 3: Binary Search (Type: lecture)
+2. Week 2 Slides: Search Algorithms (Type: slide)
+```
+
+This format is automatically parsed and rendered in the UI.
+
 #### Environment Setup
 
 **Optional `.env.local`** (see `.env.local.example`):

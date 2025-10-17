@@ -74,6 +74,11 @@ When LLM is enabled:
 - **Course Context:** Automatically builds context from course materials (lectures, slides, assignments)
 - **Multi-Course Awareness:** Detects relevant courses based on question keywords and content
 - **Smart Citations:** References actual course content with relevance scoring
+- **Citation Display:** Inline `[1] [2]` markers with clickable sources panel
+  - Highlighted citation markers scroll to source
+  - Hover tooltips show material titles
+  - Keyboard navigable (Tab, Enter, Space)
+  - QDS-compliant styling with accent colors
 - **Confidence Scoring:** Confidence levels based on material relevance (0-100)
 - **Private Conversations:** Store AI chat sessions per-user with localStorage
 - **Conversation → Thread:** Convert private conversations to public threads
