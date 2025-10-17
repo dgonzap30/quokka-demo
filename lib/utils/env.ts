@@ -53,14 +53,32 @@ export interface EnvConfig {
 
 /**
  * Get environment variable with fallback
+ *
+ * Note: In Next.js, NEXT_PUBLIC_* variables must be accessed directly (not via dynamic keys)
+ * for webpack/turbopack to perform static replacement. We map each variable explicitly.
  */
 function getEnv(key: string, fallback: string = ""): string {
-  if (typeof window === "undefined") {
-    // Server-side: use process.env
-    return process.env[key] || fallback;
-  }
-  // Client-side: use process.env (injected at build time)
-  return process.env[key] || fallback;
+  // Direct mapping for static replacement by Next.js build process
+  const envMap: Record<string, string | undefined> = {
+    'NEXT_PUBLIC_USE_LLM': process.env.NEXT_PUBLIC_USE_LLM,
+    'NEXT_PUBLIC_LLM_PROVIDER': process.env.NEXT_PUBLIC_LLM_PROVIDER,
+    'NEXT_PUBLIC_OPENAI_API_KEY': process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    'NEXT_PUBLIC_ANTHROPIC_API_KEY': process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
+    'NEXT_PUBLIC_OPENAI_MODEL': process.env.NEXT_PUBLIC_OPENAI_MODEL,
+    'NEXT_PUBLIC_ANTHROPIC_MODEL': process.env.NEXT_PUBLIC_ANTHROPIC_MODEL,
+    'NEXT_PUBLIC_MAX_TOKENS': process.env.NEXT_PUBLIC_MAX_TOKENS,
+    'NEXT_PUBLIC_LLM_TEMPERATURE': process.env.NEXT_PUBLIC_LLM_TEMPERATURE,
+    'NEXT_PUBLIC_LLM_TOP_P': process.env.NEXT_PUBLIC_LLM_TOP_P,
+    'NEXT_PUBLIC_MAX_DAILY_COST': process.env.NEXT_PUBLIC_MAX_DAILY_COST,
+    'NEXT_PUBLIC_MAX_REQUESTS_PER_MINUTE': process.env.NEXT_PUBLIC_MAX_REQUESTS_PER_MINUTE,
+    'NEXT_PUBLIC_MAX_CONTEXT_MATERIALS': process.env.NEXT_PUBLIC_MAX_CONTEXT_MATERIALS,
+    'NEXT_PUBLIC_MIN_RELEVANCE_SCORE': process.env.NEXT_PUBLIC_MIN_RELEVANCE_SCORE,
+    'NEXT_PUBLIC_AUTO_DETECT_THRESHOLD': process.env.NEXT_PUBLIC_AUTO_DETECT_THRESHOLD,
+    'NEXT_PUBLIC_DEBUG_LLM': process.env.NEXT_PUBLIC_DEBUG_LLM,
+    'NEXT_PUBLIC_SHOW_COST_TRACKING': process.env.NEXT_PUBLIC_SHOW_COST_TRACKING,
+  };
+
+  return envMap[key] || fallback;
 }
 
 /**

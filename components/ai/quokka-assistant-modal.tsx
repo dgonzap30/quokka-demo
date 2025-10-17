@@ -305,7 +305,8 @@ export function QuokkaAssistantModal({
 
   // Handle course selection change
   const handleCourseSelect = (courseId: string) => {
-    setSelectedCourseId(courseId);
+    // Convert "all" back to null for general context
+    setSelectedCourseId(courseId === "all" ? null : courseId);
     // Clear current conversation when switching courses
     setActiveConversationId(null);
   };
@@ -339,12 +340,12 @@ export function QuokkaAssistantModal({
                   <label htmlFor="course-select" className="text-xs font-medium glass-text">
                     Select Course Context (Optional)
                   </label>
-                  <Select value={selectedCourseId || ""} onValueChange={handleCourseSelect}>
+                  <Select value={selectedCourseId || "all"} onValueChange={handleCourseSelect}>
                     <SelectTrigger id="course-select" className="w-full">
                       <SelectValue placeholder="All courses (general assistant)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All courses</SelectItem>
+                      <SelectItem value="all">All courses</SelectItem>
                       {availableCourses.map((course) => (
                         <SelectItem key={course.id} value={course.id}>
                           {course.code} - {course.name}
