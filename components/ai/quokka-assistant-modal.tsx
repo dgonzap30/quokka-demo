@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -392,13 +392,13 @@ export function QuokkaAssistantModal({
                 </div>
                 <div className="flex-1">
                   <DialogTitle className="text-base glass-text">Quokka AI Assistant</DialogTitle>
-                  <p className="text-xs text-muted-foreground glass-text">
+                  <DialogDescription className="text-xs text-muted-foreground glass-text">
                     {pageContext === "course" && currentCourseCode
                       ? `${currentCourseCode}${currentCourseName ? ` - ${currentCourseName}` : ""}`
                       : pageContext === "instructor"
                         ? "Instructor Support"
                         : "Study Assistant"}
-                  </p>
+                  </DialogDescription>
                 </div>
               </div>
 
