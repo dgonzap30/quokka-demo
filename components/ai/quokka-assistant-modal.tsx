@@ -167,8 +167,9 @@ export function QuokkaAssistantModal({
 
   // Track scroll position to show/hide scroll button
   useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
     const element = messagesEndRef.current;
-    if (!element) return;
+    if (!element || !scrollContainer) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -176,14 +177,26 @@ export function QuokkaAssistantModal({
         setShowScrollButton(!entry.isIntersecting);
       },
       {
-        root: scrollContainerRef.current,
+        root: scrollContainer,
         threshold: 0.1,
       }
     );
 
     observer.observe(element);
 
-    return () => observer.disconnect();
+    // Also check on scroll for better responsiveness
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShowScrollButton(!isNearBottom);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+
+    return () => {
+      observer.disconnect();
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    };
   }, [messages]);
 
   // Handle message submission
@@ -497,9 +510,10 @@ export function QuokkaAssistantModal({
                     </div>
                   </div>
                 )}
-              </div>
 
-              <div ref={messagesEndRef} />
+                {/* Scroll marker - must be inside messages container for IntersectionObserver */}
+                <div ref={messagesEndRef} />
+              </div>
 
               {/* Scroll to Bottom Button */}
               {showScrollButton && (
