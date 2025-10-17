@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Circle } from "lucide-react";
 
 export default function QuokkaPage() {
   const router = useRouter();
@@ -114,21 +114,29 @@ export default function QuokkaPage() {
         </div>
 
         {/* Chat Container */}
-        <Card variant="glass-strong" className="flex flex-col" style={{ height: "calc(100vh - 400px)", minHeight: "500px", maxHeight: "700px" }}>
-          <CardHeader className="p-6 md:p-8 border-b border-[var(--border-glass)]">
+        <Card variant="glass-strong" className="flex flex-col min-h-[500px] max-h-[700px] h-[calc(100vh-400px)]">
+          <CardHeader className="p-6 md:p-8 border-b border-glass">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <CardTitle className="heading-4 glass-text">Chat with Quokka</CardTitle>
                 <CardDescription className="text-base">Ask me anything about your courses</CardDescription>
               </div>
               <Badge className="ai-gradient text-white border-none">
-                ● AI Online
+                <Circle className="w-2 h-2 fill-white mr-2" />
+                AI Online
               </Badge>
             </div>
           </CardHeader>
 
           {/* Messages */}
-          <CardContent className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+          <CardContent
+            className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6"
+            role="log"
+            aria-live="polite"
+            aria-atomic="false"
+            aria-label="Chat conversation"
+            aria-busy={sendMessage.isPending}
+          >
             {messages.length === 0 && !messagesLoading && (
               <div className="flex justify-start">
                 <div className="message-assistant p-4 md:p-5">
@@ -176,7 +184,7 @@ export default function QuokkaPage() {
           </CardContent>
 
           {/* Input */}
-          <div className="border-t border-[var(--border-glass)] p-6 md:p-8">
+          <div className="border-t border-glass p-6 md:p-8">
             {messages.length === 0 && !messagesLoading && (
               <div className="mb-6">
                 <p className="text-sm font-semibold text-muted-foreground mb-3">Quick prompts:</p>
