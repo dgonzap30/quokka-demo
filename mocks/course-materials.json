@@ -1,0 +1,367 @@
+[
+  {
+    "id": "mat-cs101-lecture-1",
+    "courseId": "course-cs101",
+    "type": "lecture",
+    "title": "Lecture 1: Introduction to Algorithms",
+    "content": "An algorithm is a step-by-step procedure for solving a problem or accomplishing a task. In computer science, algorithms are the foundation of all programs and data processing. This lecture introduces key concepts including algorithm correctness, efficiency, and analysis.\n\nKey topics covered:\n- What is an algorithm?\n- Algorithm properties: finiteness, definiteness, input, output, effectiveness\n- Algorithm representation: pseudocode and flowcharts\n- Introduction to time complexity and Big O notation\n- Examples: linear search, finding maximum element\n\nBy the end of this lecture, you should understand the fundamental characteristics that make a procedure an algorithm and be able to analyze simple algorithms for correctness. We'll explore how algorithms form the backbone of efficient software and why understanding their performance is crucial for writing scalable code.",
+    "keywords": ["algorithm", "introduction", "complexity", "correctness", "pseudocode", "analysis", "big o", "time complexity"],
+    "metadata": {
+      "week": 1,
+      "date": "2025-09-02T10:00:00Z",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-lecture-2",
+    "courseId": "course-cs101",
+    "type": "lecture",
+    "title": "Lecture 2: Big O Notation and Complexity Analysis",
+    "content": "Big O notation is a mathematical notation that describes the limiting behavior of a function when the argument tends toward a particular value or infinity. In computer science, we use it to classify algorithms according to how their run time or space requirements grow as the input size grows.\n\nCommon complexity classes:\n- O(1): Constant time - the best possible complexity\n- O(log n): Logarithmic time - very efficient, seen in binary search\n- O(n): Linear time - examining each element once\n- O(n log n): Linearithmic - efficient sorting algorithms like merge sort\n- O(n²): Quadratic time - nested loops over the data\n- O(2ⁿ): Exponential time - should be avoided when possible\n\nWhen analyzing algorithms, we focus on the worst-case scenario to guarantee performance. Big O gives us an upper bound on growth rate, ignoring constant factors and lower-order terms. For example, an algorithm with runtime 3n² + 5n + 2 is O(n²) because the n² term dominates for large n. Understanding complexity helps you make informed decisions about which algorithms to use for different problem sizes.",
+    "keywords": ["big o", "complexity", "analysis", "time complexity", "space complexity", "worst case", "runtime", "performance"],
+    "metadata": {
+      "week": 1,
+      "date": "2025-09-04T10:00:00Z",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-lecture-3",
+    "courseId": "course-cs101",
+    "type": "lecture",
+    "title": "Lecture 3: Binary Search and Divide-and-Conquer",
+    "content": "Binary search is an efficient algorithm for finding a target value in a sorted array. It uses the divide-and-conquer strategy to repeatedly halve the search space.\n\nHow binary search works:\n1. Start with the middle element of the sorted array\n2. If the target equals the middle element, return its position\n3. If the target is less than the middle element, search the left half\n4. If the target is greater than the middle element, search the right half\n5. Repeat until the target is found or the search space is empty\n\nTime complexity: O(log n) - much faster than linear search O(n) for large datasets\nSpace complexity: O(1) for iterative implementation, O(log n) for recursive (due to call stack)\n\nKey requirement: The array MUST be sorted first. If unsorted, you need to sort it first (O(n log n)) or use linear search.\n\nDivide-and-conquer is a powerful algorithmic paradigm where you:\n1. Divide the problem into smaller subproblems\n2. Conquer each subproblem recursively\n3. Combine solutions to solve the original problem\n\nBinary search is a simple example. More complex examples include merge sort, quicksort, and the FFT algorithm. This strategy often leads to efficient O(n log n) or O(log n) algorithms.",
+    "keywords": ["binary search", "divide and conquer", "sorted array", "logarithmic", "efficiency", "search algorithm"],
+    "metadata": {
+      "week": 2,
+      "date": "2025-09-09T10:00:00Z",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-lecture-4",
+    "courseId": "course-cs101",
+    "type": "lecture",
+    "title": "Lecture 4: Data Structures - Arrays and Linked Lists",
+    "content": "Data structures are ways of organizing and storing data so that they can be accessed and modified efficiently. Choosing the right data structure is crucial for algorithm performance.\n\nArrays:\n- Contiguous block of memory storing elements of the same type\n- Constant-time O(1) access by index\n- Fixed size (in most languages) or dynamic resizing (with O(n) cost)\n- Cache-friendly due to spatial locality\n- Poor for insertions/deletions in middle: O(n)\n- Best for: random access, iteration, known size\n\nLinked Lists:\n- Elements (nodes) scattered in memory, connected by pointers\n- O(n) access time - must traverse from head\n- Dynamic size with O(1) insertion/deletion at known positions\n- Extra memory overhead for storing pointers\n- Not cache-friendly due to pointer chasing\n- Best for: frequent insertions/deletions, unknown size\n\nTrade-offs: Arrays excel at access speed, linked lists excel at modification flexibility. Your choice depends on the specific operations your application performs most frequently. Many modern languages provide both as standard library types.",
+    "keywords": ["array", "linked list", "data structure", "memory", "pointer", "access time", "insertion", "deletion"],
+    "metadata": {
+      "week": 3,
+      "date": "2025-09-16T10:00:00Z",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-lecture-5",
+    "courseId": "course-cs101",
+    "type": "lecture",
+    "title": "Lecture 5: Sorting Algorithms - Bubble, Merge, and Quicksort",
+    "content": "Sorting is one of the most fundamental operations in computer science. We'll examine three important sorting algorithms with different trade-offs.\n\nBubble Sort:\n- Simple comparison-based algorithm\n- Repeatedly swaps adjacent elements if they're in wrong order\n- Time: O(n²) worst and average case, O(n) best case (already sorted)\n- Space: O(1) - sorts in place\n- Rarely used in practice due to poor performance, but educational\n\nMerge Sort:\n- Divide-and-conquer algorithm that splits array in half recursively\n- Merges sorted halves back together\n- Time: O(n log n) in all cases - very predictable\n- Space: O(n) - needs extra array for merging\n- Stable sort (preserves order of equal elements)\n- Good choice for linked lists\n\nQuicksort:\n- Divide-and-conquer using a pivot element\n- Partitions array around pivot, recursively sorts partitions\n- Time: O(n log n) average, O(n²) worst case (bad pivot choices)\n- Space: O(log n) for recursion stack\n- Usually fastest in practice due to good cache behavior\n- Not stable by default\n- Used in many standard library implementations\n\nChoosing a sort: For general purpose, quicksort. For guaranteed O(n log n), merge sort. For small arrays or nearly sorted data, insertion sort.",
+    "keywords": ["sorting", "bubble sort", "merge sort", "quicksort", "algorithm", "comparison", "divide and conquer"],
+    "metadata": {
+      "week": 4,
+      "date": "2025-09-23T10:00:00Z",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-lecture-6",
+    "courseId": "course-cs101",
+    "type": "lecture",
+    "title": "Lecture 6: Recursion and Recursive Algorithms",
+    "content": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem. It's a powerful tool for solving problems that have a naturally recursive structure.\n\nKey components of recursion:\n1. Base case: The terminating condition that stops recursion\n2. Recursive case: The function calling itself with a simpler input\n3. Progress toward base case: Each call must get closer to termination\n\nClassic examples:\n- Factorial: n! = n * (n-1)!\n- Fibonacci: fib(n) = fib(n-1) + fib(n-2)\n- Tree traversal: process node, recurse on children\n- Binary search: search half of array recursively\n\nAdvantages:\n- Natural and elegant for tree and graph problems\n- Simplifies code for divide-and-conquer algorithms\n- Matches mathematical definitions closely\n\nDisadvantages:\n- Function call overhead (stack frames)\n- Risk of stack overflow with deep recursion\n- Can be less efficient than iterative solutions\n\nTail recursion: When the recursive call is the last operation, some compilers can optimize it to iteration. Understanding recursion is essential for working with trees, graphs, and many algorithmic techniques.",
+    "keywords": ["recursion", "recursive", "base case", "stack", "function call", "tree traversal", "factorial", "fibonacci"],
+    "metadata": {
+      "week": 5,
+      "date": "2025-09-30T10:00:00Z",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-slide-1",
+    "courseId": "course-cs101",
+    "type": "slide",
+    "title": "Week 1-2 Slides: Algorithm Fundamentals and Complexity",
+    "content": "Algorithm Fundamentals:\n• Definition: Step-by-step procedure to solve a problem\n• Properties: Finiteness, definiteness, input, output, effectiveness\n• Representation: Pseudocode, flowcharts, code\n\nBig O Notation:\n• Describes algorithm growth rate as input size increases\n• Common complexities: O(1), O(log n), O(n), O(n log n), O(n²), O(2ⁿ)\n• Focus on dominant term, ignore constants\n• Worst-case analysis provides performance guarantees\n\nAnalyzing Algorithms:\n• Count primitive operations\n• Identify loops and recursion depth\n• Consider best, average, worst cases\n• Space complexity matters too!\n\nKey Takeaways:\n- Choose algorithms based on expected input size\n- O(log n) and O(n log n) scale well to large data\n- Avoid O(n²) or worse for large datasets when possible",
+    "keywords": ["algorithm", "big o", "complexity", "analysis", "fundamentals", "notation", "performance"],
+    "metadata": {
+      "week": 2,
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-slide-2",
+    "courseId": "course-cs101",
+    "type": "slide",
+    "title": "Week 3 Slides: Search Algorithms and Divide-and-Conquer",
+    "content": "Linear Search:\n• Check each element sequentially\n• Time: O(n)\n• Works on unsorted data\n• Simple but slow for large datasets\n\nBinary Search:\n• Requires sorted array\n• Divide search space in half each step\n• Time: O(log n)\n• Space: O(1) iterative, O(log n) recursive\n• Dramatically faster for large datasets\n\nDivide-and-Conquer Pattern:\n1. Divide problem into smaller subproblems\n2. Conquer subproblems recursively\n3. Combine solutions\n• Examples: Binary search, merge sort, quicksort, FFT\n• Often achieves O(n log n) or better complexity\n\nWhen to Use Binary Search:\n✓ Data is sorted (or sorting cost is acceptable)\n✓ Random access to elements (arrays, not linked lists)\n✓ Many searches on same dataset\n✗ Single search on unsorted data (just use linear search)",
+    "keywords": ["binary search", "linear search", "divide and conquer", "sorted", "search algorithm", "efficiency"],
+    "metadata": {
+      "week": 3,
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-slide-3",
+    "courseId": "course-cs101",
+    "type": "slide",
+    "title": "Week 4-5 Slides: Data Structures and Sorting",
+    "content": "Arrays vs Linked Lists:\n\nArrays:\n• Pros: Fast access O(1), cache-friendly, simple\n• Cons: Fixed size, slow insert/delete O(n)\n• Use when: Need random access, size known\n\nLinked Lists:\n• Pros: Dynamic size, fast insert/delete O(1) at known position\n• Cons: Slow access O(n), pointer overhead\n• Use when: Frequent modifications, size unknown\n\nSorting Algorithms Comparison:\n\nBubble Sort: O(n²) - Educational only\nMerge Sort: O(n log n) - Stable, predictable\nQuicksort: O(n log n) avg - Fastest in practice\n\nSorting Strategy:\n• Small arrays (<50): Insertion sort\n• General purpose: Quicksort\n• Need stability: Merge sort\n• Nearly sorted: Insertion sort\n• Guaranteed O(n log n): Merge sort or heapsort",
+    "keywords": ["array", "linked list", "sorting", "data structure", "merge sort", "quicksort", "comparison"],
+    "metadata": {
+      "week": 5,
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-assignment-1",
+    "courseId": "course-cs101",
+    "type": "assignment",
+    "title": "Assignment 1: Implementing Binary Search",
+    "content": "Objective: Implement and analyze the binary search algorithm.\n\nPart 1: Implementation (40 points)\nWrite a function `binary_search(arr, target)` that:\n- Takes a sorted array and target value as input\n- Returns the index of target if found, -1 if not found\n- Uses iterative (not recursive) approach\n- Handles edge cases (empty array, single element, target out of range)\n\nPart 2: Analysis (30 points)\n- Calculate the worst-case number of comparisons for arrays of size 10, 100, 1000, 1000000\n- Explain why binary search is O(log n)\n- Compare with linear search performance\n\nPart 3: Experimentation (30 points)\n- Test your implementation on arrays of various sizes\n- Measure actual runtime vs theoretical complexity\n- Submit timing results and analysis\n\nSubmission: Code file + written report (PDF)\nDue: September 20, 11:59 PM",
+    "keywords": ["binary search", "implementation", "assignment", "algorithm", "complexity", "analysis", "coding"],
+    "metadata": {
+      "week": 3,
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-assignment-2",
+    "courseId": "course-cs101",
+    "type": "assignment",
+    "title": "Assignment 2: Sorting Algorithm Comparison",
+    "content": "Objective: Implement and compare different sorting algorithms.\n\nPart 1: Implementation (50 points)\nImplement the following sorting algorithms:\n1. Bubble sort\n2. Merge sort\n3. Quicksort (use first element as pivot)\n\nEach function should:\n- Take an array as input\n- Return a new sorted array (don't modify input)\n- Handle empty and single-element arrays\n\nPart 2: Performance Testing (30 points)\nFor each algorithm:\n- Test on random arrays of sizes: 10, 100, 1000, 5000\n- Test on already-sorted and reverse-sorted arrays\n- Measure and record execution time\n- Create graphs comparing performance\n\nPart 3: Analysis (20 points)\n- Explain the time complexity of each algorithm\n- Discuss when each algorithm performs best/worst\n- Recommend which algorithm to use for different scenarios\n\nSubmission: Code + report with graphs (PDF)\nDue: October 4, 11:59 PM",
+    "keywords": ["sorting", "implementation", "comparison", "bubble sort", "merge sort", "quicksort", "performance", "assignment"],
+    "metadata": {
+      "week": 5,
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-cs101-reading-1",
+    "courseId": "course-cs101",
+    "type": "reading",
+    "title": "How to Think Like a Computer Scientist - Algorithm Design",
+    "content": "Excerpt from 'How to Think Like a Computer Scientist' by Allen B. Downey:\n\nAlgorithm design is both an art and a science. Like an artist, you need creativity to envision novel solutions. Like a scientist, you need rigor to prove your solutions are correct and efficient.\n\nThe algorithm design process:\n\n1. Understand the Problem: Before coding, fully understand inputs, outputs, and constraints. Write examples by hand.\n\n2. Design at a High Level: Use pseudocode or diagrams. Don't jump to implementation details yet.\n\n3. Consider Edge Cases: What if the input is empty? Very large? Contains duplicates? Your algorithm must handle all cases.\n\n4. Analyze Complexity: Before implementing, estimate time and space complexity. Will this scale?\n\n5. Implement Carefully: Write clean, well-commented code. Use meaningful variable names.\n\n6. Test Thoroughly: Test normal cases, edge cases, and performance with large inputs.\n\n7. Iterate and Improve: First make it work, then make it right, then make it fast.\n\nCommon pitfalls:\n- Premature optimization: Don't optimize before profiling\n- Off-by-one errors: Pay attention to loop bounds\n- Not handling edge cases: Empty inputs, null values, duplicates\n- Ignoring space complexity: Memory can be as important as time\n\nRemember: A correct O(n²) algorithm beats a buggy O(n) algorithm every time. Correctness first, optimization second.",
+    "keywords": ["algorithm design", "problem solving", "pseudocode", "edge cases", "testing", "optimization", "correctness"],
+    "metadata": {
+      "chapter": "Chapter 3",
+      "pageRange": "45-52",
+      "authorId": "user-instructor-1"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-lecture-1",
+    "courseId": "course-math221",
+    "type": "lecture",
+    "title": "Lecture 1: Integration by U-Substitution",
+    "content": "U-substitution is the most fundamental integration technique, essentially the reverse of the chain rule for derivatives. It allows us to simplify complex integrals by changing variables.\n\nThe technique:\n1. Identify an inner function u and its derivative du\n2. Substitute u for the inner function\n3. Replace dx with du (scaled appropriately)\n4. Integrate with respect to u\n5. Substitute back to the original variable\n\nChoosing u:\n- Look for a function whose derivative appears elsewhere in the integrand\n- Try the 'inside' of a composition\n- If stuck, try different choices systematically\n\nExample: ∫ 2x·cos(x²) dx\nLet u = x², then du = 2x dx\nThe integral becomes: ∫ cos(u) du = sin(u) + C\nSubstituting back: sin(x²) + C\n\nCommon patterns:\n- ∫ f'(x)·(f(x))ⁿ dx → let u = f(x)\n- ∫ f'(x)/f(x) dx → let u = f(x), gives ln|u| + C\n- ∫ f'(x)·eᶠ⁽ˣ⁾ dx → let u = f(x)\n\nTips:\n- Don't forget the constant of integration C\n- Check your answer by differentiating\n- Sometimes you need to manipulate the integrand first\n- Not all integrals can be solved with u-sub",
+    "keywords": ["integration", "u-substitution", "chain rule", "calculus", "substitution method", "integral", "technique"],
+    "metadata": {
+      "week": 1,
+      "date": "2025-09-03T14:00:00Z",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-lecture-2",
+    "courseId": "course-math221",
+    "type": "lecture",
+    "title": "Lecture 2: Integration by Parts",
+    "content": "Integration by parts is derived from the product rule for derivatives. It's used when the integrand is a product of two functions, one of which becomes simpler when differentiated.\n\nThe formula: ∫ u dv = uv - ∫ v du\n\nThis comes from the product rule: d(uv) = u dv + v du\n\nChoosing u and dv (LIATE rule):\nL - Logarithmic functions (ln x, log x)\nI - Inverse trig functions (arcsin x, arctan x)\nA - Algebraic functions (x, x², polynomials)\nT - Trigonometric functions (sin x, cos x)\nE - Exponential functions (eˣ, aˣ)\n\nChoose u in order of preference from LIATE, let dv be the rest.\n\nExample: ∫ x·eˣ dx\nLet u = x (algebraic), dv = eˣ dx\nThen du = dx, v = eˣ\nApplying formula: x·eˣ - ∫ eˣ dx = x·eˣ - eˣ + C = eˣ(x-1) + C\n\nSpecial cases:\n- Repeated integration by parts: Sometimes needed 2+ times\n- Cyclic integrals: When you get back to the original integral, solve algebraically\n- Tabular method: Efficient for polynomials times trig/exponential\n\nCommon mistakes:\n- Forgetting to differentiate u and integrate dv\n- Wrong choice of u (doesn't simplify)\n- Arithmetic errors in the algebra\n\nAlways verify your answer by differentiating!",
+    "keywords": ["integration by parts", "product rule", "LIATE", "calculus", "integral", "technique", "uv formula"],
+    "metadata": {
+      "week": 2,
+      "date": "2025-09-10T14:00:00Z",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-lecture-3",
+    "courseId": "course-math221",
+    "type": "lecture",
+    "title": "Lecture 3: Partial Fractions Decomposition",
+    "content": "Partial fractions is a technique for integrating rational functions (ratios of polynomials) by breaking them into simpler fractions that we can integrate individually.\n\nWhen to use: Integrand is P(x)/Q(x) where:\n- P(x) and Q(x) are polynomials\n- Degree of P < degree of Q (if not, use polynomial long division first)\n- Q(x) can be factored\n\nTypes of partial fractions:\n\n1. Distinct Linear Factors:\nIf Q(x) = (x-a)(x-b), then:\nP(x)/Q(x) = A/(x-a) + B/(x-b)\n\n2. Repeated Linear Factors:\nIf Q(x) = (x-a)², then:\nP(x)/Q(x) = A/(x-a) + B/(x-a)²\n\n3. Distinct Quadratic Factors:\nIf Q(x) = (x-a)(x²+bx+c), then:\nP(x)/Q(x) = A/(x-a) + (Bx+C)/(x²+bx+c)\n\n4. Repeated Quadratic Factors:\nSimilar to repeated linear, but with (Ax+B) terms\n\nSteps:\n1. Factor denominator Q(x)\n2. Write partial fraction form based on factors\n3. Clear denominators (multiply both sides)\n4. Solve for unknown coefficients\n5. Integrate each fraction separately\n\nTips:\n- Solve for coefficients by substituting convenient values of x\n- Or compare coefficients of like powers\n- Quadratic factors require completing the square for integration\n- Check factorization using quadratic formula or calculator",
+    "keywords": ["partial fractions", "rational function", "decomposition", "integration", "polynomial", "factoring", "technique"],
+    "metadata": {
+      "week": 3,
+      "date": "2025-09-17T14:00:00Z",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-lecture-4",
+    "courseId": "course-math221",
+    "type": "lecture",
+    "title": "Lecture 4: Trigonometric Substitution",
+    "content": "Trigonometric substitution is used for integrals containing radicals of the form √(a²-x²), √(a²+x²), or √(x²-a²). We substitute a trig function to eliminate the radical.\n\nThree main cases:\n\n1. √(a²-x²) → Use x = a·sin(θ)\n   Then √(a²-x²) = a·cos(θ)\n   Draw right triangle with hypotenuse a, opposite side x\n   Example: ∫ √(1-x²) dx\n\n2. √(a²+x²) → Use x = a·tan(θ)\n   Then √(a²+x²) = a·sec(θ)\n   Draw right triangle with legs a and x\n   Example: ∫ 1/(x²√(x²+4)) dx\n\n3. √(x²-a²) → Use x = a·sec(θ)\n   Then √(x²-a²) = a·tan(θ)\n   Draw right triangle with hypotenuse x, adjacent side a\n   Example: ∫ √(x²-9)/x dx\n\nProcedure:\n1. Identify which case applies\n2. Make appropriate substitution\n3. Express dx in terms of dθ\n4. Simplify using trig identities\n5. Integrate with respect to θ\n6. Convert back to x using a triangle\n\nKey identities:\n- sin²θ + cos²θ = 1\n- 1 + tan²θ = sec²θ\n- sec²θ - 1 = tan²θ\n\nAlways draw a triangle to convert back! Label sides based on your substitution, use Pythagorean theorem to find the remaining side, then read off the trig ratios you need.",
+    "keywords": ["trigonometric substitution", "integration", "radical", "square root", "trig", "substitution", "triangle"],
+    "metadata": {
+      "week": 4,
+      "date": "2025-09-24T14:00:00Z",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-lecture-5",
+    "courseId": "course-math221",
+    "type": "lecture",
+    "title": "Lecture 5: Sequences and Series Introduction",
+    "content": "A sequence is an ordered list of numbers: a₁, a₂, a₃, ... A series is the sum of a sequence: Σ aₙ.\n\nSequences:\n- Explicit formula: aₙ = f(n) directly\n- Recursive formula: aₙ = g(aₙ₋₁)\n- Examples: arithmetic (aₙ = a₁ + (n-1)d), geometric (aₙ = a₁·rⁿ⁻¹)\n\nSequence convergence:\n- {aₙ} converges to L if lim(n→∞) aₙ = L\n- Diverges if limit doesn't exist or is infinite\n- Test by computing lim(n→∞) aₙ\n\nSeries:\n- Partial sum: Sₙ = Σ(k=1 to n) aₖ\n- Series converges if lim(n→∞) Sₙ exists\n- Series diverges otherwise\n\nGeometric series:\nΣ arⁿ = a/(1-r) if |r| < 1 (converges)\nDiverges if |r| ≥ 1\n\nHarmonic series:\nΣ 1/n diverges (famous counterintuitive result)\n\nAlternating series:\nTerms alternate in sign\nConverges if terms decrease to zero\n\nWhy study series?\n- Represent functions as infinite sums (Taylor series)\n- Approximate difficult calculations\n- Foundation for calculus and analysis\n- Applications in physics, engineering, finance\n\nKey distinction: A sequence is a list, a series is a sum. Sequence convergence doesn't guarantee series convergence (harmonic series proves this).",
+    "keywords": ["sequence", "series", "convergence", "divergence", "geometric", "harmonic", "limit", "sum"],
+    "metadata": {
+      "week": 6,
+      "date": "2025-10-01T14:00:00Z",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-lecture-6",
+    "courseId": "course-math221",
+    "type": "lecture",
+    "title": "Lecture 6: Convergence Tests for Series",
+    "content": "We need systematic tests to determine if a series converges. Here are the main convergence tests:\n\n1. Divergence Test (nth term test):\nIf lim(n→∞) aₙ ≠ 0, then Σ aₙ diverges\nCAUTION: If lim(n→∞) aₙ = 0, test is inconclusive\n\n2. Integral Test:\nIf f(x) is positive, decreasing, and continuous with f(n) = aₙ:\nΣ aₙ and ∫f(x)dx either both converge or both diverge\nExample: Σ 1/n² converges (compare to ∫ 1/x² dx)\n\n3. Comparison Test:\nIf 0 ≤ aₙ ≤ bₙ for all n:\n- If Σ bₙ converges, then Σ aₙ converges\n- If Σ aₙ diverges, then Σ bₙ diverges\nStrategy: Compare to geometric or p-series\n\n4. Limit Comparison Test:\nIf lim(n→∞) (aₙ/bₙ) = c > 0:\nΣ aₙ and Σ bₙ either both converge or both diverge\nUseful when direct comparison is inconclusive\n\n5. Ratio Test:\nCalculate L = lim(n→∞) |aₙ₊₁/aₙ|\n- If L < 1: converges absolutely\n- If L > 1: diverges\n- If L = 1: inconclusive\nBest for factorials and exponentials\n\n6. Root Test:\nCalculate L = lim(n→∞) ⁿ√|aₙ|\nSame conclusions as ratio test\nBest when nth powers appear\n\n7. Alternating Series Test:\nFor Σ (-1)ⁿ aₙ with aₙ > 0:\nConverges if aₙ decreases to 0\n\nStrategy: Try tests in order until one works!",
+    "keywords": ["convergence test", "divergence", "series", "integral test", "comparison", "ratio test", "alternating"],
+    "metadata": {
+      "week": 7,
+      "date": "2025-10-08T14:00:00Z",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-slide-1",
+    "courseId": "course-math221",
+    "type": "slide",
+    "title": "Week 1-2 Slides: Integration Techniques Overview",
+    "content": "Integration Techniques:\n\nU-Substitution:\n• Reverse chain rule\n• Let u = inner function, du = derivative\n• Replace dx with du\n• Most common technique\n• Example: ∫ 2x·cos(x²) dx → u = x²\n\nIntegration by Parts:\n• Formula: ∫ u dv = uv - ∫ v du\n• Use LIATE to choose u\n• L: Logarithmic, I: Inverse trig, A: Algebraic, T: Trig, E: Exponential\n• Example: ∫ x·eˣ dx → u = x, dv = eˣ dx\n\nWhen to Use Each:\n✓ U-sub: Composition of functions, derivative visible\n✓ By parts: Product of different function types\n✓ Neither: Try partial fractions or trig substitution\n\nKey Tips:\n• Always check answer by differentiating\n• Don't forget +C constant of integration\n• Some integrals need multiple techniques\n• Practice recognizing patterns",
+    "keywords": ["integration", "u-substitution", "integration by parts", "techniques", "LIATE", "calculus"],
+    "metadata": {
+      "week": 2,
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-slide-2",
+    "courseId": "course-math221",
+    "type": "slide",
+    "title": "Week 3-4 Slides: Advanced Integration Methods",
+    "content": "Partial Fractions:\n• For rational functions P(x)/Q(x)\n• Requirement: degree(P) < degree(Q)\n• Factor denominator completely\n• Write as sum of simpler fractions\n• Types: linear, repeated linear, quadratic, repeated quadratic\n• Solve for unknown coefficients\n• Integrate each fraction separately\n\nTrigonometric Substitution:\n• For integrals with radicals\n• Three cases:\n  1. √(a²-x²) → x = a·sin(θ)\n  2. √(a²+x²) → x = a·tan(θ)\n  3. √(x²-a²) → x = a·sec(θ)\n• Draw reference triangle\n• Use trig identities to simplify\n• Convert back using triangle\n\nKey Identities:\n• sin²θ + cos²θ = 1\n• 1 + tan²θ = sec²θ\n• sec²θ - 1 = tan²θ\n\nStrategy:\n1. Identify which technique applies\n2. Make substitution carefully\n3. Simplify completely before integrating\n4. Convert back to original variable",
+    "keywords": ["partial fractions", "trigonometric substitution", "rational function", "radical", "integration", "technique"],
+    "metadata": {
+      "week": 4,
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-slide-3",
+    "courseId": "course-math221",
+    "type": "slide",
+    "title": "Week 6-7 Slides: Series and Convergence",
+    "content": "Sequences vs Series:\n• Sequence: List of numbers {aₙ}\n• Series: Sum Σ aₙ\n• Sequence convergence ≠ Series convergence\n\nImportant Series:\n• Geometric: Σ arⁿ converges if |r| < 1 to a/(1-r)\n• p-series: Σ 1/nᵖ converges if p > 1\n• Harmonic: Σ 1/n diverges (p=1 case)\n\nConvergence Tests Quick Reference:\n1. Divergence test: If lim aₙ ≠ 0, diverges\n2. Integral test: Compare to integral\n3. Comparison: Compare to known series\n4. Limit comparison: Ratio of terms\n5. Ratio test: |aₙ₊₁/aₙ| < 1 converges\n6. Root test: ⁿ√|aₙ| < 1 converges\n7. Alternating: If aₙ↓0, converges\n\nTest Selection:\n• Factorials/exponentials → Ratio test\n• nth powers → Root test\n• Polynomials/simple → Comparison\n• Alternating signs → Alternating test\n\nRemember:\n• Test in order until one works\n• Some tests are inconclusive\n• Always check test conditions",
+    "keywords": ["series", "sequence", "convergence", "test", "geometric", "harmonic", "ratio test"],
+    "metadata": {
+      "week": 7,
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-assignment-1",
+    "courseId": "course-math221",
+    "type": "assignment",
+    "title": "Assignment 1: Integration Techniques Practice",
+    "content": "Objective: Master u-substitution and integration by parts.\n\nPart A: U-Substitution (40 points)\nEvaluate the following integrals:\n1. ∫ 2x·sin(x²) dx\n2. ∫ (3x² + 6x)·(x³ + 3x² + 1)⁴ dx\n3. ∫ eˣ/(1 + eˣ) dx\n4. ∫ tan(x) dx (Hint: rewrite as sin/cos)\n\nFor each: Show substitution, all steps, and verify by differentiation.\n\nPart B: Integration by Parts (40 points)\nEvaluate:\n1. ∫ x·cos(x) dx\n2. ∫ x²·eˣ dx (requires repeated by parts)\n3. ∫ ln(x) dx (Hint: let u = ln(x), dv = dx)\n4. ∫ eˣ·sin(x) dx (cyclic integral)\n\nFor each: Show LIATE choice, formula application, all algebra.\n\nPart C: Mixed Problems (20 points)\nIdentify which technique to use, then solve:\n1. ∫ x·√(x+1) dx\n2. ∫ sin²(x) dx (use trig identity first)\n\nSubmission: Written work showing all steps\nDue: September 25, 11:59 PM",
+    "keywords": ["integration", "u-substitution", "integration by parts", "assignment", "practice", "technique", "calculus"],
+    "metadata": {
+      "week": 2,
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-assignment-2",
+    "courseId": "course-math221",
+    "type": "assignment",
+    "title": "Assignment 2: Series Convergence Analysis",
+    "content": "Objective: Apply convergence tests to determine series behavior.\n\nPart A: Direct Application (50 points)\nDetermine whether each series converges or diverges. State which test you use and show all work.\n\n1. Σ(n=1 to ∞) n/(n² + 1)\n2. Σ(n=1 to ∞) 1/(n·√n)\n3. Σ(n=1 to ∞) (2/3)ⁿ\n4. Σ(n=1 to ∞) n!/nⁿ\n5. Σ(n=1 to ∞) (-1)ⁿ/n²\n\nPart B: Test Selection (30 points)\nFor each series, explain why your chosen test is appropriate:\n• What features of the series led to your choice?\n• Why wouldn't other tests work as well?\n• What are the key steps in applying your test?\n\nPart C: Proof (20 points)\nProve that the harmonic series Σ 1/n diverges using:\na) The integral test\nb) Grouping method (group terms and compare to 1/2)\n\nRequirements:\n• Clear test identification\n• Complete calculations\n• Proper mathematical notation\n• Verification of test conditions\n\nSubmission: Written work (handwritten or typed)\nDue: October 10, 11:59 PM",
+    "keywords": ["series", "convergence", "test", "assignment", "proof", "harmonic", "analysis"],
+    "metadata": {
+      "week": 7,
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-reading-1",
+    "courseId": "course-math221",
+    "type": "reading",
+    "title": "Calculus Made Easy - The Power of Integration",
+    "content": "Excerpt from 'Calculus Made Easy' by Silvanus P. Thompson:\n\nIntegration is the inverse of differentiation, but it's more than just 'undoing' a derivative. Integration lets us:\n\n1. Find areas under curves: The fundamental application. The definite integral ∫[a to b] f(x) dx represents the signed area between the curve f(x) and the x-axis from x=a to x=b.\n\n2. Calculate accumulated quantities: If f(x) represents a rate of change, ∫f(x)dx gives the total accumulated amount. Distance from velocity, population from growth rate, revenue from marginal revenue.\n\n3. Solve differential equations: Many physical laws are expressed as differential equations (Newton's laws, heat diffusion, wave propagation). Integration is the key to solving them.\n\n4. Compute volumes and surface areas: By rotating curves around axes or using cross-sections, we can find volumes of complex 3D shapes.\n\nWhy integration is hard:\nUnlike differentiation, which has straightforward rules, integration often requires creativity and pattern recognition. There's no single algorithm that works for all integrals. Some elementary functions don't even have closed-form antiderivatives (like eˣ²)!\n\nThe toolkit:\nSuccess in integration requires mastering various techniques:\n- U-substitution for compositions\n- Parts for products\n- Partial fractions for rational functions\n- Trig substitution for radicals\n- Trig identities for powers of trig functions\n- Completing the square to recognize standard forms\n\nPractice and pattern recognition are essential. The more integrals you solve, the better you'll recognize which technique to apply.",
+    "keywords": ["integration", "calculus", "area", "accumulation", "technique", "application", "fundamental theorem"],
+    "metadata": {
+      "chapter": "Chapter 18",
+      "pageRange": "234-242",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  },
+  {
+    "id": "mat-math221-reading-2",
+    "courseId": "course-math221",
+    "type": "reading",
+    "title": "Understanding the Fundamental Theorem of Calculus",
+    "content": "The Fundamental Theorem of Calculus (FTC) is the crown jewel of calculus, connecting differentiation and integration in a profound way.\n\nPart 1 (FTC1): If f is continuous on [a,b] and F(x) = ∫[a to x] f(t) dt, then F'(x) = f(x).\n\nInterpretation: The derivative of the accumulation function is the original function. If you accumulate the rate of change, then ask for the rate of accumulation, you get back the original rate.\n\nPart 2 (FTC2): If f is continuous on [a,b] and F is any antiderivative of f, then ∫[a to b] f(x) dx = F(b) - F(a).\n\nInterpretation: To compute a definite integral (area), find any antiderivative and evaluate it at the endpoints. This is why we can compute areas without summing infinite rectangles!\n\nWhy it's profound:\n1. Unites two seemingly different concepts: slopes (derivatives) and areas (integrals)\n2. Converts an infinite summation (Riemann sums) into a simple subtraction\n3. Makes calculus computationally feasible\n4. Reveals deep structure in mathematics\n\nHistorical note:\nNewton and Leibniz independently discovered this theorem in the late 1600s, revolutionizing mathematics and physics. It enabled the scientific revolution by providing tools to solve problems in motion, gravity, optics, and more.\n\nPractical impact:\nWithout the FTC, we'd need to approximate every integral numerically. With it, we can find exact answers (when antiderivatives exist) or at least reduce the problem to finding antiderivatives.\n\nThe FTC shows that calculus isn't just two separate topics. It's a unified theory of change and accumulation.",
+    "keywords": ["fundamental theorem", "calculus", "FTC", "antiderivative", "integration", "differentiation", "connection"],
+    "metadata": {
+      "chapter": "Chapter 5",
+      "pageRange": "89-96",
+      "authorId": "user-instructor-2"
+    },
+    "createdAt": "2025-08-20T00:00:00Z",
+    "updatedAt": "2025-08-20T00:00:00Z"
+  }
+]

@@ -40,14 +40,14 @@ export default function SupportPage() {
       role="main"
       aria-label="Support and Help"
     >
-      <div className="container-wide space-y-8 md:space-y-12">
+      <div className="container-wide space-y-6">
         {/* Back Navigation */}
         <BackButton />
 
         {/* Hero Section */}
         <section
           aria-labelledby="support-heading"
-          className="py-8 md:py-12 space-y-4"
+          className="space-y-4"
         >
           <Card
             variant="glass-strong"

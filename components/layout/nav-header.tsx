@@ -103,10 +103,19 @@ export function NavHeader() {
       <QuokkaAssistantModal
         isOpen={aiModalOpen}
         onClose={() => setAiModalOpen(false)}
-        contextType={getAIContextType()}
-        courseId={inCourseContext ? course.id : undefined}
-        courseName={inCourseContext ? course.name : undefined}
-        courseCode={inCourseContext ? course.code : undefined}
+        pageContext={getAIContextType()}
+        currentCourseId={inCourseContext ? course.id : undefined}
+        currentCourseName={inCourseContext ? course.name : undefined}
+        currentCourseCode={inCourseContext ? course.code : undefined}
+        availableCourses={!inCourseContext && dashboardData?.enrolledCourses
+          ? dashboardData.enrolledCourses.map(c => ({
+              id: c.id,
+              code: c.code,
+              name: c.name,
+              term: c.term,
+            }))
+          : undefined
+        }
       />
 
       {/* Course Context Bar (Row 2) - Only in course pages */}

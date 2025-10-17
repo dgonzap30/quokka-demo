@@ -107,11 +107,11 @@ function AskQuestionForm() {
   }
 
   return (
-    <div className="min-h-screen p-8 md:p-12">
-      <div className="container-narrow space-y-12">
+    <div className="min-h-screen p-4 md:p-6">
+      <div className="container-narrow space-y-8">
         {/* Hero Section */}
-        <div className="py-8 md:py-12 space-y-6">
-          <div className="space-y-4">
+        <div className="space-y-4">
+          <div className="space-y-3">
             <h1 className="heading-2 glass-text">Ask a Question</h1>
             <p className="text-lg md:text-xl text-muted-foreground glass-text leading-relaxed max-w-2xl">
               Get help from your classmates and instructors. Provide detailed information to receive the best answers.

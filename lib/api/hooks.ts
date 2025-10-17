@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useQueries } from "@tanstack/react-query";
 import type {
   LoginInput,
   SignupInput,
@@ -11,6 +11,12 @@ import type {
   BulkEndorseInput,
   SearchQuestionsInput,
   CreateResponseTemplateInput,
+  SearchCourseMaterialsInput,
+  AIConversation,
+  AIMessage,
+  CreateConversationInput,
+  SendMessageInput,
+  Thread,
 } from "@/lib/models/types";
 import { api } from "./client";
 import { isAuthSuccess } from "@/lib/models/types";
@@ -28,6 +34,8 @@ const queryKeys = {
   courseThreads: (courseId: string) => ["courseThreads", courseId] as const,
   courseMetrics: (courseId: string) => ["courseMetrics", courseId] as const,
   courseInsights: (courseId: string) => ["courseInsights", courseId] as const,
+  courseMaterials: (courseId: string) => ["courseMaterials", courseId] as const,
+  searchCourseMaterials: (input: SearchCourseMaterialsInput) => ["searchCourseMaterials", input] as const,
   thread: (threadId: string) => ["thread", threadId] as const,
   notifications: (userId: string, courseId?: string) =>
     courseId ? ["notifications", userId, courseId] as const : ["notifications", userId] as const,
@@ -41,6 +49,9 @@ const queryKeys = {
   trendingTopics: (courseId: string, timeRange: string) => ["trendingTopics", courseId, timeRange] as const,
   questionSearch: (courseId: string, query: string) => ["questionSearch", courseId, query] as const,
   responseTemplates: (userId: string) => ["responseTemplates", userId] as const,
+  // Conversation query keys
+  aiConversations: (userId: string) => ["aiConversations", userId] as const,
+  conversationMessages: (conversationId: string) => ["conversationMessages", conversationId] as const,
 };
 
 // ============================================
@@ -225,6 +236,62 @@ export function useCourseInsights(courseId: string | undefined) {
     enabled: !!courseId,
     staleTime: 5 * 60 * 1000, // 5 minutes (expensive AI operation)
     gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * Get all course materials for a course
+ *
+ * Returns all educational content (lectures, slides, assignments, readings, etc.)
+ * for the specified course. Materials include full content for AI context.
+ * Cached for 10 minutes since materials change infrequently.
+ */
+export function useCourseMaterials(courseId: string | undefined) {
+  return useQuery({
+    queryKey: courseId ? queryKeys.courseMaterials(courseId) : ["courseMaterials"],
+    queryFn: () => (courseId ? api.getCourseMaterials(courseId) : Promise.resolve([])),
+    enabled: !!courseId,
+    staleTime: 10 * 60 * 1000, // 10 minutes (materials are static)
+    gcTime: 15 * 60 * 1000,    // 15 minutes
+  });
+}
+
+/**
+ * Get materials for multiple courses in parallel
+ *
+ * Useful when AI needs context from all enrolled courses.
+ * Executes queries in parallel for better performance.
+ *
+ * Returns an array of query results, one per course.
+ */
+export function useMultiCourseMaterials(courseIds: string[]) {
+  return useQueries({
+    queries: courseIds.map((courseId) => ({
+      queryKey: queryKeys.courseMaterials(courseId),
+      queryFn: () => api.getCourseMaterials(courseId),
+      enabled: !!courseId,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 15 * 60 * 1000,    // 15 minutes
+    })),
+  });
+}
+
+/**
+ * Search course materials by keywords (debounced)
+ *
+ * Performs keyword-based search across material titles and content.
+ * Returns results scored by relevance with matched keywords highlighted.
+ * Disabled if query is too short (<3 chars).
+ */
+export function useSearchCourseMaterials(
+  input: SearchCourseMaterialsInput | null
+) {
+  return useQuery({
+    queryKey: input ? queryKeys.searchCourseMaterials(input) : ["searchCourseMaterials"],
+    queryFn: () => (input ? api.searchCourseMaterials(input) : Promise.resolve([])),
+    enabled: !!input && input.query.length >= 3,
+    staleTime: 2 * 60 * 1000, // 2 minutes (search results change slowly)
+    gcTime: 5 * 60 * 1000,    // 5 minutes
   });
 }
 
@@ -762,6 +829,244 @@ export function useDeleteResponseTemplate() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.responseTemplates(data.userId)
       });
+    },
+  });
+}
+
+// ============================================
+// AI Conversation Hooks
+// ============================================
+
+/**
+ * Get AI conversations for a user
+ *
+ * Returns all private AI conversations for the user.
+ * Conversations are sorted by most recently updated.
+ * Cached for 1 minute since conversations update frequently.
+ */
+export function useAIConversations(userId: string | undefined) {
+  return useQuery({
+    queryKey: userId ? queryKeys.aiConversations(userId) : ["aiConversations"],
+    queryFn: () => (userId ? api.getAIConversations(userId) : Promise.resolve([])),
+    enabled: !!userId,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000,    // 5 minutes
+  });
+}
+
+/**
+ * Get messages for a conversation
+ *
+ * Returns all messages (user + AI) for a specific conversation.
+ * Messages are sorted chronologically.
+ * Polls every 5 seconds to detect new messages.
+ */
+export function useConversationMessages(conversationId: string | undefined) {
+  return useQuery({
+    queryKey: conversationId ? queryKeys.conversationMessages(conversationId) : ["conversationMessages"],
+    queryFn: () => (conversationId ? api.getConversationMessages(conversationId) : Promise.resolve([])),
+    enabled: !!conversationId,
+    staleTime: 30 * 1000,         // 30 seconds
+    gcTime: 5 * 60 * 1000,        // 5 minutes
+    refetchInterval: 5 * 1000,    // Poll every 5 seconds
+  });
+}
+
+/**
+ * Create new AI conversation mutation
+ *
+ * Creates a new private AI conversation for the user.
+ * Optionally associates conversation with a specific course.
+ *
+ * Invalidates:
+ * - aiConversations (to show new conversation in list)
+ */
+export function useCreateConversation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateConversationInput) => api.createConversation(input),
+    onSuccess: (newConversation) => {
+      // Invalidate conversations list
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiConversations(newConversation.userId)
+      });
+    },
+  });
+}
+
+/**
+ * Send message in conversation mutation
+ *
+ * Sends a user message and generates AI response.
+ * Uses optimistic updates to immediately show user message.
+ * AI response is added when API call completes.
+ *
+ * Invalidates:
+ * - conversationMessages (to show new messages)
+ * - aiConversations (to update conversation timestamp)
+ */
+export function useSendMessage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: SendMessageInput) => api.sendMessage(input),
+
+    // Optimistic update: add user message immediately
+    onMutate: async (input) => {
+      const queryKey = queryKeys.conversationMessages(input.conversationId);
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      // Get current cached data
+      const previousMessages = queryClient.getQueryData(queryKey);
+
+      // Optimistically add user message
+      queryClient.setQueryData(queryKey, (old: AIMessage[] | undefined) => {
+        const optimisticUserMessage: AIMessage = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          conversationId: input.conversationId,
+          role: 'user',
+          content: input.content,
+          timestamp: new Date().toISOString(),
+        };
+        return old ? [...old, optimisticUserMessage] : [optimisticUserMessage];
+      });
+
+      // Return context for rollback
+      return { previousMessages, conversationId: input.conversationId };
+    },
+
+    // On error: rollback optimistic update
+    onError: (err, variables, context) => {
+      if (context?.previousMessages && context?.conversationId) {
+        queryClient.setQueryData(
+          queryKeys.conversationMessages(context.conversationId),
+          context.previousMessages
+        );
+      }
+    },
+
+    // On success: replace temp message with real messages
+    onSuccess: (result, variables, context) => {
+      if (!context?.conversationId) return;
+
+      // Invalidate messages to refetch with real IDs and AI response
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.conversationMessages(context.conversationId)
+      });
+
+      // Invalidate conversations list (to update timestamp)
+      const conversation = queryClient.getQueryData<AIConversation[]>(
+        queryKeys.aiConversations(result.userMessage.conversationId)
+      );
+      if (conversation) {
+        queryClient.invalidateQueries({
+          queryKey: ["aiConversations"]
+        });
+      }
+    },
+  });
+}
+
+/**
+ * Delete AI conversation mutation
+ *
+ * Deletes a conversation and all its messages (cascade delete).
+ * Uses optimistic update to immediately remove from UI.
+ *
+ * Invalidates:
+ * - aiConversations (to remove from list)
+ */
+export function useDeleteConversation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ conversationId, userId }: { conversationId: string; userId: string }) =>
+      api.deleteAIConversation(conversationId).then(() => ({ conversationId, userId })),
+
+    // Optimistic update: remove conversation immediately
+    onMutate: async ({ conversationId, userId }) => {
+      const queryKey = queryKeys.aiConversations(userId);
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      // Get current cached data
+      const previousConversations = queryClient.getQueryData(queryKey);
+
+      // Optimistically remove conversation
+      queryClient.setQueryData(queryKey, (old: AIConversation[] | undefined) => {
+        return old ? old.filter((conv) => conv.id !== conversationId) : [];
+      });
+
+      // Return context for rollback
+      return { previousConversations, userId };
+    },
+
+    // On error: rollback optimistic update
+    onError: (err, variables, context) => {
+      if (context?.previousConversations && context?.userId) {
+        queryClient.setQueryData(
+          queryKeys.aiConversations(context.userId),
+          context.previousConversations
+        );
+      }
+    },
+
+    // On success: ensure cache consistency
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiConversations(data.userId)
+      });
+    },
+  });
+}
+
+/**
+ * Convert conversation to thread mutation
+ *
+ * Converts a private AI conversation into a public discussion thread.
+ * Preserves all messages as thread content.
+ * Preserves last AI message as AIAnswer.
+ *
+ * Invalidates:
+ * - courseThreads (to show new thread)
+ * - aiConversations (conversation still exists but now linked to thread)
+ * - studentDashboard (activity feed needs update)
+ */
+export function useConvertConversationToThread() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ conversationId, userId, courseId }: { conversationId: string; userId: string; courseId: string }) =>
+      api.convertConversationToThread(conversationId, userId, courseId),
+    onSuccess: (result, variables) => {
+      const { thread, aiAnswer } = result;
+
+      // Invalidate course threads (to show new thread)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.courseThreads(thread.courseId)
+      });
+
+      // Invalidate conversations (conversation updated with link to thread)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.aiConversations(variables.userId)
+      });
+
+      // Invalidate dashboards (activity feed needs update)
+      queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+
+      // OPTIONAL: Pre-populate thread cache with AI answer
+      if (aiAnswer) {
+        queryClient.setQueryData(queryKeys.thread(thread.id), {
+          thread,
+          posts: [],
+          aiAnswer,
+        });
+      }
     },
   });
 }

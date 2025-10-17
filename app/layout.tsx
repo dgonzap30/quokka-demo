@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { NavHeader } from "@/components/layout/nav-header";
+import { LayoutMain } from "@/components/layout/layout-main";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,9 +73,9 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <NavHeader />
           </Suspense>
-          <main className="flex-1 overflow-y-auto sidebar-scroll relative pt-[104px] pb-20 md:pt-[104px] md:pb-0">
+          <LayoutMain>
             {children}
-          </main>
+          </LayoutMain>
         </Providers>
       </body>
     </html>
