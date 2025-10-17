@@ -9,7 +9,6 @@ import {
   useCreateConversation,
   useSendMessage,
 } from "@/lib/api/hooks";
-import type { AIMessage } from "@/lib/models/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,7 +140,7 @@ export default function QuokkaPage() {
               <div className="flex justify-start">
                 <div className="message-assistant p-4 md:p-5">
                   <p className="text-sm md:text-base leading-relaxed">
-                    Hi! I'm Quokka, your AI study assistant. Ask me anything about your courses! 🎓
+                    Hi! I&apos;m Quokka, your AI study assistant. Ask me anything about your courses! 🎓
                   </p>
                 </div>
               </div>

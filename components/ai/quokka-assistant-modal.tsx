@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback, FormEvent } from "react";
+import { useState, useEffect, useRef, useMemo, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Send, Sparkles, Trash2, Share2, MoreVertical, GraduationCap } from "lucide-react";
+import { Send, Sparkles, Trash2, Share2, MoreVertical } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   useCurrentUser,
-  useCreateThread,
   useAIConversations,
   useConversationMessages,
   useCreateConversation,
@@ -370,7 +369,7 @@ export function QuokkaAssistantModal({
                   <div className="flex justify-start">
                     <div className="message-assistant p-3">
                       <p className="text-sm leading-relaxed">
-                        Hi! I'm Quokka, your AI study assistant. How can I help you today? 🎓
+                        Hi! I&apos;m Quokka, your AI study assistant. How can I help you today? 🎓
                       </p>
                     </div>
                   </div>
