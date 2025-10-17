@@ -35,6 +35,9 @@ import type {
   CreateResponseTemplateInput,
   UrgencyLevel,
   TrendDirection,
+  CourseMaterial,
+  SearchCourseMaterialsInput,
+  CourseMaterialSearchResult,
 } from "@/lib/models/types";
 
 import {
@@ -49,6 +52,12 @@ import {
 
 import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
 import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
+
+// LLM imports
+import { getLLMProvider, isLLMProviderAvailable } from "@/lib/llm";
+import { buildCourseContext } from "@/lib/context";
+import { buildSystemPrompt, buildUserPromptWithContext, extractKeywords as extractLLMKeywords } from "@/lib/llm/utils";
+import type { MaterialReference } from "@/lib/models/types";
 
 import {
   seedData,
@@ -83,6 +92,7 @@ import {
   deleteResponseTemplate as deleteResponseTemplateFromStore,
   incrementTemplateUsage,
   getAssignments,
+  getCourseMaterialsByCourse,
 } from "@/lib/store/localStore";
 
 // ============================================
@@ -127,6 +137,80 @@ function extractKeywords(text: string): string[] {
 function calculateMatchRatio(questionKeywords: string[], templateKeywords: string[]): number {
   const matches = questionKeywords.filter(k => templateKeywords.includes(k)).length;
   return questionKeywords.length > 0 ? matches / questionKeywords.length : 0;
+}
+
+/**
+ * Generate excerpt from material content around matched keywords
+ */
+function generateExcerpt(content: string, keywords: string[]): string {
+  const lowerContent = content.toLowerCase();
+
+  // Find first occurrence of any keyword
+  let startIdx = -1;
+  for (const keyword of keywords) {
+    const idx = lowerContent.indexOf(keyword.toLowerCase());
+    if (idx !== -1 && (startIdx === -1 || idx < startIdx)) {
+      startIdx = idx;
+    }
+  }
+
+  if (startIdx === -1) {
+    // No keyword found, return beginning
+    return content.slice(0, 150).trim() + '...';
+  }
+
+  // Extract context around keyword (150 chars)
+  const start = Math.max(0, startIdx - 40);
+  const end = Math.min(content.length, start + 150);
+  let excerpt = content.slice(start, end).trim();
+
+  if (start > 0) excerpt = '...' + excerpt;
+  if (end < content.length) excerpt = excerpt + '...';
+
+  return excerpt;
+}
+
+/**
+ * Generate snippet from material content for search results
+ */
+function generateSnippet(content: string, keywords: string[], maxLength: number): string {
+  const lowerContent = content.toLowerCase();
+
+  // Find first occurrence of any keyword
+  let startIdx = -1;
+  for (const keyword of keywords) {
+    const idx = lowerContent.indexOf(keyword.toLowerCase());
+    if (idx !== -1 && (startIdx === -1 || idx < startIdx)) {
+      startIdx = idx;
+    }
+  }
+
+  if (startIdx === -1) {
+    // No keyword found, return beginning
+    return content.slice(0, maxLength).trim() + (content.length > maxLength ? '...' : '');
+  }
+
+  // Extract context around keyword
+  const start = Math.max(0, startIdx - 50);
+  const end = Math.min(content.length, start + maxLength);
+  let snippet = content.slice(start, end).trim();
+
+  if (start > 0) snippet = '...' + snippet;
+  if (end < content.length) snippet = snippet + '...';
+
+  return snippet;
+}
+
+/**
+ * Map CourseMaterialType to CitationSourceType
+ */
+function mapMaterialTypeToCitationType(materialType: CourseMaterial['type']): Citation['sourceType'] {
+  // Handle the mapping between the two type systems
+  // CourseMaterialType uses "slide" (singular), CitationSourceType uses "slides" (plural)
+  if (materialType === 'slide') return 'slides';
+
+  // All other types match exactly
+  return materialType as Citation['sourceType'];
 }
 
 /**
@@ -355,7 +439,7 @@ Remember: Understanding takes time and practice. Don't hesitate to ask for clari
 };
 
 /**
- * Generate AI response using template system
+ * Generate AI response using template system (synchronous fallback)
  */
 function generateAIResponse(
   courseCode: string,
@@ -394,7 +478,7 @@ function generateAIResponse(
   const confidenceScore = Math.round(55 + (bestMatchRatio * 40));
   const confidenceLevel = getConfidenceLevel(confidenceScore);
 
-  // Generate citations
+  // Generate citations using hardcoded materials (fallback)
   const citations = generateCitations(courseCode, keywords);
 
   return {
@@ -403,6 +487,211 @@ function generateAIResponse(
       level: confidenceLevel,
       score: confidenceScore,
     },
+    citations,
+  };
+}
+
+/**
+ * Generate AI response with course material references (LLM-powered)
+ *
+ * Uses actual LLM (OpenAI/Anthropic) when enabled, with fallback to template system.
+ * Implements provider fallback chain: LLM → Templates
+ */
+async function generateAIResponseWithMaterials(
+  courseId: string,
+  courseCode: string,
+  title: string,
+  content: string,
+  tags: string[]
+): Promise<{
+  content: string;
+  confidence: { level: ConfidenceLevel; score: number };
+  citations: Citation[];
+}> {
+  const questionText = `${title} ${content} ${tags.join(' ')}`;
+
+  // Check if LLM is enabled and available
+  if (!isLLMProviderAvailable()) {
+    console.log('[AI] LLM not available, using template fallback');
+    return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
+  }
+
+  try {
+    // Get course and materials
+    const course = await api.getCourse(courseId);
+    if (!course) {
+      throw new Error(`Course not found: ${courseId}`);
+    }
+
+    const materials = await api.getCourseMaterials(courseId);
+
+    // Build course context with ranked materials
+    const context = buildCourseContext(course, materials, questionText, {
+      maxMaterials: 5,
+      minRelevance: 30,
+      maxTokens: 2000,
+    });
+
+    // Prepare material references for prompt
+    const materialRefs: MaterialReference[] = context.materials.map(m => ({
+      materialId: m.id,
+      title: m.title,
+      type: m.type,
+      excerpt: m.content.substring(0, 300),
+      relevanceScore: m.relevanceScore,
+    }));
+
+    // Build prompts
+    const systemPrompt = buildSystemPrompt();
+    const userPrompt = buildUserPromptWithContext(
+      questionText,
+      materialRefs,
+      course.code,
+      course.name
+    );
+
+    // Get LLM provider and generate response
+    const llmProvider = getLLMProvider();
+    const llmResponse = await llmProvider.generate({
+      systemPrompt,
+      userPrompt,
+      maxTokens: 1000,
+      temperature: 0.7,
+    });
+
+    if (!llmResponse.success) {
+      console.warn('[AI] LLM generation failed:', llmResponse.error);
+      return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
+    }
+
+    // Extract citations from ranked materials
+    const keywords = extractKeywords(questionText);
+    const citations: Citation[] = context.materials
+      .slice(0, 3) // Top 3 materials
+      .map(material => ({
+        id: generateId('cite'),
+        sourceType: mapMaterialTypeToCitationType(material.type),
+        source: material.title,
+        excerpt: generateExcerpt(material.content, keywords),
+        relevance: material.relevanceScore,
+        link: undefined,
+      }));
+
+    // Calculate confidence from material relevance
+    const avgRelevance = context.materials.length > 0
+      ? context.materials.reduce((sum, m) => sum + m.relevanceScore, 0) / context.materials.length
+      : 50;
+
+    const confidenceScore = Math.min(95, Math.max(40, Math.round(avgRelevance)));
+    const confidenceLevel = getConfidenceLevel(confidenceScore);
+
+    console.log('[AI] LLM response generated successfully', {
+      provider: llmResponse.provider,
+      model: llmResponse.model,
+      tokens: llmResponse.usage.totalTokens,
+      cost: llmResponse.usage.estimatedCost,
+      materialsUsed: context.materials.length,
+    });
+
+    return {
+      content: llmResponse.content,
+      confidence: { level: confidenceLevel, score: confidenceScore },
+      citations,
+    };
+  } catch (error) {
+    console.error('[AI] LLM generation error:', error);
+    console.log('[AI] Falling back to template system');
+    return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
+  }
+}
+
+/**
+ * Generate AI response using template system (fallback)
+ *
+ * Original template-based logic used as fallback when LLM is unavailable.
+ */
+async function generateAIResponseWithTemplates(
+  courseId: string,
+  courseCode: string,
+  title: string,
+  content: string,
+  tags: string[]
+): Promise<{
+  content: string;
+  confidence: { level: ConfidenceLevel; score: number };
+  citations: Citation[];
+}> {
+  const questionText = `${title} ${content} ${tags.join(' ')}`;
+  const keywords = extractKeywords(questionText);
+
+  // 1. Select template based on course type
+  type Template = { keywords: string[]; content: string };
+  let templateList: Template[] = [];
+
+  if (courseCode.startsWith('CS')) {
+    templateList = CS_TEMPLATES;
+  } else if (courseCode.startsWith('MATH')) {
+    templateList = MATH_TEMPLATES;
+  }
+
+  // 2. Find best matching template
+  let bestMatch: Template = GENERAL_TEMPLATE;
+  let bestMatchRatio = 0;
+
+  if (templateList.length > 0) {
+    for (const template of templateList) {
+      const ratio = calculateMatchRatio(keywords, template.keywords);
+      if (ratio > bestMatchRatio) {
+        bestMatchRatio = ratio;
+        bestMatch = template;
+      }
+    }
+  }
+
+  // 3. Calculate confidence
+  const confidenceScore = Math.round(55 + (bestMatchRatio * 40));
+  const confidenceLevel = getConfidenceLevel(confidenceScore);
+
+  // 4. Get materials from database
+  let materials: CourseMaterial[] = [];
+  try {
+    materials = await api.getCourseMaterials(courseId);
+  } catch (error) {
+    console.warn('Failed to load course materials:', error);
+    const citations = generateCitations(courseCode, keywords);
+    return {
+      content: bestMatch.content,
+      confidence: { level: confidenceLevel, score: confidenceScore },
+      citations,
+    };
+  }
+
+  // 5. Score materials by keyword matches
+  const scoredMaterials = materials.map(material => {
+    const materialKeywords = material.keywords;
+    const matches = keywords.filter(k => materialKeywords.includes(k)).length;
+    const relevance = Math.min(95, 60 + (matches * 10));
+    return { material, relevance, matches };
+  });
+
+  // 6. Sort by relevance and take top 2-3
+  const topMaterials = scoredMaterials
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, 2 + Math.floor(Math.random() * 2));
+
+  // 7. Generate citations using actual materials
+  const citations: Citation[] = topMaterials.map(({ material, relevance }) => ({
+    id: generateId('cite'),
+    sourceType: mapMaterialTypeToCitationType(material.type),
+    source: material.title,
+    excerpt: generateExcerpt(material.content, keywords),
+    relevance,
+    link: undefined,
+  }));
+
+  return {
+    content: bestMatch.content,
+    confidence: { level: confidenceLevel, score: confidenceScore },
     citations,
   };
 }
@@ -711,6 +1000,92 @@ export const api = {
       trendingTopics,
       generatedAt: new Date().toISOString(),
     };
+  },
+
+  /**
+   * Get all course materials for a course
+   *
+   * Returns all educational content (lectures, slides, assignments, readings, etc.)
+   * for the specified course. Materials include full content for AI context.
+   */
+  async getCourseMaterials(courseId: string): Promise<CourseMaterial[]> {
+    await delay(); // 200-500ms
+    seedData();
+
+    // Get materials from store
+    const materials = getCourseMaterialsByCourse(courseId);
+
+    // Sort by type order, then title
+    const typeOrder: CourseMaterial['type'][] = ["lecture", "slide", "assignment", "reading", "lab", "textbook"];
+    return materials.sort((a, b) => {
+      const typeComparison = typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
+      if (typeComparison !== 0) return typeComparison;
+      return a.title.localeCompare(b.title);
+    });
+  },
+
+  /**
+   * Search course materials by keywords
+   *
+   * Performs keyword-based search across material titles and content.
+   * Returns results scored by relevance with matched keywords highlighted.
+   */
+  async searchCourseMaterials(
+    input: SearchCourseMaterialsInput
+  ): Promise<CourseMaterialSearchResult[]> {
+    await delay(200 + Math.random() * 100); // 200-300ms
+    seedData();
+
+    const { courseId, query, types, limit = 20, minRelevance = 20 } = input;
+
+    // Validate query length
+    if (query.trim().length < 3) {
+      throw new Error("Search query must be at least 3 characters");
+    }
+
+    // Extract keywords from query
+    const queryKeywords = extractKeywords(query);
+
+    // Get all materials for course
+    const allMaterials = await this.getCourseMaterials(courseId);
+
+    // Filter by type if specified
+    const materialsToSearch = types && types.length > 0
+      ? allMaterials.filter(m => types.includes(m.type))
+      : allMaterials;
+
+    // Score each material
+    const results: CourseMaterialSearchResult[] = materialsToSearch.map(material => {
+      // Combine title and content for matching
+      const materialText = `${material.title} ${material.content}`.toLowerCase();
+      const materialKeywords = material.keywords; // Pre-computed keywords
+
+      // Count matches
+      const matchedKeywords = queryKeywords.filter(k =>
+        materialKeywords.includes(k) || materialText.includes(k)
+      );
+
+      // Calculate relevance score
+      const relevanceScore = queryKeywords.length > 0
+        ? Math.round((matchedKeywords.length / queryKeywords.length) * 100)
+        : 0;
+
+      // Generate snippet (first 150 chars with matched keywords)
+      const snippet = generateSnippet(material.content, matchedKeywords, 150);
+
+      return {
+        material,
+        relevanceScore,
+        matchedKeywords,
+        snippet,
+      };
+    });
+
+    // Filter by minimum relevance and sort
+    return results
+      .filter(r => r.relevanceScore >= minRelevance)
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, limit);
   },
 
   // ============================================
@@ -1266,8 +1641,9 @@ export const api = {
       throw new Error(`Course not found: ${input.courseId}`);
     }
 
-    // Generate AI response using template system
-    const { content, confidence, citations } = generateAIResponse(
+    // Generate AI response using enhanced helper with course materials
+    const { content, confidence, citations } = await generateAIResponseWithMaterials(
+      input.courseId, // NEW: Pass courseId for material lookup
       course.code,
       input.title,
       input.content,
@@ -1314,8 +1690,9 @@ export const api = {
       throw new Error(`Course not found: ${input.courseId}`);
     }
 
-    // Generate AI response using template system (same as generateAIAnswer)
-    const { content, confidence, citations } = generateAIResponse(
+    // Generate AI response using enhanced helper with course materials
+    const { content, confidence, citations } = await generateAIResponseWithMaterials(
+      input.courseId, // NEW: Pass courseId for material lookup
       course.code,
       input.title,
       input.content,
