@@ -2,7 +2,14 @@
 
 import { useState, FormEvent, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/lib/api/hooks";
+import {
+  useCurrentUser,
+  useAIConversations,
+  useConversationMessages,
+  useCreateConversation,
+  useSendMessage,
+} from "@/lib/api/hooks";
+import type { AIMessage } from "@/lib/models/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,62 +17,47 @@ import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
 import { Sparkles } from "lucide-react";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: string; // ISO 8601 timestamp
-}
-
-// Simple keyword-based responses (mock AI)
-const getAIResponse = (question: string): string => {
-  const q = question.toLowerCase();
-
-  if (q.includes("binary search")) {
-    return "Binary search is an efficient algorithm for finding an item in a sorted array. It works by repeatedly dividing the search interval in half:\n\n1. Compare the target value to the middle element\n2. If equal, return the position\n3. If target is less, search the left half\n4. If target is greater, search the right half\n\nTime complexity: O(log n)\n\n**Important:** The array must be sorted first!";
-  }
-
-  if (q.includes("linked list") || q.includes("array")) {
-    return "**Arrays vs Linked Lists:**\n\n**Arrays:**\n- Fixed size\n- O(1) random access\n- O(n) insertion/deletion\n- Contiguous memory\n\n**Linked Lists:**\n- Dynamic size\n- O(n) access by index\n- O(1) insertion/deletion at known position\n- Non-contiguous memory\n\nUse arrays when you need fast lookups, linked lists when you need frequent insertions/deletions.";
-  }
-
-  if (q.includes("big o") || q.includes("complexity") || q.includes("time complexity")) {
-    return "**Big O Notation** measures algorithm efficiency:\n\n- O(1): Constant time\n- O(log n): Logarithmic (binary search)\n- O(n): Linear (simple loop)\n- O(n log n): Efficient sorting (merge sort)\n- O(n²): Quadratic (nested loops)\n- O(2ⁿ): Exponential (avoid!)\n\nFocus on worst-case scenarios and drop constants/lower terms.";
-  }
-
-  if (q.includes("recursion")) {
-    return "**Recursion** is when a function calls itself:\n\n```python\ndef factorial(n):\n    if n <= 1:  # Base case\n        return 1\n    return n * factorial(n-1)  # Recursive case\n```\n\n**Key components:**\n1. Base case (stopping condition)\n2. Recursive case (calls itself)\n3. Progress toward base case\n\nUseful for tree traversal, divide-and-conquer algorithms, and mathematical problems.";
-  }
-
-  if (q.includes("integration") || q.includes("calculus") || q.includes("derivative")) {
-    return "I can help with calculus! For integration:\n\n**Common techniques:**\n- Substitution (u-substitution)\n- Integration by parts: ∫u dv = uv - ∫v du\n- Partial fractions\n- Trigonometric substitution\n\n**LIATE rule** for choosing u in integration by parts:\nL - Logarithmic\nI - Inverse trig\nA - Algebraic\nT - Trigonometric\nE - Exponential\n\nWhat specific problem are you working on?";
-  }
-
-  if (q.includes("hello") || q.includes("hi") || q.includes("hey")) {
-    return "Hello! 👋 I'm Quokka, your AI study assistant. I can help you with:\n\n- Computer Science concepts (algorithms, data structures)\n- Mathematics (calculus, algebra)\n- General study questions\n\nJust ask me anything, and I'll do my best to help!";
-  }
-
-  if (q.includes("help") || q.includes("what can you do")) {
-    return "I'm here to help you learn! I can assist with:\n\n✓ **Computer Science:** Algorithms, data structures, Big O notation\n✓ **Mathematics:** Calculus, integration, derivatives\n✓ **Problem Solving:** Break down complex problems\n✓ **Code Examples:** Provide working examples\n\nTry asking me about binary search, linked lists, Big O notation, or calculus!";
-  }
-
-  return `I'd be happy to help with "${question}"!\n\nWhile I'm best at Computer Science and Math topics, I can try to assist. Could you:\n\n1. Provide more context about what you're trying to learn?\n2. Share any specific problems you're working on?\n3. Let me know which course this is for?\n\nYou might also want to post this as a thread in your course for more detailed help from instructors and peers!`;
-};
-
 export default function QuokkaPage() {
   const router = useRouter();
   const { data: user, isLoading: userLoading } = useCurrentUser();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: "Hi! I'm Quokka, your AI study assistant. Ask me anything about your courses! 🎓",
-      timestamp: new Date().toISOString(),
-    },
-  ]);
   const [input, setInput] = useState("");
-  const [isThinking, setIsThinking] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch user's conversations
+  const { data: conversations } = useAIConversations(user?.id);
+
+  // Fetch messages for active conversation
+  const { data: messages = [], isLoading: messagesLoading } = useConversationMessages(activeConversationId || undefined);
+
+  // Conversation mutations
+  const createConversation = useCreateConversation();
+  const sendMessage = useSendMessage();
+
+  // Auto-load or create conversation on mount
+  useEffect(() => {
+    if (!user || activeConversationId) return;
+
+    // Try to load most recent conversation
+    if (conversations && conversations.length > 0) {
+      const mostRecent = conversations[0]; // Already sorted by updatedAt DESC
+      setActiveConversationId(mostRecent.id);
+    } else {
+      // Create new conversation if none exists
+      createConversation.mutate(
+        {
+          userId: user.id,
+          courseId: null, // General conversation (multi-course)
+          title: "Quokka Chat",
+        },
+        {
+          onSuccess: (newConversation) => {
+            setActiveConversationId(newConversation.id);
+          },
+        }
+      );
+    }
+  }, [user, conversations, activeConversationId, createConversation]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -80,31 +72,18 @@ export default function QuokkaPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !activeConversationId || !user) return;
 
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: input.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const messageContent = input.trim();
     setInput("");
-    setIsThinking(true);
 
-    // Simulate AI thinking delay
-    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
-
-    const aiResponse: Message = {
-      id: `ai-${Date.now()}`,
-      role: "assistant",
-      content: getAIResponse(userMessage.content),
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, aiResponse]);
-    setIsThinking(false);
+    // Send message via mutation (includes optimistic update)
+    sendMessage.mutate({
+      conversationId: activeConversationId,
+      content: messageContent,
+      userId: user.id,
+      role: "user",
+    });
   };
 
   const quickPrompts = [
@@ -150,6 +129,16 @@ export default function QuokkaPage() {
 
           {/* Messages */}
           <CardContent className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+            {messages.length === 0 && !messagesLoading && (
+              <div className="flex justify-start">
+                <div className="message-assistant p-4 md:p-5">
+                  <p className="text-sm md:text-base leading-relaxed">
+                    Hi! I'm Quokka, your AI study assistant. Ask me anything about your courses! 🎓
+                  </p>
+                </div>
+              </div>
+            )}
+
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -172,7 +161,7 @@ export default function QuokkaPage() {
               </div>
             ))}
 
-            {isThinking && (
+            {sendMessage.isPending && (
               <div className="flex justify-start">
                 <div className="message-assistant p-4 md:p-5">
                   <div className="flex items-center gap-2">
@@ -188,7 +177,7 @@ export default function QuokkaPage() {
 
           {/* Input */}
           <div className="border-t border-[var(--border-glass)] p-6 md:p-8">
-            {messages.length === 1 && (
+            {messages.length === 0 && !messagesLoading && (
               <div className="mb-6">
                 <p className="text-sm font-semibold text-muted-foreground mb-3">Quick prompts:</p>
                 <div className="flex flex-wrap gap-2">
@@ -212,7 +201,7 @@ export default function QuokkaPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
-                disabled={isThinking}
+                disabled={sendMessage.isPending || !activeConversationId}
                 className="flex-1 h-12 text-base"
                 aria-label="Message input"
               />
@@ -220,7 +209,7 @@ export default function QuokkaPage() {
                 type="submit"
                 variant="glass-primary"
                 size="lg"
-                disabled={isThinking || !input.trim()}
+                disabled={sendMessage.isPending || !input.trim() || !activeConversationId}
               >
                 Send
               </Button>
@@ -237,7 +226,7 @@ export default function QuokkaPage() {
             <ul className="space-y-3 text-sm md:text-base text-muted-foreground leading-relaxed">
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-0.5">✓</span>
-                <span>I&apos;m best at Computer Science and Mathematics topics</span>
+                <span>I can help with all your enrolled courses using course materials and context</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-0.5">✓</span>
@@ -245,7 +234,7 @@ export default function QuokkaPage() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-accent mt-0.5">✓</span>
-                <span>I use keyword matching - be specific and include key terms in your questions!</span>
+                <span>Your conversations are private and persist across sessions</span>
               </li>
             </ul>
           </CardContent>
