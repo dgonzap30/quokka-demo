@@ -16,7 +16,29 @@
     "createdAt": "2025-09-13T17:12:26.013Z",
     "updatedAt": "2025-09-14T19:12:26.013Z",
     "hasAIAnswer": true,
-    "aiAnswerId": "ai-answer-1"
+    "aiAnswerId": "ai-answer-1",
+    "endorsements": [
+      {
+        "userId": "user-instructor-1",
+        "role": "instructor",
+        "timestamp": "2025-09-14T10:30:00.000Z"
+      }
+    ],
+    "upvotes": [
+      {
+        "userId": "user-student-3",
+        "timestamp": "2025-09-13T18:45:00.000Z"
+      },
+      {
+        "userId": "user-student-4",
+        "timestamp": "2025-09-13T20:15:00.000Z"
+      },
+      {
+        "userId": "user-student-5",
+        "timestamp": "2025-09-14T09:00:00.000Z"
+      }
+    ],
+    "qualityStatus": "endorsed"
   },
   {
     "id": "thread-2",
@@ -34,7 +56,18 @@
     "createdAt": "2025-09-14T18:12:26.013Z",
     "updatedAt": "2025-09-15T20:12:26.013Z",
     "hasAIAnswer": true,
-    "aiAnswerId": "ai-answer-2"
+    "aiAnswerId": "ai-answer-2",
+    "upvotes": [
+      {
+        "userId": "user-student-2",
+        "timestamp": "2025-09-14T19:30:00.000Z"
+      },
+      {
+        "userId": "user-student-6",
+        "timestamp": "2025-09-15T08:15:00.000Z"
+      }
+    ],
+    "qualityStatus": "proposed"
   },
   {
     "id": "thread-3",

@@ -5,7 +5,8 @@ import { Card, CardHeader, CardDescription, CardContent } from "@/components/ui/
 import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
 import { StatusBadge } from "@/components/course/status-badge";
-import { Eye, Calendar, Tag } from "lucide-react";
+import { EndorsedBadge } from "@/components/course/endorsed-badge";
+import { Eye, Calendar, Tag, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Thread } from "@/lib/models/types";
 
@@ -74,7 +75,10 @@ export function ThreadCard({ thread, variant = "full", className }: ThreadCardPr
                   </CardDescription>
                 )}
               </div>
-              <StatusBadge status={thread.status} aria-label={`Thread status: ${thread.status}`} />
+              <div className="flex items-center gap-2">
+                {thread.qualityStatus === 'endorsed' && <EndorsedBadge variant="compact" />}
+                <StatusBadge status={thread.status} aria-label={`Thread status: ${thread.status}`} />
+              </div>
             </div>
           </CardHeader>
 
@@ -85,6 +89,17 @@ export function ThreadCard({ thread, variant = "full", className }: ThreadCardPr
             {thread.hasAIAnswer && (
               <>
                 <AIBadge variant="compact" aria-label="Quokka answered this" />
+                <span className="text-muted-foreground opacity-50" aria-hidden="true">•</span>
+              </>
+            )}
+
+            {/* Upvotes */}
+            {thread.upvotes && thread.upvotes.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <ThumbsUp className="size-4" aria-hidden="true" />
+                  <span>{thread.upvotes.length} {thread.upvotes.length === 1 ? 'upvote' : 'upvotes'}</span>
+                </div>
                 <span className="text-muted-foreground opacity-50" aria-hidden="true">•</span>
               </>
             )}
