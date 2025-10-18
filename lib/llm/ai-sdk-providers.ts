@@ -8,6 +8,7 @@
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import type { LanguageModel } from 'ai';
 import { getEnvConfig, isLLMEnabled } from '@/lib/utils/env';
 import type { LLMProviderType } from '@/lib/models/types';
 
@@ -17,9 +18,7 @@ import type { LLMProviderType } from '@/lib/models/types';
  * Represents a configured LLM model from AI SDK.
  * Can be used with generateText, streamText, generateObject, etc.
  */
-export type AISDKModel = ReturnType<typeof createOpenAI> extends infer T
-  ? T extends (...args: any[]) => infer R ? R : never
-  : never;
+export type AISDKModel = LanguageModel;
 
 /**
  * Create AI SDK provider instance

@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       model,
       system: systemPrompt + courseContextInfo,
       messages: coreMessages,
-      tools: ragTools as any, // Type assertion for AI SDK compatibility
+      tools: ragTools,
       temperature: config.temperature,
       topP: config.topP,
     });

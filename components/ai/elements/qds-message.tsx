@@ -6,7 +6,6 @@
  * REDESIGNED with proper layout, styling, and visual hierarchy
  */
 
-import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { User, Sparkles } from "lucide-react";
