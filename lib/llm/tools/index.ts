@@ -49,10 +49,16 @@ export const kbSearchTool = tool({
   execute: async ({ query, courseId, maxResults }) => {
     // Import handler dynamically to avoid circular dependencies
     const { handleKBSearch } = await import("./handlers");
+
+    // Generate turnId: timestamp rounded to nearest second
+    // This groups all tool calls within the same second as part of the same turn
+    const turnId = Math.floor(Date.now() / 1000).toString();
+
     return handleKBSearch({
       query,
       courseId,
       maxResults,
+      turnId,
     });
   },
 });
@@ -77,7 +83,12 @@ export const kbFetchTool = tool({
   execute: async ({ materialId }) => {
     // Import handler dynamically to avoid circular dependencies
     const { handleKBFetch } = await import("./handlers");
-    return handleKBFetch({ materialId });
+
+    // Generate turnId: timestamp rounded to nearest second
+    // This groups all tool calls within the same second as part of the same turn
+    const turnId = Math.floor(Date.now() / 1000).toString();
+
+    return handleKBFetch({ materialId, turnId });
   },
 });
 

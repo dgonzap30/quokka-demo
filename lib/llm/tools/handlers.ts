@@ -50,13 +50,14 @@ function cleanupOldUsage() {
  * Uses hybrid retrieval (BM25 + embeddings) from CourseContextBuilder
  * to find relevant materials with semantic understanding.
  *
- * @param params - Search parameters (query, courseId, maxResults)
+ * @param params - Search parameters (query, courseId, maxResults, turnId)
  * @returns Array of materials with relevance scores
  */
 export async function handleKBSearch(params: {
   query: string;
   courseId?: string;
   maxResults: number;
+  turnId: string;
 }): Promise<{
   materials: Array<{
     id: string;
@@ -73,13 +74,12 @@ export async function handleKBSearch(params: {
     maxResults: number;
   };
 }> {
-  const { query, courseId, maxResults } = params;
+  const { query, courseId, maxResults, turnId } = params;
 
-  // Generate turn ID (timestamp-based for simplicity)
-  const turnId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // Cleanup old usage data periodically
   cleanupOldUsage();
 
-  // Check tool usage limits
+  // Check tool usage limits (using turnId from caller)
   const usage = getToolUsage(turnId);
   if (usage.searches >= TOOL_LIMITS.maxSearchesPerTurn) {
     throw new Error(
@@ -198,11 +198,12 @@ export async function handleKBSearch(params: {
  * Retrieves full content of a course material for detailed citation.
  * Used after kb.search to get complete material details.
  *
- * @param params - Fetch parameters (materialId)
+ * @param params - Fetch parameters (materialId, turnId)
  * @returns Full material with content and metadata
  */
 export async function handleKBFetch(params: {
   materialId: string;
+  turnId: string;
 }): Promise<{
   material: {
     id: string;
@@ -215,13 +216,12 @@ export async function handleKBFetch(params: {
     updatedAt: string;
   };
 }> {
-  const { materialId } = params;
+  const { materialId, turnId } = params;
 
-  // Generate turn ID
-  const turnId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // Cleanup old usage data periodically
   cleanupOldUsage();
 
-  // Check tool usage limits
+  // Check tool usage limits (using turnId from caller)
   const usage = getToolUsage(turnId);
   if (usage.fetches >= TOOL_LIMITS.maxFetchesPerTurn) {
     throw new Error(
