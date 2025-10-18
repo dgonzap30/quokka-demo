@@ -46,7 +46,10 @@ import type {
   ConversationToThreadResult,
   Endorsement,
   Upvote,
+  SimilarThread,
 } from "@/lib/models/types";
+
+import { findSimilarDocuments } from "@/lib/utils/similarity";
 
 import {
   createStatWithTrend,
@@ -2603,5 +2606,114 @@ export const api = {
     };
 
     updateThread(threadId, updatedThread);
+  },
+
+  /**
+   * Phase 3.2: Check for duplicate threads before posting
+   *
+   * Uses TF-IDF + cosine similarity to find existing threads that are
+   * similar to the proposed new thread.
+   *
+   * @param input - Thread creation input (title, content, courseId)
+   * @returns Array of similar threads with similarity scores
+   */
+  async checkThreadDuplicates(input: CreateThreadInput): Promise<SimilarThread[]> {
+    await delay(200 + Math.random() * 200); // 200-400ms
+    seedData();
+
+    // Get all threads in the same course
+    const courseThreads = getThreadsByCourse(input.courseId);
+
+    // Build query text from new thread
+    const queryText = `${input.title} ${input.content}`;
+
+    // Build candidate texts from existing threads
+    const candidates = courseThreads.map(thread => ({
+      id: thread.id,
+      text: `${thread.title} ${thread.content}`,
+    }));
+
+    // Find similar documents with 0.8 threshold (80% similarity)
+    const similarDocs = findSimilarDocuments(queryText, candidates, 0.8);
+
+    // Map to SimilarThread format
+    const similarThreads: SimilarThread[] = similarDocs.map(doc => {
+      const thread = getThreadById(doc.id);
+      if (!thread) {
+        throw new Error(`Thread not found: ${doc.id}`);
+      }
+
+      return {
+        thread,
+        similarity: doc.similarity,
+        similarityPercent: Math.round(doc.similarity * 100),
+      };
+    });
+
+    return similarThreads;
+  },
+
+  /**
+   * Phase 3.2: Merge duplicate threads
+   *
+   * Merges sourceThread into targetThread:
+   * - Marks source as merged (duplicatesOf = targetId)
+   * - Updates target with mergedFrom array
+   * - Preserves citations and content from both threads
+   * - Creates permanent redirect
+   *
+   * @param sourceId - Thread to merge (will be marked as duplicate)
+   * @param targetId - Thread to merge into (will remain active)
+   * @param userId - User performing the merge (must be instructor/TA)
+   * @returns Updated target thread with merge metadata
+   */
+  async mergeThreads(
+    sourceId: string,
+    targetId: string,
+    userId: string
+  ): Promise<Thread> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    // Validate threads exist
+    const sourceThread = getThreadById(sourceId);
+    const targetThread = getThreadById(targetId);
+
+    if (!sourceThread) {
+      throw new Error(`Source thread not found: ${sourceId}`);
+    }
+    if (!targetThread) {
+      throw new Error(`Target thread not found: ${targetId}`);
+    }
+    if (sourceId === targetId) {
+      throw new Error('Cannot merge a thread with itself');
+    }
+
+    // Validate user has instructor or TA role
+    const user = getUserById(userId);
+    if (!user) {
+      throw new Error(`User not found: ${userId}`);
+    }
+    if (user.role !== 'instructor' && user.role !== 'ta') {
+      throw new Error('Only instructors and TAs can merge threads');
+    }
+
+    // Mark source thread as duplicate
+    const updatedSource: Thread = {
+      ...sourceThread,
+      duplicatesOf: targetId,
+      updatedAt: new Date().toISOString(),
+    };
+    updateThread(sourceId, updatedSource);
+
+    // Update target thread with merge metadata
+    const updatedTarget: Thread = {
+      ...targetThread,
+      mergedFrom: [...(targetThread.mergedFrom || []), sourceId],
+      updatedAt: new Date().toISOString(),
+    };
+    updateThread(targetId, updatedTarget);
+
+    return updatedTarget;
   },
 };

@@ -592,6 +592,18 @@ export interface ThreadWithAIAnswer extends Thread {
 }
 
 /**
+ * Phase 3.2: Similar thread for duplicate detection
+ */
+export interface SimilarThread {
+  /** Thread that is similar to the new thread */
+  thread: Thread;
+  /** Similarity score (0-1), where 1 is identical */
+  similarity: number;
+  /** Similarity percentage for display (0-100) */
+  similarityPercent: number;
+}
+
+/**
  * Input for creating a new thread
  */
 export interface CreateThreadInput {
