@@ -47,6 +47,7 @@ import type {
   Endorsement,
   Upvote,
   SimilarThread,
+  InstructorMetrics,
 } from "@/lib/models/types";
 
 import { findSimilarDocuments } from "@/lib/utils/similarity";
@@ -2715,5 +2716,148 @@ export const api = {
     updateThread(targetId, updatedTarget);
 
     return updatedTarget;
+  },
+
+  /**
+   * Phase 3.4: Get instructor metrics for time saved and engagement
+   *
+   * Calculates:
+   * - Questions auto-answered (threads with AI answers)
+   * - Time saved (5 min per auto-answer)
+   * - Citation coverage (% of AI answers with citations)
+   * - Endorsed threads analytics
+   * - Top contributors and topics
+   *
+   * @param courseId - Course to get metrics for
+   * @param timeRange - Time range for metrics (default: 'week')
+   * @returns Comprehensive metrics for instructor dashboard
+   */
+  async getInstructorMetrics(
+    courseId: string,
+    timeRange: 'week' | 'month' | 'quarter' | 'all-time' = 'week'
+  ): Promise<InstructorMetrics> {
+    await delay(300 + Math.random() * 200); // 300-500ms
+    seedData();
+
+    // Get all threads and AI answers for the course
+    const allThreads = getThreadsByCourse(courseId);
+    const allAIAnswers = getAIAnswers();
+    const users = getUsers();
+
+    // Calculate time range boundaries
+    const now = new Date();
+    let startDate: Date;
+    switch (timeRange) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'quarter':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case 'all-time':
+      default:
+        startDate = new Date(0); // Beginning of time
+        break;
+    }
+
+    // Filter threads by time range
+    const threads = allThreads.filter(t =>
+      new Date(t.createdAt) >= startDate
+    );
+
+    // Core ROI metrics
+    const threadsWithAI = threads.filter(t => t.hasAIAnswer);
+    const questionsAutoAnswered = threadsWithAI.length;
+    const timeSavedMinutes = questionsAutoAnswered * 5; // 5 minutes per auto-answer
+
+    // Citation coverage
+    const aiAnswersInRange = threadsWithAI
+      .map(t => allAIAnswers.find(a => a.id === t.aiAnswerId))
+      .filter(a => a != null);
+    const aiAnswersWithCitations = aiAnswersInRange.filter(
+      a => a.citations && a.citations.length > 0
+    );
+    const citationCoverage = aiAnswersInRange.length > 0
+      ? Math.round((aiAnswersWithCitations.length / aiAnswersInRange.length) * 100)
+      : 0;
+
+    // Thread quality metrics
+    const endorsedThreads = threads.filter(t => t.qualityStatus === 'endorsed');
+    const endorsedThreadsCount = endorsedThreads.length;
+    const endorsedThreadsViews = endorsedThreads.reduce((sum, t) => sum + t.views, 0);
+    const averageViewsPerEndorsed = endorsedThreadsCount > 0
+      ? Math.round(endorsedThreadsViews / endorsedThreadsCount)
+      : 0;
+
+    // Engagement metrics
+    const totalThreads = threads.length;
+    // Calculate total replies from posts
+    const allPosts = getPosts();
+    const threadIds = new Set(threads.map(t => t.id));
+    const totalReplies = allPosts.filter(p => threadIds.has(p.threadId)).length;
+
+    // Active students (unique authors + repliers)
+    const activeStudentIds = new Set<string>();
+    threads.forEach(t => activeStudentIds.add(t.authorId));
+    const activeStudents = activeStudentIds.size;
+
+    // Top contributors
+    const contributorMap = new Map<string, { threadCount: number; replyCount: number }>();
+    threads.forEach(t => {
+      const current = contributorMap.get(t.authorId) || { threadCount: 0, replyCount: 0 };
+      contributorMap.set(t.authorId, {
+        threadCount: current.threadCount + 1,
+        replyCount: current.replyCount,
+      });
+    });
+
+    const topContributors = Array.from(contributorMap.entries())
+      .map(([userId, stats]) => {
+        const user = users.find(u => u.id === userId);
+        return {
+          userId,
+          name: user?.name || 'Unknown User',
+          threadCount: stats.threadCount,
+          replyCount: stats.replyCount,
+        };
+      })
+      .sort((a, b) => b.threadCount - a.threadCount)
+      .slice(0, 5);
+
+    // Top topics by tag frequency
+    const tagMap = new Map<string, number>();
+    threads.forEach(t => {
+      t.tags?.forEach(tag => {
+        tagMap.set(tag, (tagMap.get(tag) || 0) + 1);
+      });
+    });
+
+    const topTopics = Array.from(tagMap.entries())
+      .map(([tag, count]) => ({
+        tag,
+        count,
+        trend: 'stable' as const, // Simplified - would need historical data for real trends
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return {
+      courseId,
+      timeRange,
+      questionsAutoAnswered,
+      timeSavedMinutes,
+      citationCoverage,
+      endorsedThreadsCount,
+      endorsedThreadsViews,
+      averageViewsPerEndorsed,
+      totalThreads,
+      totalReplies,
+      activeStudents,
+      topContributors,
+      topTopics,
+    };
   },
 };

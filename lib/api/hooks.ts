@@ -1242,3 +1242,39 @@ export function useMergeThreads() {
     },
   });
 }
+
+// ============================================
+// Phase 3.4: Instructor Metrics Hooks
+// ============================================
+
+/**
+ * Get instructor metrics for time saved and engagement
+ *
+ * Fetches comprehensive metrics including:
+ * - Questions auto-answered (AI coverage)
+ * - Time saved (5 min per auto-answer)
+ * - Citation coverage percentage
+ * - Endorsed threads analytics
+ * - Top contributors and topics
+ *
+ * Usage:
+ * ```tsx
+ * const { data: metrics } = useInstructorMetrics('course-cs101', 'week');
+ *
+ * if (metrics) {
+ *   console.log(`Time saved: ${metrics.timeSavedMinutes} minutes`);
+ *   console.log(`Citation coverage: ${metrics.citationCoverage}%`);
+ * }
+ * ```
+ */
+export function useInstructorMetrics(
+  courseId: string,
+  timeRange: 'week' | 'month' | 'quarter' | 'all-time' = 'week'
+) {
+  return useQuery({
+    queryKey: ['instructorMetrics', courseId, timeRange],
+    queryFn: () => api.getInstructorMetrics(courseId, timeRange),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+}

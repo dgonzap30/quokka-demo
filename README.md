@@ -29,9 +29,17 @@ Deployed on Netlify with continuous deployment from the `main` branch.
 ### Explore the Demo
 
 - **Home (`/`)** - Browse discussion threads with filtering
-- **Thread Detail (`/threads/thread-1`)** - View Q&A with AI answer
-- **Ask Question (`/ask`)** - Get AI answer preview with similar questions
-- **Instructor Dashboard (`/instructor`)** - View metrics and moderation tools
+- **Thread Detail (`/threads/thread-1`)** - View Q&A with AI answer, endorsements, and upvotes
+- **Ask Question (`/ask`)** - Get AI answer preview with similar questions and duplicate detection
+- **Instructor Dashboard (`/instructor`)** - View ROI metrics, time saved analytics, moderation tools
+- **Quokka Chat (`/quokka`)** - Private AI conversations with course context and persistence
+
+**✨ Phase 3 Features (New):**
+- **Thread Endorsements** - Professors/TAs can endorse quality answers (green checkmark badge)
+- **Student Upvoting** - Community signal before endorsement (visible upvote counts)
+- **Duplicate Detection** - TF-IDF similarity prevents duplicate questions (80% threshold warning)
+- **ROI Metrics Dashboard** - Time saved calculation (5 min/question), citation coverage %, engagement analytics
+- **Enhanced AI Prompts** - Absolute dates ("Friday, Nov 7"), ambiguity handling, better citation sources
 
 ---
 
@@ -195,31 +203,37 @@ quokka-demo/
 ### Flow 1: Browse & View Threads
 1. Visit `/` to see thread list
 2. Filter by status (All, Open, Answered)
-3. Click a thread to view details
-4. See AI answer with citations
-5. Read community replies
+3. Notice **endorsed badge** (✓ green checkmark) on quality threads
+4. Click a thread to view details
+5. See AI answer with citations
+6. **Upvote thread** if helpful (Phase 3.1)
+7. Read community replies
 
 ### Flow 2: Ask a Question
 1. Visit `/ask` page
-2. Type question title
+2. Type question title and content
 3. See similar threads appear (debounced)
 4. Get AI answer preview (~800ms)
 5. View citations and confidence level
-6. Post to forum if needed
+6. **Check for duplicates** - Warning shows if 80%+ similar thread exists (Phase 3.2)
+7. Post to forum if not duplicate
 
 ### Flow 3: Instructor Dashboard
 1. Visit `/instructor` (logged in as Dr. Sarah Chen)
-2. View metrics cards (unanswered, response time)
-3. Check unanswered questions queue
-4. Review endorsed/flagged posts
-5. See active student stats
+2. **View ROI metrics** - Time saved, citation coverage, endorsed threads (Phase 3.4)
+3. See **top contributors** and **trending topics**
+4. Check unanswered questions queue
+5. Review endorsed/flagged posts
+6. Monitor active student stats
 
-### Flow 4: Moderate Content
+### Flow 4: Moderate Content (Enhanced - Phase 3.1)
 1. Open any thread as instructor
-2. Endorse helpful replies (Award icon)
-3. Flag inappropriate content (Flag icon)
-4. Mark replies as "Answer"
-5. Resolve threads
+2. **Endorse entire thread** (Award icon) - Sets thread to "endorsed" status
+3. Endorse helpful replies (existing feature)
+4. Flag inappropriate content (Flag icon)
+5. Mark replies as "Answer"
+6. Resolve threads
+7. **View upvote counts** to gauge community interest
 
 ---
 

@@ -18,6 +18,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **Instructor Dashboard** - Metrics, moderation queue, and analytics overview
 4. **Similar Questions** - Debounced search with similarity matching
 5. **Role-Based UI** - Different views for students, instructors, and TAs
+6. **Thread Endorsements** (Phase 3.1) - Prof/TA endorsements and student upvotes for quality signals
+7. **Duplicate Detection** (Phase 3.2) - TF-IDF similarity matching prevents duplicate questions (80% threshold)
+8. **ROI Metrics Dashboard** (Phase 3.4) - Time saved analytics, citation coverage, engagement metrics
+9. **Enhanced AI Prompts** (Phase 3.5) - Absolute dates, ambiguity handling, better citations
 
 ---
 
@@ -325,27 +329,37 @@ npm run seed
 | `resolveThread(id)` | `void` | 100ms |
 | `askQuestion(input)` | `AiAnswer` | 800ms |
 | `getSimilarThreads(query)` | `SimilarThread[]` | 200-500ms |
-| `getInstructorMetrics()` | `InstructorMetrics` | 200-500ms |
+| `getInstructorMetrics(courseId, timeRange)` | `InstructorMetrics` | 300-500ms |
 | `getUnansweredThreads()` | `Thread[]` | 200-500ms |
 | `getCurrentUser()` | `User` | 200-500ms |
+| `endorseThread(threadId, userId)` (Phase 3.1) | `void` | 100ms |
+| `upvoteThread(threadId, userId)` (Phase 3.1) | `void` | 100ms |
+| `removeUpvote(threadId, userId)` (Phase 3.1) | `void` | 100ms |
+| `checkThreadDuplicates(input)` (Phase 3.2) | `SimilarThread[]` | 200-500ms |
+| `mergeThreads(sourceId, targetId, userId)` (Phase 3.2) | `Thread` | 200-500ms |
 
 ### Hooks (lib/api/hooks.ts)
 
 All hook names and signatures MUST remain stable:
 
 ```typescript
-useThreads()              // Fetches all threads
-useThread(id)             // Fetches single thread
-useCreateThread()         // Mutation for new thread
-useCreatePost()           // Mutation for new post
-useEndorsePost()          // Mutation for endorsement
-useFlagPost()             // Mutation for flagging
-useResolveThread()        // Mutation for resolving
-useAskQuestion()          // Mutation for AI query
-useSimilarThreads(query)  // Debounced similar search
-useInstructorMetrics()    // Dashboard metrics
-useUnansweredThreads()    // Open threads
-useCurrentUser()          // Current user
+useThreads()                           // Fetches all threads
+useThread(id)                          // Fetches single thread
+useCreateThread()                      // Mutation for new thread
+useCreatePost()                        // Mutation for new post
+useEndorsePost()                       // Mutation for post endorsement
+useFlagPost()                          // Mutation for flagging
+useResolveThread()                     // Mutation for resolving
+useAskQuestion()                       // Mutation for AI query
+useSimilarThreads(query)               // Debounced similar search
+useInstructorMetrics(courseId, range)  // Dashboard metrics (updated Phase 3.4)
+useUnansweredThreads()                 // Open threads
+useCurrentUser()                       // Current user
+useEndorseThread()                     // Mutation for thread endorsement (Phase 3.1)
+useUpvoteThread()                      // Mutation for upvoting (Phase 3.1)
+useRemoveUpvote()                      // Mutation for removing upvote (Phase 3.1)
+useCheckDuplicates()                   // Mutation for duplicate check (Phase 3.2)
+useMergeThreads()                      // Mutation for merging threads (Phase 3.2)
 ```
 
 ---
@@ -747,6 +761,7 @@ Update `context.md` after each task:
 ```markdown
 ## Changelog
 
+- `2025-10-17` | [Phase 3] | Thread endorsements, duplicate detection, ROI metrics dashboard, enhanced AI prompts
 - `2025-10-04` | [Workflow] | Set up agentic development workflow with doccloud/
 - `2025-10-03` | [Design System] | Applied QDS v1.0
 - `2025-10-03` | [Documentation] | Created CLAUDE.md

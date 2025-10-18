@@ -272,6 +272,7 @@ import { QuickSearchBar } from "@/components/instructor/quick-search-bar";
 import { BulkActionsToolbar } from "@/components/instructor/bulk-actions-toolbar";
 import { InstructorEmptyState } from "@/components/instructor/instructor-empty-state";
 import { CourseSelector } from "@/components/instructor/course-selector";
+import { MetricsDashboard } from "@/components/instructor/metrics-dashboard";
 
 // Hooks
 import {
@@ -473,6 +474,17 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
             />
           </section>
         </div>
+
+        {/* ROI Metrics Dashboard - Phase 3.4 */}
+        <section aria-labelledby="roi-metrics-heading" className="space-y-6">
+          <h2 id="roi-metrics-heading" className="text-xl sm:text-2xl md:text-3xl font-bold glass-text">
+            ROI & Engagement Metrics
+          </h2>
+          <MetricsDashboard
+            courseId={courseId}
+            timeRange={timeRange}
+          />
+        </section>
 
         {/* Stats Overview */}
         <section aria-labelledby="instructor-stats-heading" className="space-y-6">

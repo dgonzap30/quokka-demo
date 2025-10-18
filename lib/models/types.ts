@@ -604,6 +604,55 @@ export interface SimilarThread {
 }
 
 /**
+ * Phase 3.4: Instructor metrics for time saved and engagement
+ */
+export interface InstructorMetrics {
+  /** Course ID for these metrics */
+  courseId: string;
+  /** Time range for metrics */
+  timeRange: 'week' | 'month' | 'quarter' | 'all-time';
+
+  // Core ROI metrics
+  /** Number of questions auto-answered by AI */
+  questionsAutoAnswered: number;
+  /** Estimated time saved in minutes (5 min per auto-answer) */
+  timeSavedMinutes: number;
+  /** Percentage of answers with citations (0-100) */
+  citationCoverage: number;
+
+  // Thread quality metrics
+  /** Number of endorsed threads */
+  endorsedThreadsCount: number;
+  /** Total views on endorsed threads */
+  endorsedThreadsViews: number;
+  /** Average views per endorsed thread */
+  averageViewsPerEndorsed: number;
+
+  // Engagement metrics
+  /** Total threads in time range */
+  totalThreads: number;
+  /** Total replies in time range */
+  totalReplies: number;
+  /** Number of active students (posted/replied) */
+  activeStudents: number;
+
+  // Breakdown data
+  /** Top contributors by thread count */
+  topContributors: Array<{
+    userId: string;
+    name: string;
+    threadCount: number;
+    replyCount: number;
+  }>;
+  /** Most discussed topics by tag */
+  topTopics: Array<{
+    tag: string;
+    count: number;
+    trend: 'up' | 'down' | 'stable';
+  }>;
+}
+
+/**
  * Input for creating a new thread
  */
 export interface CreateThreadInput {
