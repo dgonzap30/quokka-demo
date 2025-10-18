@@ -1162,3 +1162,83 @@ export function useRemoveUpvote() {
     },
   });
 }
+
+// ============================================
+// Phase 3.2: Duplicate Detection Hooks
+// ============================================
+
+/**
+ * Check for duplicate threads
+ *
+ * Uses TF-IDF + cosine similarity to find existing threads that are
+ * similar to the proposed new thread (≥80% similarity).
+ *
+ * This is a mutation (not a query) because:
+ * - It's triggered by user action (typing question)
+ * - We don't want automatic refetching
+ * - Results shouldn't be cached (input changes frequently)
+ *
+ * Usage:
+ * ```tsx
+ * const checkDuplicates = useCheckDuplicates();
+ *
+ * const handleCheck = () => {
+ *   checkDuplicates.mutate({
+ *     courseId: "course-1",
+ *     title: "How does binary search work?",
+ *     content: "I'm confused about the algorithm..."
+ *   });
+ * };
+ *
+ * // Access results
+ * if (checkDuplicates.data && checkDuplicates.data.length > 0) {
+ *   console.log(`Found ${checkDuplicates.data.length} similar threads`);
+ * }
+ * ```
+ */
+export function useCheckDuplicates() {
+  return useMutation({
+    mutationFn: (input: CreateThreadInput) => api.checkThreadDuplicates(input),
+  });
+}
+
+/**
+ * Merge duplicate threads
+ *
+ * Merges source thread into target thread (instructor/TA only).
+ * - Marks source as merged (duplicatesOf = targetId)
+ * - Updates target with mergedFrom array
+ *
+ * Invalidates:
+ * - Both thread detail queries
+ * - Course threads list
+ */
+export function useMergeThreads() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      sourceId,
+      targetId,
+      userId,
+    }: {
+      sourceId: string;
+      targetId: string;
+      userId: string;
+    }) => api.mergeThreads(sourceId, targetId, userId),
+    onSuccess: (_data, variables) => {
+      // Invalidate both threads
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.thread(variables.sourceId)
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.thread(variables.targetId)
+      });
+
+      // Invalidate course threads lists
+      queryClient.invalidateQueries({
+        queryKey: ["courseThreads"]
+      });
+    },
+  });
+}

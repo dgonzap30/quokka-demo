@@ -2,12 +2,14 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser, useCreateThread, useGenerateAIPreview } from "@/lib/api/hooks";
+import { useCurrentUser, useCreateThread, useGenerateAIPreview, useCheckDuplicates } from "@/lib/api/hooks";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AIAnswerCard } from "./ai-answer-card";
+import { DuplicateWarning } from "./duplicate-warning";
+import type { SimilarThread } from "@/lib/models/types";
 
 export interface AskQuestionModalProps {
   /** Course ID for the question */
@@ -37,20 +39,25 @@ export function AskQuestionModal({
   const { data: user } = useCurrentUser();
   const createThreadMutation = useCreateThread();
   const previewMutation = useGenerateAIPreview();
+  const checkDuplicates = useCheckDuplicates();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [similarThreads, setSimilarThreads] = useState<SimilarThread[]>([]);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
 
   // Reset form when modal closes
   const handleClose = () => {
-    if (!isSubmitting && !previewMutation.isPending) {
+    if (!isSubmitting && !previewMutation.isPending && !checkDuplicates.isPending) {
       setTitle("");
       setContent("");
       setTags("");
       setShowPreview(false);
+      setSimilarThreads([]);
+      setShowDuplicateWarning(false);
       onClose();
     }
   };
@@ -77,8 +84,8 @@ export function AskQuestionModal({
     );
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  // Phase 3.2: Actually post the thread (after duplicate check or user proceeds anyway)
+  const postThread = async () => {
     if (!title.trim() || !content.trim() || !user) return;
 
     setIsSubmitting(true);
@@ -101,6 +108,8 @@ export function AskQuestionModal({
       setContent("");
       setTags("");
       setShowPreview(false);
+      setSimilarThreads([]);
+      setShowDuplicateWarning(false);
       onClose();
 
       // Call success handler if provided
@@ -114,6 +123,42 @@ export function AskQuestionModal({
       console.error("Failed to create thread:", error);
       setIsSubmitting(false);
     }
+  };
+
+  // Phase 3.2: Check for duplicates before posting
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !content.trim() || !user) return;
+
+    // Check for duplicate threads
+    checkDuplicates.mutate(
+      {
+        courseId,
+        title: title.trim(),
+        content: content.trim(),
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0),
+      },
+      {
+        onSuccess: (duplicates) => {
+          if (duplicates.length > 0) {
+            // Found duplicates - show warning
+            setSimilarThreads(duplicates);
+            setShowDuplicateWarning(true);
+          } else {
+            // No duplicates - post directly
+            postThread();
+          }
+        },
+        onError: (error) => {
+          console.error("Failed to check duplicates:", error);
+          // On error, proceed with posting anyway
+          postThread();
+        },
+      }
+    );
   };
 
   const isFormValid = title.trim() && content.trim();
@@ -297,6 +342,18 @@ export function AskQuestionModal({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Phase 3.2: Duplicate Warning Dialog */}
+      <DuplicateWarning
+        isOpen={showDuplicateWarning}
+        similarThreads={similarThreads}
+        onClose={() => setShowDuplicateWarning(false)}
+        onProceed={() => {
+          setShowDuplicateWarning(false);
+          postThread();
+        }}
+        courseId={courseId}
+      />
     </>
   );
 }
