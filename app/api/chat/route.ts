@@ -10,9 +10,13 @@ import { getAISDKModel, getAISDKConfig } from '@/lib/llm/ai-sdk-providers';
 import { buildSystemPrompt } from '@/lib/llm/utils';
 import { api } from '@/lib/api/client';
 import { ragTools } from '@/lib/llm/tools';
+import { rateLimit } from '@/lib/utils/rate-limit';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
+
+// Rate limiter: 10 requests per minute per user
+const limiter = rateLimit({ requests: 10, window: '1m' });
 
 /**
  * POST /api/chat (Phase 2: RAG Tools Enabled)
@@ -54,6 +58,29 @@ export async function POST(req: Request) {
       return Response.json(
         { error: 'User ID is required' },
         { status: 400 }
+      );
+    }
+
+    // Check rate limit
+    const rateCheck = await limiter.check(userId);
+    if (!rateCheck.allowed) {
+      console.warn(`[Rate Limit] User ${userId} exceeded limit: ${rateCheck.count}/${rateCheck.limit} requests`);
+      return Response.json(
+        {
+          error: 'Rate limit exceeded',
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many requests. Please wait before trying again.',
+          retryAfter: rateCheck.retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateCheck.retryAfter!.toString(),
+            'X-RateLimit-Limit': rateCheck.limit!.toString(),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateCheck.retryAfter!.toString(),
+          },
+        }
       );
     }
 
