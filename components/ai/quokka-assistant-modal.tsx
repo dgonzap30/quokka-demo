@@ -42,6 +42,7 @@ import {
 } from "@/lib/api/hooks";
 import { usePersistedChat } from "@/lib/llm/hooks/usePersistedChat";
 import { QDSConversation, QDSPromptInput } from "@/components/ai/elements";
+import { RateLimitIndicator } from "@/components/ai/rate-limit-indicator";
 import type { CourseSummary } from "@/lib/models/types";
 
 export interface QuokkaAssistantModalProps {
@@ -533,6 +534,11 @@ export function QuokkaAssistantModal({
                   </DropdownMenu>
                 </div>
               )}
+
+              {/* Rate Limit Indicator */}
+              <div className="px-4 py-2">
+                <RateLimitIndicator compact showReset />
+              </div>
 
               {/* Prompt Input - Using QDSPromptInput Component */}
               <QDSPromptInput

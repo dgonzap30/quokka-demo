@@ -5,6 +5,7 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useState } from "react";
 import { getConversationMessages, addMessage } from "@/lib/store/localStore";
 import { trackMessageSent, trackResponseGenerated } from "@/lib/store/metrics";
+import { trackRequest, getRateLimitStatus } from "@/lib/store/rateLimit";
 import { toast } from "sonner";
 import type { AIMessage } from "@/lib/models/types";
 
@@ -99,6 +100,9 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
   // Local error state for UI feedback
   const [customError, setCustomError] = useState<Error | undefined>();
 
+  // Rate limit state
+  const [isRateLimited, setIsRateLimited] = useState(false);
+
   // Load initial messages from localStorage
   const initialMessages = useMemo<UIMessage[]>(() => {
     if (!conversationId) return [];
@@ -181,15 +185,39 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
     }
   }, [chat.messages, conversationId, onMessageAdded]);
 
+  // Wrap sendMessage with rate limit check
+  const sendMessageWithRateLimit: typeof chat.sendMessage = async (input) => {
+    // Check rate limit before sending
+    const allowed = trackRequest();
+
+    if (!allowed) {
+      setIsRateLimited(true);
+      const status = getRateLimitStatus();
+
+      toast.error('Rate limit exceeded', {
+        description: `You've reached the hourly request limit. Please wait and try again.`,
+      });
+
+      // Automatically clear rate limit flag after showing toast
+      setTimeout(() => setIsRateLimited(false), 3000);
+
+      return;
+    }
+
+    setIsRateLimited(false);
+    return chat.sendMessage(input);
+  };
+
   return {
     ...chat,
     // Re-export commonly used properties for clarity
     messages: chat.messages,
-    sendMessage: chat.sendMessage,
+    sendMessage: sendMessageWithRateLimit,
     regenerate: chat.regenerate,
     stop: chat.stop,
     status: chat.status,
     error: chat.error || customError, // Expose error state
     clearError: () => setCustomError(undefined), // Allow manual error dismissal
+    isRateLimited, // Expose rate limit state
   };
 }
