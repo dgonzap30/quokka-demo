@@ -65,10 +65,9 @@ import {
 import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
 import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
 
-// LLM imports
-import { getLLMProvider, isLLMProviderAvailable } from "@/lib/llm";
+// Legacy LLM imports removed - production uses AI SDK via /api/chat and /api/answer
+// These mock functions now use template fallback only
 import { buildCourseContext } from "@/lib/context";
-import { buildSystemPrompt, buildUserPromptWithContext, extractKeywords as extractLLMKeywords } from "@/lib/llm/utils";
 import type { MaterialReference } from "@/lib/models/types";
 
 import {
@@ -528,101 +527,10 @@ async function generateAIResponseWithMaterials(
   confidence: { level: ConfidenceLevel; score: number };
   citations: Citation[];
 }> {
-  const questionText = `${title} ${content} ${tags.join(' ')}`;
-
-  // Check if LLM is enabled and available
-  if (!isLLMProviderAvailable()) {
-    console.log('[AI] LLM not available, using template fallback');
-    return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
-  }
-
-  try {
-    // Get course and materials
-    const course = await api.getCourse(courseId);
-    if (!course) {
-      throw new Error(`Course not found: ${courseId}`);
-    }
-
-    const materials = await api.getCourseMaterials(courseId);
-
-    // Build course context with ranked materials
-    const context = await buildCourseContext(course, materials, questionText, {
-      maxMaterials: 5,
-      minRelevance: 30,
-      maxTokens: 2000,
-    });
-
-    // Prepare material references for prompt
-    const materialRefs: MaterialReference[] = context.materials.map(m => ({
-      materialId: m.id,
-      title: m.title,
-      type: m.type,
-      excerpt: m.content.substring(0, 300),
-      relevanceScore: m.relevanceScore,
-    }));
-
-    // Build prompts
-    const systemPrompt = buildSystemPrompt();
-    const userPrompt = buildUserPromptWithContext(
-      questionText,
-      materialRefs,
-      course.code,
-      course.name
-    );
-
-    // Get LLM provider and generate response
-    const llmProvider = getLLMProvider();
-    const llmResponse = await llmProvider.generate({
-      systemPrompt,
-      userPrompt,
-      maxTokens: 1000,
-      temperature: 0.7,
-    });
-
-    if (!llmResponse.success) {
-      console.warn('[AI] LLM generation failed:', llmResponse.error);
-      return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
-    }
-
-    // Extract citations from ranked materials
-    const keywords = extractKeywords(questionText);
-    const citations: Citation[] = context.materials
-      .slice(0, 3) // Top 3 materials
-      .map(material => ({
-        id: generateId('cite'),
-        sourceType: mapMaterialTypeToCitationType(material.type),
-        source: material.title,
-        excerpt: generateExcerpt(material.content, keywords),
-        relevance: material.relevanceScore,
-        link: undefined,
-      }));
-
-    // Calculate confidence from material relevance
-    const avgRelevance = context.materials.length > 0
-      ? context.materials.reduce((sum, m) => sum + m.relevanceScore, 0) / context.materials.length
-      : 50;
-
-    const confidenceScore = Math.min(95, Math.max(40, Math.round(avgRelevance)));
-    const confidenceLevel = getConfidenceLevel(confidenceScore);
-
-    console.log('[AI] LLM response generated successfully', {
-      provider: llmResponse.provider,
-      model: llmResponse.model,
-      tokens: llmResponse.usage.totalTokens,
-      cost: llmResponse.usage.estimatedCost,
-      materialsUsed: context.materials.length,
-    });
-
-    return {
-      content: llmResponse.content,
-      confidence: { level: confidenceLevel, score: confidenceScore },
-      citations,
-    };
-  } catch (error) {
-    console.error('[AI] LLM generation error:', error);
-    console.log('[AI] Falling back to template system');
-    return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
-  }
+  // Legacy provider system removed - always use template fallback
+  // Production uses /api/answer with AI SDK
+  console.log('[AI] Using template fallback (mock API - production uses /api/answer)');
+  return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
 }
 
 /**

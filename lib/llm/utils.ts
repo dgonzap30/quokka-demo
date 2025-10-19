@@ -149,95 +149,9 @@ export function buildConversationPrompt(
   return prompt;
 }
 
-/**
- * Extract keywords from text for material matching
- *
- * Removes common words and returns meaningful keywords.
- */
-export function extractKeywords(text: string): string[] {
-  const commonWords = new Set([
-    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-    "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
-    "been", "being", "have", "has", "had", "do", "does", "did", "will",
-    "would", "should", "could", "may", "might", "can", "this", "that",
-    "these", "those", "what", "which", "who", "when", "where", "why", "how",
-  ]);
-
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s]/g, " ")
-    .split(/\s+/)
-    .filter(word => word.length > 2 && !commonWords.has(word))
-    .filter((word, index, array) => array.indexOf(word) === index); // Remove duplicates
-}
-
-/**
- * Calculate material relevance score
- *
- * Scores a material based on keyword matches with the query.
- * Returns a score from 0-100.
- */
-export function calculateRelevanceScore(
-  queryKeywords: string[],
-  materialKeywords: string[],
-  materialContent: string
-): number {
-  if (queryKeywords.length === 0) return 0;
-
-  // Count keyword matches in material keywords
-  const keywordMatches = queryKeywords.filter(q =>
-    materialKeywords.some(m => m.includes(q) || q.includes(m))
-  ).length;
-
-  // Count keyword matches in material content
-  const contentLower = materialContent.toLowerCase();
-  const contentMatches = queryKeywords.filter(q =>
-    contentLower.includes(q)
-  ).length;
-
-  // Keyword matches are weighted higher than content matches
-  const keywordScore = (keywordMatches / queryKeywords.length) * 60;
-  const contentScore = (contentMatches / queryKeywords.length) * 40;
-
-  return Math.min(100, Math.round(keywordScore + contentScore));
-}
-
-/**
- * Rank course materials by relevance
- *
- * Sorts materials by relevance score and returns top N.
- */
-export function rankMaterials(
-  materials: CourseMaterial[],
-  query: string,
-  limit: number = 10
-): Array<CourseMaterial & { relevanceScore: number; matchedKeywords: string[] }> {
-  const queryKeywords = extractKeywords(query);
-
-  const scored = materials.map(material => {
-    const relevanceScore = calculateRelevanceScore(
-      queryKeywords,
-      material.keywords,
-      material.content
-    );
-
-    const matchedKeywords = queryKeywords.filter(q =>
-      material.keywords.some(m => m.includes(q) || q.includes(m)) ||
-      material.content.toLowerCase().includes(q)
-    );
-
-    return {
-      ...material,
-      relevanceScore,
-      matchedKeywords,
-    };
-  });
-
-  return scored
-    .filter(m => m.relevanceScore > 0)
-    .sort((a, b) => b.relevanceScore - a.relevanceScore)
-    .slice(0, limit);
-}
+// Legacy keyword extraction and relevance scoring functions removed.
+// These have been superseded by hybrid retrieval (BM25 + embeddings)
+// in lib/retrieval/ which provides superior semantic understanding.
 
 /**
  * Format cost for display

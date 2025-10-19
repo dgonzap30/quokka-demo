@@ -10,7 +10,27 @@ import type {
   ContextBuildOptions,
 } from "@/lib/models/types";
 import { CourseContextBuilder } from "./CourseContextBuilder";
-import { extractKeywords } from "@/lib/llm/utils";
+
+/**
+ * Simple keyword extraction for course detection
+ * Removes common words and returns meaningful keywords
+ */
+function extractKeywords(text: string): string[] {
+  const commonWords = new Set([
+    "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
+    "been", "being", "have", "has", "had", "do", "does", "did", "will",
+    "would", "should", "could", "may", "might", "can", "this", "that",
+    "these", "those", "what", "which", "who", "when", "where", "why", "how",
+  ]);
+
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !commonWords.has(word))
+    .filter((word, index, array) => array.indexOf(word) === index); // Remove duplicates
+}
 
 /**
  * Multi-Course Context Builder
