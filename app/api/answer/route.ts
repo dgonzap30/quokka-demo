@@ -8,11 +8,10 @@
 import { generateObject } from 'ai';
 import { getAISDKModel, getAISDKConfig } from '@/lib/llm/ai-sdk-providers';
 import { AIAnswerSchema } from '@/lib/llm/schemas/citation';
-// Note: buildCourseContext removed in Phase 3 cleanup
-// This route needs refactoring to use createHybridRetriever or kb_search tool
 import { buildSystemPrompt } from '@/lib/llm/utils';
 import { api } from '@/lib/api/client';
-import type { AIAnswer } from '@/lib/models/types';
+import { createHybridRetriever } from '@/lib/retrieval';
+import type { AIAnswer, CourseMaterial } from '@/lib/models/types';
 
 // Allow up to 30 seconds for answer generation
 export const maxDuration = 30;
@@ -83,33 +82,44 @@ export async function POST(req: Request) {
       );
     }
 
-    // TODO: This route needs refactoring after Phase 3 cleanup
-    // buildCourseContext was removed. Options:
-    // 1. Use createHybridRetriever directly (like kb_search tool does)
-    // 2. Deprecate this route and use /api/chat with kb_search tool instead
-    //
-    // For now, return a placeholder error to avoid breaking the build
-    return Response.json(
-      {
-        error: 'This endpoint is temporarily unavailable',
-        code: 'ENDPOINT_DEPRECATED',
-        message: 'Please use /api/chat with conversation-based Q&A instead',
-      },
-      { status: 501 } // Not Implemented
-    );
+    if (!materials || materials.length === 0) {
+      return Response.json(
+        { error: 'No course materials available' },
+        { status: 404 }
+      );
+    }
 
-    /* COMMENTED OUT - needs refactoring
-    // Build course context
-    const context = await buildCourseContext(
-      course,
-      materials || [],
-      question,
-      {
-        maxMaterials: 5,
-        minRelevance: 30,
-        maxTokens: 2000,
-      }
-    );
+    console.log(`[AI Answer] Generating answer for course ${course.code}, ${materials.length} materials available`);
+
+    // Use hybrid retrieval system (same as kb_search tool)
+    const { retriever } = await createHybridRetriever(materials as CourseMaterial[], {
+      useRRF: true,
+      rrfK: 60,
+      useMMR: true,
+      mmrLambda: 0.7,
+    });
+
+    // Retrieve top 5 relevant materials
+    const results = await retriever.retrieve(question, 5);
+
+    console.log(`[AI Answer] Found ${results.length} relevant materials`);
+
+    // Format materials for LLM context
+    let contextText = '';
+    if (results.length > 0) {
+      contextText = '**Relevant Course Materials:**\n\n';
+      results.forEach((result, index) => {
+        const material = result.material;
+        contextText += `${index + 1}. **${material.title}** (${material.type})\n`;
+        // Include excerpt or full content if short
+        const excerpt = material.content.length > 300
+          ? material.content.substring(0, 300) + '...'
+          : material.content;
+        contextText += `   ${excerpt}\n`;
+        contextText += `   *Relevance: ${Math.round(result.score * 100)}%*\n\n`;
+      });
+      contextText += '---\n\n';
+    }
 
     // Build system prompt
     const systemPrompt = buildSystemPrompt();
@@ -118,9 +128,7 @@ export async function POST(req: Request) {
     const answerPrompt = `
 [Course Context: ${course.code} - ${course.name}]
 
-${context.contextText}
-
----
+${contextText}
 
 **Student Question:**
 ${question}
@@ -128,7 +136,7 @@ ${question}
 **Instructions:**
 - Provide a clear, comprehensive answer to the student's question
 - Use the provided course materials to support your answer
-- Include citations to specific course materials you reference
+- Include citations to specific course materials you reference (use [1], [2], etc.)
 - Assess your confidence in the answer accuracy
 - Format your answer in markdown for readability
 - Suggest 2-3 follow-up questions the student might find helpful
@@ -138,6 +146,8 @@ ${question}
     // Get AI SDK configuration
     const config = getAISDKConfig();
 
+    console.log('[AI Answer] Generating structured answer with AI SDK...');
+
     // Generate structured answer using generateObject
     const result = await generateObject({
       model,
@@ -146,6 +156,8 @@ ${question}
       prompt: answerPrompt,
       temperature: config.temperature,
     });
+
+    console.log(`[AI Answer] Generated answer with ${result.object.citations.length} citations`);
 
     // Transform AI SDK output to our AIAnswer format
     const aiAnswer: AIAnswer = {
@@ -176,13 +188,11 @@ ${question}
       success: true,
       answer: aiAnswer,
       metadata: {
-        estimatedTokens: context.estimatedTokens,
-        materialsUsed: context.materials.length,
+        materialsUsed: results.length,
         courseId: course.id,
         courseCode: course.code,
       },
     });
-    */
   } catch (error) {
     console.error('[AI Answer] Error:', error);
 
