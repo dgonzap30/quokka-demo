@@ -585,6 +585,107 @@ export function deleteConversation(conversationId: string): void {
   localStorage.setItem(KEYS.conversationMessages, JSON.stringify(filteredMessages));
 }
 
+// ============================================
+// Storage Quota Management
+// ============================================
+
+/**
+ * Maximum messages to keep per conversation (sliding window)
+ * Prevents localStorage quota exceeded errors
+ *
+ * Rationale:
+ * - Average message size: ~1KB (including citations)
+ * - 100 messages = ~100KB per conversation
+ * - Allows ~50 active conversations before hitting 5MB quota
+ * - Preserves recent context while preventing unbounded growth
+ */
+const MAX_MESSAGES_PER_CONVERSATION = 100;
+
+/**
+ * Calculate approximate localStorage usage in KB
+ */
+export function getStorageUsage(): { totalKB: number; messagesKB: number; percentage: number } {
+  if (typeof window === "undefined") return { totalKB: 0, messagesKB: 0, percentage: 0 };
+
+  let totalSize = 0;
+  let messagesSize = 0;
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key) continue;
+
+    const value = localStorage.getItem(key) || '';
+    const size = new Blob([value]).size;
+    totalSize += size;
+
+    if (key === KEYS.conversationMessages) {
+      messagesSize = size;
+    }
+  }
+
+  // Most browsers limit localStorage to 5-10MB
+  const quotaKB = 5 * 1024; // Conservative 5MB
+  return {
+    totalKB: Math.round(totalSize / 1024),
+    messagesKB: Math.round(messagesSize / 1024),
+    percentage: Math.round((totalSize / (quotaKB * 1024)) * 100),
+  };
+}
+
+/**
+ * Prune old messages from a conversation to enforce quota
+ * Keeps most recent MAX_MESSAGES_PER_CONVERSATION messages
+ */
+function pruneConversationMessages(conversationId: string, allMessages: AIMessage[]): AIMessage[] {
+  const conversationMessages = allMessages
+    .filter((m) => m.conversationId === conversationId)
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+  if (conversationMessages.length <= MAX_MESSAGES_PER_CONVERSATION) {
+    return allMessages; // No pruning needed
+  }
+
+  // Keep only the most recent MAX_MESSAGES_PER_CONVERSATION messages
+  const toKeep = conversationMessages.slice(-MAX_MESSAGES_PER_CONVERSATION);
+  const toKeepIds = new Set(toKeep.map((m) => m.id));
+
+  // Return all messages except the pruned ones
+  return allMessages.filter((m) =>
+    m.conversationId !== conversationId || toKeepIds.has(m.id)
+  );
+}
+
+/**
+ * Manually purge old messages across all conversations
+ * Call this when storage usage is high
+ *
+ * @returns Number of messages deleted
+ */
+export function purgeOldMessages(): number {
+  if (typeof window === "undefined") return 0;
+
+  const allMessages = getAllConversationMessages();
+  const beforeCount = allMessages.length;
+
+  // Get all unique conversation IDs
+  const conversationIds = Array.from(new Set(allMessages.map((m) => m.conversationId)));
+
+  // Prune each conversation
+  let prunedMessages = allMessages;
+  for (const conversationId of conversationIds) {
+    prunedMessages = pruneConversationMessages(conversationId, prunedMessages);
+  }
+
+  // Save pruned messages
+  localStorage.setItem(KEYS.conversationMessages, JSON.stringify(prunedMessages));
+
+  const afterCount = prunedMessages.length;
+  const deletedCount = beforeCount - afterCount;
+
+  console.log(`[Storage] Purged ${deletedCount} old messages (${beforeCount} → ${afterCount})`);
+  return deletedCount;
+}
+
 /**
  * Get all conversation messages from localStorage
  */
@@ -616,22 +717,29 @@ export function getConversationMessages(conversationId: string): AIMessage[] {
 }
 
 /**
- * Add message to conversation
+ * Add message to conversation with automatic quota management
+ *
+ * Enforces MAX_MESSAGES_PER_CONVERSATION limit by pruning old messages
+ * when the conversation exceeds the quota.
  */
 export function addMessage(message: AIMessage): void {
   if (typeof window === "undefined") return;
 
-  const messages = getAllConversationMessages();
+  let messages = getAllConversationMessages();
   messages.push(message);
+
+  // Enforce quota for this conversation
+  messages = pruneConversationMessages(message.conversationId, messages);
+
   localStorage.setItem(KEYS.conversationMessages, JSON.stringify(messages));
 
   // Update conversation's updatedAt and messageCount
   const conversation = getConversationById(message.conversationId);
   if (conversation) {
-    const currentCount = conversation.messageCount || 0;
+    const conversationMessages = messages.filter((m) => m.conversationId === message.conversationId);
     updateConversation(message.conversationId, {
       updatedAt: message.timestamp,
-      messageCount: currentCount + 1,
+      messageCount: conversationMessages.length, // Accurate count after pruning
     });
   }
 }

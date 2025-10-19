@@ -9,40 +9,16 @@
 import { createHybridRetriever } from "@/lib/retrieval";
 import type { CourseMaterial, Course } from "@/lib/models/types";
 import { TOOL_LIMITS } from "./index";
+import {
+  getToolUsage,
+  incrementSearches,
+  incrementFetches,
+  cleanupOldUsage,
+} from "./usage-tracker";
 
 // Import mock data directly for server-side access
 import coursesData from "@/mocks/courses.json";
 import courseMaterialsData from "@/mocks/course-materials.json";
-
-/**
- * Track tool usage per turn (server-side state)
- * In production, this should use request context or session storage
- */
-const toolUsageStore = new Map<string, { searches: number; fetches: number }>();
-
-/**
- * Get or initialize tool usage for a turn
- * Uses a simple timestamp-based turn ID
- */
-function getToolUsage(turnId: string) {
-  if (!toolUsageStore.has(turnId)) {
-    toolUsageStore.set(turnId, { searches: 0, fetches: 0 });
-  }
-  return toolUsageStore.get(turnId)!;
-}
-
-/**
- * Clean up old turn usage data (keep last hour)
- */
-function cleanupOldUsage() {
-  const oneHourAgo = Date.now() - 60 * 60 * 1000;
-  for (const [turnId] of toolUsageStore) {
-    const timestamp = parseInt(turnId.split("-")[0]);
-    if (timestamp < oneHourAgo) {
-      toolUsageStore.delete(turnId);
-    }
-  }
-}
 
 /**
  * kb.search handler - Search course materials
@@ -87,8 +63,8 @@ export async function handleKBSearch(params: {
     );
   }
 
-  // Increment search count
-  usage.searches++;
+  // Increment search count (persisted to localStorage)
+  incrementSearches(turnId);
 
   console.log(`[kb.search] Query: "${query}", courseId: ${courseId || "all"}, maxResults: ${maxResults}`);
 
@@ -236,8 +212,8 @@ export async function handleKBFetch(params: {
     );
   }
 
-  // Increment fetch count
-  usage.fetches++;
+  // Increment fetch count (persisted to localStorage)
+  incrementFetches(turnId);
 
   console.log(`[kb.fetch] Fetching material: ${materialId}`);
 
