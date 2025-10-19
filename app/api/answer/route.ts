@@ -11,6 +11,7 @@ import { AIAnswerSchema } from '@/lib/llm/schemas/citation';
 import { buildSystemPrompt } from '@/lib/llm/utils';
 import { api } from '@/lib/api/client';
 import { createHybridRetriever } from '@/lib/retrieval';
+import { commonErrors } from '@/lib/api/errors';
 import type { AIAnswer, CourseMaterial } from '@/lib/models/types';
 
 // Allow up to 30 seconds for answer generation
@@ -36,24 +37,15 @@ export async function POST(req: Request) {
 
     // Validation
     if (!question || typeof question !== 'string') {
-      return Response.json(
-        { error: 'Question is required' },
-        { status: 400 }
-      );
+      return commonErrors.validationError('Question');
     }
 
     if (!courseId) {
-      return Response.json(
-        { error: 'Course ID is required' },
-        { status: 400 }
-      );
+      return commonErrors.validationError('Course ID');
     }
 
     if (!userId) {
-      return Response.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+      return commonErrors.validationError('User ID');
     }
 
     // Get AI SDK model
@@ -61,14 +53,7 @@ export async function POST(req: Request) {
 
     // If model is not available, return error (frontend will fall back to template)
     if (!model) {
-      return Response.json(
-        {
-          error: 'LLM provider not available',
-          code: 'LLM_UNAVAILABLE',
-          message: 'AI service is not configured. Please set up API keys in .env.local',
-        },
-        { status: 503 }
-      );
+      return commonErrors.llmUnavailable();
     }
 
     // Load course and materials
@@ -76,17 +61,11 @@ export async function POST(req: Request) {
     const materials = await api.getCourseMaterials(courseId);
 
     if (!course) {
-      return Response.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      );
+      return commonErrors.notFound('Course');
     }
 
     if (!materials || materials.length === 0) {
-      return Response.json(
-        { error: 'No course materials available' },
-        { status: 404 }
-      );
+      return commonErrors.notFound('Course materials');
     }
 
     console.log(`[AI Answer] Generating answer for course ${course.code}, ${materials.length} materials available`);
@@ -197,14 +176,6 @@ ${question}
     console.error('[AI Answer] Error:', error);
 
     // Return structured error
-    return Response.json(
-      {
-        success: false,
-        error: 'Failed to generate AI answer',
-        code: 'GENERATION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-      },
-      { status: 500 }
-    );
+    return commonErrors.internalError(error);
   }
 }

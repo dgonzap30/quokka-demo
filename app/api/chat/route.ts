@@ -11,6 +11,7 @@ import { buildSystemPrompt } from '@/lib/llm/utils';
 import { api } from '@/lib/api/client';
 import { ragTools } from '@/lib/llm/tools';
 import { rateLimit } from '@/lib/utils/rate-limit';
+import { apiError, commonErrors } from '@/lib/api/errors';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -48,40 +49,24 @@ export async function POST(req: Request) {
 
     // Validation
     if (!messages || !Array.isArray(messages)) {
-      return Response.json(
-        { error: 'Messages array is required' },
-        { status: 400 }
-      );
+      return commonErrors.validationError('Messages array');
     }
 
     if (!userId) {
-      return Response.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+      return commonErrors.validationError('User ID');
     }
 
     // Check rate limit
     const rateCheck = await limiter.check(userId);
     if (!rateCheck.allowed) {
       console.warn(`[Rate Limit] User ${userId} exceeded limit: ${rateCheck.count}/${rateCheck.limit} requests`);
-      return Response.json(
-        {
-          error: 'Rate limit exceeded',
-          code: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many requests. Please wait before trying again.',
-          retryAfter: rateCheck.retryAfter,
-        },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': rateCheck.retryAfter!.toString(),
-            'X-RateLimit-Limit': rateCheck.limit!.toString(),
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': rateCheck.retryAfter!.toString(),
-          },
-        }
-      );
+      const response = commonErrors.rateLimitExceeded(rateCheck.retryAfter!);
+      // Add rate limit headers
+      response.headers.set('Retry-After', rateCheck.retryAfter!.toString());
+      response.headers.set('X-RateLimit-Limit', rateCheck.limit!.toString());
+      response.headers.set('X-RateLimit-Remaining', '0');
+      response.headers.set('X-RateLimit-Reset', rateCheck.retryAfter!.toString());
+      return response;
     }
 
     // Get AI SDK model
@@ -89,14 +74,7 @@ export async function POST(req: Request) {
 
     // If model is not available, return error (frontend will fall back to template)
     if (!model) {
-      return Response.json(
-        {
-          error: 'LLM provider not available',
-          code: 'LLM_UNAVAILABLE',
-          message: 'AI service is not configured. Please set up API keys in .env.local',
-        },
-        { status: 503 }
-      );
+      return commonErrors.llmUnavailable();
     }
 
     // Build system prompt with tool instructions
@@ -137,13 +115,6 @@ export async function POST(req: Request) {
     console.error('[AI Chat] Error:', error);
 
     // Return structured error
-    return Response.json(
-      {
-        error: 'Internal server error',
-        code: 'INTERNAL_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-      },
-      { status: 500 }
-    );
+    return commonErrors.internalError(error);
   }
 }
