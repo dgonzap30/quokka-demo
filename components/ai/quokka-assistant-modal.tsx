@@ -138,8 +138,8 @@ function QuokkaAssistantModalContent({
   // Check if streaming is in progress
   const isStreaming = chat.status === "submitted" || chat.status === "streaming";
 
-  // Check if chat is ready (has conversation ID)
-  const isChatReady = !!activeConversationId;
+  // Check if chat is ready (has conversation ID and not currently creating)
+  const isChatReady = !!activeConversationId && !createConversation.isPending;
 
   // Auto-load or create conversation when modal opens
   useEffect(() => {
