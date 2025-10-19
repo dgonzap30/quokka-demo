@@ -383,7 +383,7 @@ function QuokkaAssistantModalContent({
         <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-7xl h-[95vh] overflow-hidden glass-panel-strong p-0">
           <div className="flex flex-col h-full">
             {/* Header */}
-            <DialogHeader className="p-4 border-b border-[var(--border-glass)] space-y-3">
+            <DialogHeader className="flex-shrink-0 p-4 border-b border-[var(--border-glass)] space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                   <Sparkles className="h-5 w-5 text-white" />
@@ -423,68 +423,40 @@ function QuokkaAssistantModalContent({
               )}
             </DialogHeader>
 
-            {/* Error Alert */}
-            {chat.error && (
-              <div className="px-4 pt-2">
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription className="flex items-center justify-between">
-                    <span className="flex-1 pr-4">
-                      {chat.error.message || 'Failed to send message. Please try again.'}
-                    </span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => chat.clearError?.()}
-                      >
-                        Dismiss
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => {
-                          chat.clearError?.();
-                          chat.regenerate();
-                        }}
-                      >
-                        Retry
-                      </Button>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-
             {/* Messages - Using QDSConversation Component */}
-            <div className="flex-1 overflow-hidden">
-              {!isChatReady ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center space-y-2">
-                    <div className="animate-pulse text-muted-foreground">
-                      <Sparkles className="h-8 w-8 mx-auto mb-2" />
-                      <p className="text-sm">Initializing conversation...</p>
-                    </div>
+            {!isChatReady ? (
+              <div className="flex-1 min-h-0 flex items-center justify-center">
+                <div className="text-center space-y-2">
+                  <div className="animate-pulse text-muted-foreground">
+                    <Sparkles className="h-8 w-8 mx-auto mb-2" />
+                    <p className="text-sm">Initializing conversation...</p>
                   </div>
                 </div>
-              ) : (
-                <div key={activeConversationId || 'no-conversation'}>
-                  <QDSConversation
-                    messages={messages}
-                    isStreaming={isStreaming}
-                    onCopy={handleCopy}
-                    onRetry={handleRetry}
-                    canRetry={messages.length > 0 && messages[messages.length - 1].role === "assistant"}
-                    pageContext={pageContext}
-                    courseCode={currentCourseCode}
-                  />
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <QDSConversation
+                key={activeConversationId || 'no-conversation'}
+                className="flex-1 min-h-0"
+                messages={messages}
+                isStreaming={isStreaming}
+                onCopy={handleCopy}
+                onRetry={handleRetry}
+                canRetry={messages.length > 0 && messages[messages.length - 1].role === "assistant"}
+                pageContext={pageContext}
+                courseCode={currentCourseCode}
+                error={chat.error ? {
+                  message: chat.error.message || 'Failed to send message. Please try again.',
+                  onDismiss: () => chat.clearError?.(),
+                  onRetry: () => {
+                    chat.clearError?.();
+                    chat.regenerate();
+                  }
+                } : undefined}
+              />
+            )}
 
             {/* Input */}
-            <div className="border-t border-[var(--border-glass)] p-4">
+            <div className="flex-shrink-0 border-t border-[var(--border-glass)] p-4">
               {/* Quick prompts (only show when no messages) */}
               {messages.length === 0 && (
                 <div className="mb-3">

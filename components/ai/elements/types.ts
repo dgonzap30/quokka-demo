@@ -60,6 +60,13 @@ export interface QDSConversationProps {
   /** Current course code for prompts */
   courseCode?: string;
 
+  /** Error state with dismiss and retry handlers */
+  error?: {
+    message: string;
+    onDismiss: () => void;
+    onRetry: () => void;
+  };
+
   /** Custom className */
   className?: string;
 
