@@ -68,7 +68,8 @@ export interface QuokkaAssistantModalProps {
   availableCourses?: CourseSummary[];
 }
 
-export function QuokkaAssistantModal({
+// Inner component that uses the hook - will remount when userId changes
+function QuokkaAssistantModalContent({
   isOpen,
   onClose,
   pageContext,
@@ -76,9 +77,9 @@ export function QuokkaAssistantModal({
   currentCourseName,
   currentCourseCode,
   availableCourses,
-}: QuokkaAssistantModalProps) {
+  user,
+}: QuokkaAssistantModalProps & { user: any }) {
   const router = useRouter();
-  const { data: user } = useCurrentUser();
 
   // Local state
   const [input, setInput] = useState("");
@@ -96,7 +97,7 @@ export function QuokkaAssistantModal({
   const messageInputRef = useRef<HTMLInputElement>(null);
 
   // Conversation hooks
-  const { data: conversations } = useAIConversations(user?.id);
+  const { data: conversations } = useAIConversations(user.id); // user is guaranteed to exist
   const createConversation = useCreateConversation();
   const deleteConversation = useDeleteConversation();
   const convertToThread = useConvertConversationToThread();
@@ -124,10 +125,11 @@ export function QuokkaAssistantModal({
   }, [pageContext, currentCourseId, currentCourseCode, currentCourseName, activeCourseId, availableCourses]);
 
   // Use persisted chat hook for streaming + localStorage sync
+  // User is guaranteed to be loaded at this point (checked in outer component)
   const chat = usePersistedChat({
     conversationId: activeConversationId,
     courseId: activeCourseId,
-    userId: user?.id || "",
+    userId: user.id, // user is guaranteed to exist
   });
 
   // Extract messages from chat hook
@@ -135,6 +137,9 @@ export function QuokkaAssistantModal({
 
   // Check if streaming is in progress
   const isStreaming = chat.status === "submitted" || chat.status === "streaming";
+
+  // Check if chat is ready (has conversation ID)
+  const isChatReady = !!activeConversationId;
 
   // Auto-load or create conversation when modal opens
   useEffect(() => {
@@ -454,15 +459,28 @@ export function QuokkaAssistantModal({
 
             {/* Messages - Using QDSConversation Component */}
             <div className="flex-1 overflow-hidden">
-              <QDSConversation
-                messages={messages}
-                isStreaming={isStreaming}
-                onCopy={handleCopy}
-                onRetry={handleRetry}
-                canRetry={messages.length > 0 && messages[messages.length - 1].role === "assistant"}
-                pageContext={pageContext}
-                courseCode={currentCourseCode}
-              />
+              {!isChatReady ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-2">
+                    <div className="animate-pulse text-muted-foreground">
+                      <Sparkles className="h-8 w-8 mx-auto mb-2" />
+                      <p className="text-sm">Initializing conversation...</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div key={activeConversationId || 'no-conversation'}>
+                  <QDSConversation
+                    messages={messages}
+                    isStreaming={isStreaming}
+                    onCopy={handleCopy}
+                    onRetry={handleRetry}
+                    canRetry={messages.length > 0 && messages[messages.length - 1].role === "assistant"}
+                    pageContext={pageContext}
+                    courseCode={currentCourseCode}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Input */}
@@ -650,5 +668,24 @@ export function QuokkaAssistantModal({
         </div>
       )}
     </>
+  );
+}
+
+// Outer wrapper component that handles user loading
+export function QuokkaAssistantModal(props: QuokkaAssistantModalProps) {
+  const { data: user, isLoading: isUserLoading } = useCurrentUser();
+
+  // Don't render until user is loaded
+  if (isUserLoading || !user) {
+    return null;
+  }
+
+  // Render inner component with key to force remount when user changes
+  return (
+    <QuokkaAssistantModalContent
+      key={user.id}
+      {...props}
+      user={user}
+    />
   );
 }

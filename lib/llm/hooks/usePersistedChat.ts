@@ -112,6 +112,8 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
   }, [conversationId]);
 
   // Create transport with body params
+  // Note: Since the outer component now ensures user is loaded,
+  // userId will always be valid when this hook is called
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -119,7 +121,7 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
         body: {
           conversationId,
           courseId: courseId || null,
-          userId,
+          userId, // This is now guaranteed to be valid
         },
       }),
     [conversationId, courseId, userId]
@@ -187,6 +189,15 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
 
   // Wrap sendMessage with rate limit check
   const sendMessageWithRateLimit: typeof chat.sendMessage = async (input) => {
+    // Validate userId before sending
+    if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+      console.error('[AI Chat] Cannot send message: userId is missing or invalid');
+      toast.error('Authentication required', {
+        description: 'Please wait while we load your session.',
+      });
+      return;
+    }
+
     // Check rate limit before sending
     const allowed = trackRequest();
 

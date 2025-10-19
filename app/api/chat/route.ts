@@ -109,8 +109,8 @@ export async function POST(req: Request) {
       topP: config.topP,
     });
 
-    // Return streaming response
-    return result.toTextStreamResponse();
+    // Return streaming response (UI Message Stream for tool calls + useChat compatibility)
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('[AI Chat] Error:', error);
 
