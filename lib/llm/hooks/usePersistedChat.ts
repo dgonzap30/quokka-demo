@@ -2,8 +2,9 @@
 
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getConversationMessages, addMessage } from "@/lib/store/localStore";
+import { toast } from "sonner";
 import type { AIMessage } from "@/lib/models/types";
 
 /**
@@ -94,6 +95,9 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
   const { conversationId, courseId, userId, onMessageAdded, onStreamFinish } =
     options;
 
+  // Local error state for UI feedback
+  const [customError, setCustomError] = useState<Error | undefined>();
+
   // Load initial messages from localStorage
   const initialMessages = useMemo<UIMessage[]>(() => {
     if (!conversationId) return [];
@@ -132,6 +136,22 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
 
       onStreamFinish?.();
     },
+    onError: (error) => {
+      console.error('[AI Chat] Error:', error);
+      setCustomError(error);
+
+      // Show user-friendly toast notification
+      toast.error('Failed to send message', {
+        description: error.message || 'Please try again or check your connection.',
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            setCustomError(undefined);
+            chat.regenerate();
+          },
+        },
+      });
+    },
   });
 
   // Save user messages to localStorage immediately when added
@@ -162,6 +182,7 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
     regenerate: chat.regenerate,
     stop: chat.stop,
     status: chat.status,
-    error: undefined, // TODO: Add error handling
+    error: chat.error || customError, // Expose error state
+    clearError: () => setCustomError(undefined), // Allow manual error dismissal
   };
 }

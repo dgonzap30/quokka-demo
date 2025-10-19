@@ -21,7 +21,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sparkles, Trash2, Share2, MoreVertical } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Sparkles, Trash2, Share2, MoreVertical, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -415,6 +416,40 @@ export function QuokkaAssistantModal({
                 </div>
               )}
             </DialogHeader>
+
+            {/* Error Alert */}
+            {chat.error && (
+              <div className="px-4 pt-2">
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription className="flex items-center justify-between">
+                    <span className="flex-1 pr-4">
+                      {chat.error.message || 'Failed to send message. Please try again.'}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => chat.clearError?.()}
+                      >
+                        Dismiss
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => {
+                          chat.clearError?.();
+                          chat.regenerate();
+                        }}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
 
             {/* Messages - Using QDSConversation Component */}
             <div className="flex-1 overflow-hidden">
