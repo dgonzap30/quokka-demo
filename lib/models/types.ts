@@ -559,6 +559,9 @@ export interface GenerateAIAnswerInput {
   /** Course context for answer generation */
   courseId: string;
 
+  /** User requesting the answer */
+  userId: string;
+
   /** Question title */
   title: string;
 

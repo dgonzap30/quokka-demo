@@ -51,6 +51,7 @@ function AskQuestionForm() {
       {
         threadId: "preview-temp",
         courseId: selectedCourseId,
+        userId: user!.id,
         title: title.trim(),
         content: content.trim(),
         tags: tags

@@ -459,169 +459,14 @@ Remember: Understanding takes time and practice. Don't hesitate to ask for clari
 };
 
 /**
- * Generate AI response using template system (synchronous fallback)
- */
-function generateAIResponse(
-  courseCode: string,
-  title: string,
-  content: string,
-  tags: string[]
-): { content: string; confidence: { level: ConfidenceLevel; score: number }; citations: Citation[] } {
-  const questionText = `${title} ${content} ${tags.join(' ')}`;
-  const keywords = extractKeywords(questionText);
-
-  // Select template based on course type
-  type Template = { keywords: string[]; content: string };
-  let templateList: Template[] = [];
-
-  if (courseCode.startsWith('CS')) {
-    templateList = CS_TEMPLATES;
-  } else if (courseCode.startsWith('MATH')) {
-    templateList = MATH_TEMPLATES;
-  }
-
-  // Find best matching template
-  let bestMatch: Template = GENERAL_TEMPLATE;
-  let bestMatchRatio = 0;
-
-  if (templateList.length > 0) {
-    for (const template of templateList) {
-      const ratio = calculateMatchRatio(keywords, template.keywords);
-      if (ratio > bestMatchRatio) {
-        bestMatchRatio = ratio;
-        bestMatch = template;
-      }
-    }
-  }
-
-  // Calculate confidence (55% base + up to 40% from match ratio)
-  const confidenceScore = Math.round(55 + (bestMatchRatio * 40));
-  const confidenceLevel = getConfidenceLevel(confidenceScore);
-
-  // Generate citations using hardcoded materials (fallback)
-  const citations = generateCitations(courseCode, keywords);
-
-  return {
-    content: bestMatch.content,
-    confidence: {
-      level: confidenceLevel,
-      score: confidenceScore,
-    },
-    citations,
-  };
-}
-
-/**
- * Generate AI response with course material references (LLM-powered)
+ * Simple fallback message (replaces complex template system)
  *
- * Uses actual LLM (OpenAI/Anthropic) when enabled, with fallback to template system.
- * Implements provider fallback chain: LLM → Templates
+ * NOTE: This should rarely be called since production uses /api/chat endpoint.
+ * Kept as ultimate safety net when API routes fail.
  */
-async function generateAIResponseWithMaterials(
-  courseId: string,
-  courseCode: string,
-  title: string,
-  content: string,
-  tags: string[]
-): Promise<{
-  content: string;
-  confidence: { level: ConfidenceLevel; score: number };
-  citations: Citation[];
-}> {
-  // Legacy provider system removed - always use template fallback
-  // Production uses /api/answer with AI SDK
-  console.log('[AI] Using template fallback (mock API - production uses /api/answer)');
-  return generateAIResponseWithTemplates(courseId, courseCode, title, content, tags);
-}
-
-/**
- * Generate AI response using template system (fallback)
- *
- * Original template-based logic used as fallback when LLM is unavailable.
- */
-async function generateAIResponseWithTemplates(
-  courseId: string,
-  courseCode: string,
-  title: string,
-  content: string,
-  tags: string[]
-): Promise<{
-  content: string;
-  confidence: { level: ConfidenceLevel; score: number };
-  citations: Citation[];
-}> {
-  const questionText = `${title} ${content} ${tags.join(' ')}`;
-  const keywords = extractKeywords(questionText);
-
-  // 1. Select template based on course type
-  type Template = { keywords: string[]; content: string };
-  let templateList: Template[] = [];
-
-  if (courseCode.startsWith('CS')) {
-    templateList = CS_TEMPLATES;
-  } else if (courseCode.startsWith('MATH')) {
-    templateList = MATH_TEMPLATES;
-  }
-
-  // 2. Find best matching template
-  let bestMatch: Template = GENERAL_TEMPLATE;
-  let bestMatchRatio = 0;
-
-  if (templateList.length > 0) {
-    for (const template of templateList) {
-      const ratio = calculateMatchRatio(keywords, template.keywords);
-      if (ratio > bestMatchRatio) {
-        bestMatchRatio = ratio;
-        bestMatch = template;
-      }
-    }
-  }
-
-  // 3. Calculate confidence
-  const confidenceScore = Math.round(55 + (bestMatchRatio * 40));
-  const confidenceLevel = getConfidenceLevel(confidenceScore);
-
-  // 4. Get materials from database
-  let materials: CourseMaterial[] = [];
-  try {
-    materials = await api.getCourseMaterials(courseId);
-  } catch (error) {
-    console.warn('Failed to load course materials:', error);
-    const citations = generateCitations(courseCode, keywords);
-    return {
-      content: bestMatch.content,
-      confidence: { level: confidenceLevel, score: confidenceScore },
-      citations,
-    };
-  }
-
-  // 5. Score materials by keyword matches
-  const scoredMaterials = materials.map(material => {
-    const materialKeywords = material.keywords;
-    const matches = keywords.filter(k => materialKeywords.includes(k)).length;
-    const relevance = Math.min(95, 60 + (matches * 10));
-    return { material, relevance, matches };
-  });
-
-  // 6. Sort by relevance and take top 2-3
-  const topMaterials = scoredMaterials
-    .sort((a, b) => b.relevance - a.relevance)
-    .slice(0, 2 + Math.floor(Math.random() * 2));
-
-  // 7. Generate citations using actual materials
-  const citations: Citation[] = topMaterials.map(({ material, relevance }) => ({
-    id: generateId('cite'),
-    sourceType: mapMaterialTypeToCitationType(material.type),
-    source: material.title,
-    excerpt: generateExcerpt(material.content, keywords),
-    relevance,
-    link: undefined,
-  }));
-
+function generateSimpleFallbackMessage(): { content: string } {
   return {
-    content: bestMatch.content,
-    confidence: { level: confidenceLevel, score: confidenceScore },
-    citations,
+    content: "I apologize, but I'm currently unable to process your request. The AI service may be temporarily unavailable. Please try again in a moment, or contact support if the issue persists."
   };
 }
 
@@ -1120,6 +965,7 @@ export const api = {
       aiAnswer = await this.generateAIAnswer({
         threadId: newThread.id,
         courseId: input.courseId,
+        userId: authorId,
         title: input.title,
         content: input.content,
         tags: input.tags,
@@ -1570,30 +1416,26 @@ export const api = {
       throw new Error(`Course not found: ${input.courseId}`);
     }
 
-    // Generate AI response using enhanced helper with course materials
-    const { content, confidence, citations } = await generateAIResponseWithMaterials(
-      input.courseId, // NEW: Pass courseId for material lookup
-      course.code,
-      input.title,
-      input.content,
-      input.tags || []
-    );
+    // Generate AI response using /api/answer endpoint
+    const response = await fetch('/api/answer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: `${input.title}\n\n${input.content}`,
+        courseId: input.courseId,
+        userId: input.userId,
+      }),
+    });
 
+    if (!response.ok) {
+      throw new Error(`AI answer generation failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
     const aiAnswer: AIAnswer = {
-      id: generateId("ai"),
+      ...data.answer,
+      id: generateId("ai"), // Override with our ID
       threadId: input.threadId,
-      courseId: input.courseId,
-      content,
-      confidenceLevel: confidence.level,
-      confidenceScore: confidence.score,
-      citations,
-      studentEndorsements: 0,
-      instructorEndorsements: 0,
-      totalEndorsements: 0,
-      endorsedBy: [],
-      instructorEndorsed: false,
-      generatedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     addAIAnswer(aiAnswer);
@@ -1619,28 +1461,26 @@ export const api = {
       throw new Error(`Course not found: ${input.courseId}`);
     }
 
-    // Generate AI response using enhanced helper with course materials
-    const { content, confidence, citations } = await generateAIResponseWithMaterials(
-      input.courseId, // NEW: Pass courseId for material lookup
-      course.code,
-      input.title,
-      input.content,
-      input.tags || []
-    );
+    // Generate AI response using /api/answer endpoint
+    const response = await fetch('/api/answer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: `${input.title}\n\n${input.content}`,
+        courseId: input.courseId,
+        userId: input.userId,
+      }),
+    });
 
+    if (!response.ok) {
+      throw new Error(`AI answer generation failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
     const preview: AIAnswer = {
-      id: `preview-${Date.now()}`,
+      ...data.answer,
+      id: `preview-${Date.now()}`, // Override with preview ID
       threadId: input.threadId,
-      courseId: input.courseId,
-      content,
-      confidenceLevel: confidence.level,
-      confidenceScore: confidence.score,
-      citations,
-      studentEndorsements: 0,
-      instructorEndorsements: 0,
-      totalEndorsements: 0,
-      endorsedBy: [],
-      instructorEndorsed: false,
       generatedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -2252,35 +2092,10 @@ export const api = {
     } catch (error) {
       console.error('[AI SDK] Failed to generate response:', error);
 
-      // Fall back to template system
-      try {
-        if (conversation.courseId) {
-          const course = await this.getCourse(conversation.courseId);
-          if (course) {
-            const { content } = await generateAIResponseWithMaterials(
-              conversation.courseId,
-              course.code,
-              input.content,
-              '',
-              []
-            );
-            aiContent = content;
-          } else {
-            // Course not found, use generic template
-            const { content } = generateAIResponse('GENERAL', input.content, '', []);
-            aiContent = content;
-          }
-        } else {
-          // General conversation, use generic template
-          const { content } = generateAIResponse('GENERAL', input.content, '', []);
-          aiContent = content;
-        }
-
-        console.log('[AI] Template fallback used');
-      } catch (fallbackError) {
-        console.error('[AI] Template fallback also failed:', fallbackError);
-        aiContent = "I apologize, but I'm having trouble generating a response right now. Please try again.";
-      }
+      // Fall back to simple error message
+      console.warn('[AI] /api/chat failed, using simple fallback message');
+      const { content } = generateSimpleFallbackMessage();
+      aiContent = content;
     }
 
     // Create AI message

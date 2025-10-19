@@ -69,6 +69,7 @@ export function AskQuestionModal({
       {
         threadId: "preview-temp",
         courseId,
+        userId: user!.id,
         title: title.trim(),
         content: content.trim(),
         tags: tags
