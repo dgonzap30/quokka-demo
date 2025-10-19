@@ -5,17 +5,17 @@
 // This file aggregates all API modules into a single client instance.
 // As modules are extracted from the monolithic client.ts, they are imported here.
 //
-// **Phase 3.1 Progress:** 4/9 modules extracted (auth, notifications, courses, materials)
-// **Remaining:** threads, posts, ai-answers, conversations, instructor
+// **Phase 3.1 Progress:** 5/9 modules extracted (auth, notifications, courses, materials, posts)
+// **Remaining:** threads, ai-answers, conversations, instructor
 
 import { authAPI } from "./auth";
 import { notificationsAPI } from "./notifications";
 import { coursesAPI } from "./courses";
 import { materialsAPI } from "./materials";
+import { postsAPI } from "./posts";
 
 // TODO: Import remaining modules as they are extracted
 // import { threadsAPI } from "./threads";
-// import { postsAPI } from "./posts";
 // import { aiAnswersAPI } from "./ai-answers";
 // import { conversationsAPI } from "./conversations";
 // import { instructorAPI } from "./instructor";
@@ -37,8 +37,8 @@ import { api as legacyAPI } from "../client";
  * - ✅ notifications (3 methods)
  * - ✅ courses (5 methods)
  * - ✅ materials (2 methods)
+ * - ✅ posts (1 method)
  * - ⏳ threads (8 methods) - TODO
- * - ⏳ posts (3 methods) - TODO
  * - ⏳ ai-answers (5 methods) - TODO
  * - ⏳ conversations (6 methods) - TODO
  * - ⏳ instructor (8 methods) - TODO
@@ -76,6 +76,11 @@ export const api = {
   ...materialsAPI,
 
   // ============================================
+  // Posts (Extracted Module)
+  // ============================================
+  ...postsAPI,
+
+  // ============================================
   // Threads (TODO: Extract to threads.ts)
   // ============================================
   getCourseThreads: legacyAPI.getCourseThreads.bind(legacyAPI),
@@ -86,11 +91,6 @@ export const api = {
   removeUpvote: legacyAPI.removeUpvote.bind(legacyAPI),
   checkThreadDuplicates: legacyAPI.checkThreadDuplicates.bind(legacyAPI),
   mergeThreads: legacyAPI.mergeThreads.bind(legacyAPI),
-
-  // ============================================
-  // Posts (TODO: Extract to posts.ts)
-  // ============================================
-  createPost: legacyAPI.createPost.bind(legacyAPI),
 
   // ============================================
   // AI Answers (TODO: Extract to ai-answers.ts)
