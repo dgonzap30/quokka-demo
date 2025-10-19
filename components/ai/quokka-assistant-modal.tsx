@@ -380,8 +380,8 @@ function QuokkaAssistantModalContent({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-7xl h-[95vh] overflow-hidden glass-panel-strong p-0">
-          <div className="flex flex-col h-full">
+        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-7xl h-[95vh] glass-panel-strong p-0">
+          <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <DialogHeader className="flex-shrink-0 p-4 border-b border-[var(--border-glass)] space-y-3">
               <div className="flex items-center gap-3">
@@ -425,7 +425,7 @@ function QuokkaAssistantModalContent({
 
             {/* Messages - Using QDSConversation Component */}
             {!isChatReady ? (
-              <div className="flex-1 min-h-0 flex items-center justify-center">
+              <div className="flex-1 h-0 flex items-center justify-center">
                 <div className="text-center space-y-2">
                   <div className="animate-pulse text-muted-foreground">
                     <Sparkles className="h-8 w-8 mx-auto mb-2" />
@@ -436,7 +436,7 @@ function QuokkaAssistantModalContent({
             ) : (
               <QDSConversation
                 key={activeConversationId || 'no-conversation'}
-                className="flex-1 min-h-0"
+                className="flex-1 h-0"
                 messages={messages}
                 isStreaming={isStreaming}
                 onCopy={handleCopy}
