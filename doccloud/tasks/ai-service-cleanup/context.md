@@ -53,8 +53,8 @@ Comprehensive cleanup of AI service architecture to:
 - [x] 0 dead code (removed generateAIResponse* functions)
 - [x] All API routes use standardized error format
 - [x] TypeScript compiles without errors (`npx tsc --noEmit`)
-- [ ] All routes load without console errors in dev (verification pending)
-- [ ] Documentation updated (CLAUDE.md, audit report) (in progress)
+- [x] All routes load without console errors in dev
+- [x] Documentation updated (CLAUDE.md, audit report)
 
 **Sprint 2 Acceptance Criteria:**
 - [ ] lib/api/client.ts split into focused modules
@@ -294,3 +294,4 @@ If critical issues occur:
 - `2025-10-19` | [Sprint 1] | Fixed /api/answer endpoint with hybrid retrieval (BM25 + RRF + MMR)
 - `2025-10-19` | [Sprint 1] | Removed 160 lines of dead template code, updated call sites
 - `2025-10-19` | [Sprint 1] | Standardized API error responses (created lib/api/errors.ts)
+- `2025-10-19` | [Sprint 1] | ✅ COMPLETE - All acceptance criteria met, TypeScript/lint pass
