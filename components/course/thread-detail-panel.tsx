@@ -78,6 +78,7 @@ export function ThreadDetailPanel({
   const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [isEndorsingLocally, setIsEndorsingLocally] = useState(false);
 
   // Empty state (no thread selected) - handled by parent now
   if (!threadId) {
@@ -153,8 +154,9 @@ export function ThreadDetailPanel({
 
   // Handle AI answer endorsement
   const handleEndorseAIAnswer = async () => {
-    if (!user || !aiAnswer) return;
+    if (!user || !aiAnswer || isEndorsingLocally) return;
 
+    setIsEndorsingLocally(true); // Prevent duplicate clicks immediately
     try {
       await endorseAIAnswerMutation.mutateAsync({
         aiAnswerId: aiAnswer.id,
@@ -163,6 +165,8 @@ export function ThreadDetailPanel({
       });
     } catch (error) {
       console.error("Failed to endorse AI answer:", error);
+    } finally {
+      setIsEndorsingLocally(false);
     }
   };
 
@@ -232,7 +236,7 @@ export function ThreadDetailPanel({
             currentUserEndorsed={aiAnswer.endorsedBy.includes(user?.id || "")}
             currentUserRole={user?.role}
             onEndorse={handleEndorseAIAnswer}
-            isEndorsing={endorseAIAnswerMutation.isPending}
+            isEndorsing={endorseAIAnswerMutation.isPending || isEndorsingLocally}
             variant="hero"
           />
         </section>
