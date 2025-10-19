@@ -1,3 +1,28 @@
+// ============================================
+// React Query Hooks - Consolidated Module
+// ============================================
+//
+// This file contains all React Query hooks for the application.
+// Hooks are organized by domain for easy navigation.
+//
+// Structure:
+// - Query Keys (lines 28-55) - Centralized cache key definitions
+// - Helper Functions (lines 58-73) - Utility functions
+// - Authentication Hooks (lines 76-159)
+// - Course Hooks (lines 162-296)
+// - Notification Hooks (lines 299-345)
+// - Thread Hooks (lines 348-416)
+// - Dashboard Hooks (lines 419-446)
+// - AI Answer Hooks (lines 449-569)
+// - Instructor Hooks (lines 572-834)
+// - AI Conversation Hooks (lines 837-1070)
+// - Phase 3.1: Thread Endorsement Hooks (lines 1073-1164)
+// - Phase 3.2: Duplicate Detection Hooks (lines 1167-1244)
+// - Phase 3.4: Instructor Metrics Hooks (lines 1247-1280)
+//
+// Future: Consider splitting into domain modules (auth.hooks.ts, etc.)
+// when this file exceeds 1,500 lines or individual domains exceed 300 lines.
+
 import { useMutation, useQuery, useQueryClient, useQueries } from "@tanstack/react-query";
 import type {
   LoginInput,
