@@ -86,6 +86,7 @@ function renderTextWithCitations(
 export function QDSResponse({
   content,
   citations = [],
+  isStreaming = false,
   className,
 }: QDSResponseProps) {
   /**
@@ -99,6 +100,10 @@ export function QDSResponse({
     return (
       <div className={cn("text-sm leading-relaxed", className)}>
         <Response>{content}</Response>
+        {/* Streaming cursor */}
+        {isStreaming && (
+          <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary animate-pulse" aria-hidden="true" />
+        )}
       </div>
     );
   }
@@ -109,6 +114,10 @@ export function QDSResponse({
   return (
     <div className={cn("text-sm leading-relaxed whitespace-pre-wrap", className)}>
       {contentWithCitations}
+      {/* Streaming cursor */}
+      {isStreaming && (
+        <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary animate-pulse" aria-hidden="true" />
+      )}
     </div>
   );
 }

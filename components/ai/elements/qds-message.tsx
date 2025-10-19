@@ -108,10 +108,15 @@ export function QDSMessage({
               <QDSResponse
                 content={displayText}
                 citations={parsed.citations}
+                isStreaming={isStreaming && isLast}
               />
             ) : (
               <div className="text-sm leading-relaxed whitespace-pre-wrap">
                 {displayText}
+                {/* Streaming cursor for assistant messages */}
+                {message.role === "assistant" && isStreaming && isLast && (
+                  <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary animate-pulse" aria-hidden="true" />
+                )}
               </div>
             )}
           </div>

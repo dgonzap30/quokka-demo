@@ -103,6 +103,9 @@ export interface QDSResponseProps {
   /** Parsed citations */
   citations?: QuokkaMessageMetadata["citations"];
 
+  /** Whether the message is currently streaming */
+  isStreaming?: boolean;
+
   /** Custom className */
   className?: string;
 }
