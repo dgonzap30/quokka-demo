@@ -67,7 +67,8 @@ import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
 
 // Legacy LLM imports removed - production uses AI SDK via /api/chat and /api/answer
 // These mock functions now use template fallback only
-import { buildCourseContext } from "@/lib/context";
+// Note: buildCourseContext removed in Phase 3 cleanup
+// Use createHybridRetriever from @/lib/retrieval for material search
 import type { MaterialReference } from "@/lib/models/types";
 
 import {

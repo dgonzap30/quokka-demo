@@ -8,7 +8,8 @@
 import { generateObject } from 'ai';
 import { getAISDKModel, getAISDKConfig } from '@/lib/llm/ai-sdk-providers';
 import { AIAnswerSchema } from '@/lib/llm/schemas/citation';
-import { buildCourseContext } from '@/lib/context';
+// Note: buildCourseContext removed in Phase 3 cleanup
+// This route needs refactoring to use createHybridRetriever or kb_search tool
 import { buildSystemPrompt } from '@/lib/llm/utils';
 import { api } from '@/lib/api/client';
 import type { AIAnswer } from '@/lib/models/types';
@@ -82,6 +83,22 @@ export async function POST(req: Request) {
       );
     }
 
+    // TODO: This route needs refactoring after Phase 3 cleanup
+    // buildCourseContext was removed. Options:
+    // 1. Use createHybridRetriever directly (like kb_search tool does)
+    // 2. Deprecate this route and use /api/chat with kb_search tool instead
+    //
+    // For now, return a placeholder error to avoid breaking the build
+    return Response.json(
+      {
+        error: 'This endpoint is temporarily unavailable',
+        code: 'ENDPOINT_DEPRECATED',
+        message: 'Please use /api/chat with conversation-based Q&A instead',
+      },
+      { status: 501 } // Not Implemented
+    );
+
+    /* COMMENTED OUT - needs refactoring
     // Build course context
     const context = await buildCourseContext(
       course,
@@ -165,6 +182,7 @@ ${question}
         courseCode: course.code,
       },
     });
+    */
   } catch (error) {
     console.error('[AI Answer] Error:', error);
 

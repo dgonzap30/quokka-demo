@@ -273,29 +273,153 @@ export class HybridRetriever {
 - Instant UI feedback
 - Maintained cache consistency
 
-## Future Improvements
+## Phase 3 Cleanup (October 2025)
 
-### Potential Enhancements
+**Status:** ✅ Complete
 
-1. **Self-RAG Adaptive Routing** (~550 lines in `lib/retrieval/adaptive/`)
-   - Currently disabled via feature flag
-   - Decision needed: wire up or remove
+### Systems Removed (~2,185 lines)
 
-2. **Prompt Templates** (~280 lines in `lib/llm/prompts/templates/`)
-   - CS, Math, General templates defined but unused
-   - Decision needed: implement course detection or remove
+Removed advanced RAG systems that were never integrated into production:
 
-3. **Hierarchical Retrieval** (`lib/retrieval/hierarchical/`)
-   - Status unknown
-   - Needs investigation
+#### 1. **Self-RAG Adaptive Routing** (550 lines removed)
 
-4. **Response Streaming UI**
+**Location:** `lib/retrieval/adaptive/`
+
+**What it was:**
+- Confidence-based query routing with caching
+- Three-tier strategy: High confidence → cache, Medium → standard, Low → aggressive
+- Claimed 80% cost savings via query result caching
+
+**Why removed:**
+- Feature flag existed but **never enabled** (`enableAdaptiveRouting: false`)
+- `CourseContextBuilder` (integration point) never instantiated in production
+- No path to enable without major refactoring
+- Caching not needed at current scale
+
+**Restore from:**
+```bash
+git log --all -- lib/retrieval/adaptive/
+```
+
+#### 2. **RAPTOR Hierarchical Retrieval** (800 lines removed)
+
+**Location:** `lib/retrieval/hierarchical/`
+
+**What it was:**
+- Tree-based retrieval with AI-generated summaries
+- Multi-level structure: leaves (materials) → internal nodes (summaries)
+- Better handling of broad queries ("What did we cover this month?")
+
+**Why removed:**
+- Never imported anywhere in production code
+- Complex implementation with LLM summarization costs
+- Flat hybrid retrieval (BM25 + embeddings) sufficient for current queries
+
+**Restore from:**
+```bash
+git log --all -- lib/retrieval/hierarchical/
+```
+
+#### 3. **Query Expansion (PRF)** (390 lines removed)
+
+**Location:** `lib/retrieval/expansion/`
+
+**What it was:**
+- Pseudo-Relevance Feedback using Rocchio algorithm
+- Expands queries with related terms from top results
+- Example: "quicksort" → "quicksort pivot partition divide-and-conquer"
+
+**Why removed:**
+- Never integrated with HybridRetriever
+- Embeddings already handle vocabulary mismatch semantically
+- Added complexity without proven need
+
+**Restore from:**
+```bash
+git log --all -- lib/retrieval/expansion/
+```
+
+#### 4. **Prompt Templates** (445 lines removed)
+
+**Location:** `lib/llm/prompts/templates.ts`, `CoursePromptBuilder.ts`
+
+**What it was:**
+- Course-specific prompts (CS, Math, General)
+- CS template: code examples with Big O notation
+- Math template: LaTeX equations and step-by-step proofs
+- Auto-detection based on course code
+
+**Why removed:**
+- Never imported in `/api/chat` or `/api/answer`
+- Production uses generic `buildSystemPrompt()` from utils
+- Well-designed but zero integration
+
+**Restore from:**
+```bash
+git log --all -- lib/llm/prompts/templates.ts lib/llm/prompts/CoursePromptBuilder.ts
+```
+
+#### 5. **Context Builders** (400 lines removed)
+
+**Location:** `lib/context/CourseContextBuilder.ts`, `MultiCourseContextBuilder.ts`
+
+**What they were:**
+- Pre-built context objects for LLM prompts
+- Single-course and multi-course variants
+- Integration point for Self-RAG and hierarchical retrieval
+
+**Why removed:**
+- Never instantiated in production
+- Production uses tool-based retrieval (`kb_search`, `kb_fetch`)
+- No need for pre-built context objects
+
+**Restore from:**
+```bash
+git log --all -- lib/context/CourseContextBuilder.ts lib/context/MultiCourseContextBuilder.ts
+```
+
+### Impact
+
+**Code Reduction:**
+- Before: 52 TypeScript files in `lib/`
+- After: ~35 TypeScript files
+- **Total removed: ~2,185 lines**
+
+**Directory Sizes:**
+- `lib/retrieval/`: 180KB → ~60KB (3x reduction)
+- `lib/llm/prompts/`: 32KB → 4KB (8x reduction)
+
+**Architecture Clarity:**
+- Production stack now = what you see in codebase
+- Removed confusing "why are there 3 retrieval systems?" questions
+- Simpler onboarding for new developers
+
+### What Remains (Production Stack)
+
+| Component | Status | Purpose |
+|-----------|--------|---------|
+| Vercel AI SDK | ✅ Active | Provider-agnostic LLM integration |
+| RAG Tools (`kb_search`, `kb_fetch`) | ✅ Active | Tool-based course material retrieval |
+| HybridRetriever (BM25 + embeddings) | ✅ Active | Sparse + dense retrieval with RRF fusion |
+| MMR Diversifier | ✅ Active | Reduce redundancy in results |
+| Generic System Prompts | ✅ Active | `buildSystemPrompt()` from utils |
+
+### Future Improvements
+
+If performance or scale issues arise, these systems can be restored from git:
+
+1. **Response Streaming UI**
    - Current implementation buffers full response
    - Could add token-by-token streaming with `useChat` hook
 
-5. **Tool Use Visualization**
+2. **Tool Use Visualization**
    - Show when AI is searching course materials
    - Display search queries and results in real-time
+
+3. **Advanced RAG (if needed at scale)**
+   - Restore Self-RAG for caching (if query volume >10k/day)
+   - Restore RAPTOR for hierarchical search (if broad queries become common)
+   - Restore Query Expansion for recall improvements (if recall <70%)
 
 ## Testing
 

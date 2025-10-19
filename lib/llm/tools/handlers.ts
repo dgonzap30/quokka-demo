@@ -3,10 +3,10 @@
 // ============================================
 //
 // Implements tool execution logic for kb.search and kb.fetch.
-// Uses existing hybrid retrieval system (CourseContextBuilder)
+// Uses hybrid retrieval system (BM25 + embeddings + RRF)
 // with hard caps on tool usage per turn.
 
-import { CourseContextBuilder } from "@/lib/context/CourseContextBuilder";
+import { createHybridRetriever } from "@/lib/retrieval";
 import type { CourseMaterial, Course } from "@/lib/models/types";
 import { TOOL_LIMITS } from "./index";
 
@@ -104,22 +104,24 @@ export async function handleKBSearch(params: {
       const allMaterials = courseMaterialsData as CourseMaterial[];
       const materials = allMaterials.filter((m) => m.courseId === courseId);
 
-      // Use CourseContextBuilder for semantic search
-      const builder = new CourseContextBuilder(course, materials);
-      const context = await builder.buildContext(query, {
-        maxMaterials: maxResults,
-        minRelevance: 0, // No threshold - return all ranked results
-        maxTokens: 4000, // Larger context for tool responses
+      // Use hybrid retrieval (BM25 + embeddings + RRF)
+      const { retriever } = await createHybridRetriever(materials, {
+        useRRF: true,
+        rrfK: 60,
+        useMMR: true,
+        mmrLambda: 0.7,
       });
 
+      const results = await retriever.retrieve(query, maxResults);
+
       // Format results for AI
-      const formattedMaterials = context.materials.map((m) => ({
-        id: m.id,
-        title: m.title,
-        type: m.type,
-        excerpt: m.content.substring(0, 300) + (m.content.length > 300 ? "..." : ""),
-        relevanceScore: m.relevanceScore,
-        matchedKeywords: m.matchedKeywords,
+      const formattedMaterials = results.map((r) => ({
+        id: r.material.id,
+        title: r.material.title,
+        type: r.material.type,
+        excerpt: r.material.content.substring(0, 300) + (r.material.content.length > 300 ? "..." : ""),
+        relevanceScore: Math.round(r.score * 100), // Convert 0-1 to 0-100
+        matchedKeywords: (r.metadata?.matchedTerms || []) as string[],
       }));
 
       console.log(`[kb.search] Found ${formattedMaterials.length} results for course ${course.code}`);
@@ -149,21 +151,26 @@ export async function handleKBSearch(params: {
       // Search each course and collect results
       for (const course of courses) {
         const materials = allMaterials.filter((m) => m.courseId === course.id);
-        const builder = new CourseContextBuilder(course, materials);
-        const context = await builder.buildContext(query, {
-          maxMaterials: Math.ceil(maxResults / courses.length), // Distribute across courses
-          minRelevance: 0, // No threshold - return all ranked results
-          maxTokens: 2000,
+
+        // Use hybrid retrieval for this course
+        const { retriever } = await createHybridRetriever(materials, {
+          useRRF: true,
+          rrfK: 60,
         });
 
+        const results = await retriever.retrieve(
+          query,
+          Math.ceil(maxResults / courses.length) // Distribute across courses
+        );
+
         // Add course prefix to titles for multi-course results
-        const formatted = context.materials.map((m) => ({
-          id: m.id,
-          title: `[${course.code}] ${m.title}`,
-          type: m.type,
-          excerpt: m.content.substring(0, 200) + (m.content.length > 200 ? "..." : ""),
-          relevanceScore: m.relevanceScore,
-          matchedKeywords: m.matchedKeywords,
+        const formatted = results.map((r) => ({
+          id: r.material.id,
+          title: `[${course.code}] ${r.material.title}`,
+          type: r.material.type,
+          excerpt: r.material.content.substring(0, 200) + (r.material.content.length > 200 ? "..." : ""),
+          relevanceScore: Math.round(r.score * 100), // Convert 0-1 to 0-100
+          matchedKeywords: (r.metadata?.matchedTerms || []) as string[],
         }));
 
         allResults.push(...formatted);
