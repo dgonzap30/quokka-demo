@@ -5,19 +5,19 @@
 // This file aggregates all API modules into a single client instance.
 // As modules are extracted from the monolithic client.ts, they are imported here.
 //
-// **Phase 3.1 Progress:** 2/9 modules extracted (auth, notifications)
-// **Remaining:** courses, threads, posts, ai-answers, conversations, materials, instructor
+// **Phase 3.1 Progress:** 4/9 modules extracted (auth, notifications, courses, materials)
+// **Remaining:** threads, posts, ai-answers, conversations, instructor
 
 import { authAPI } from "./auth";
 import { notificationsAPI } from "./notifications";
+import { coursesAPI } from "./courses";
+import { materialsAPI } from "./materials";
 
 // TODO: Import remaining modules as they are extracted
-// import { coursesAPI } from "./courses";
 // import { threadsAPI } from "./threads";
 // import { postsAPI } from "./posts";
 // import { aiAnswersAPI } from "./ai-answers";
 // import { conversationsAPI } from "./conversations";
-// import { materialsAPI } from "./materials";
 // import { instructorAPI } from "./instructor";
 
 // Temporary: Import all methods from original client.ts for non-extracted modules
@@ -35,12 +35,12 @@ import { api as legacyAPI } from "../client";
  * **Migration Status:**
  * - ✅ auth (5 methods)
  * - ✅ notifications (3 methods)
- * - ⏳ courses (5 methods) - TODO
+ * - ✅ courses (5 methods)
+ * - ✅ materials (2 methods)
  * - ⏳ threads (8 methods) - TODO
  * - ⏳ posts (3 methods) - TODO
  * - ⏳ ai-answers (5 methods) - TODO
  * - ⏳ conversations (6 methods) - TODO
- * - ⏳ materials (2 methods) - TODO
  * - ⏳ instructor (8 methods) - TODO
  *
  * @example
@@ -66,13 +66,14 @@ export const api = {
   ...notificationsAPI,
 
   // ============================================
-  // Courses (TODO: Extract to courses.ts)
+  // Courses (Extracted Module)
   // ============================================
-  getAllCourses: legacyAPI.getAllCourses.bind(legacyAPI),
-  getUserCourses: legacyAPI.getUserCourses.bind(legacyAPI),
-  getCourse: legacyAPI.getCourse.bind(legacyAPI),
-  getCourseMetrics: legacyAPI.getCourseMetrics.bind(legacyAPI),
-  getCourseInsights: legacyAPI.getCourseInsights.bind(legacyAPI),
+  ...coursesAPI,
+
+  // ============================================
+  // Materials (Extracted Module)
+  // ============================================
+  ...materialsAPI,
 
   // ============================================
   // Threads (TODO: Extract to threads.ts)
@@ -109,12 +110,6 @@ export const api = {
   sendMessage: legacyAPI.sendMessage.bind(legacyAPI),
   deleteAIConversation: legacyAPI.deleteAIConversation.bind(legacyAPI),
   convertConversationToThread: legacyAPI.convertConversationToThread.bind(legacyAPI),
-
-  // ============================================
-  // Materials (TODO: Extract to materials.ts)
-  // ============================================
-  getCourseMaterials: legacyAPI.getCourseMaterials.bind(legacyAPI),
-  searchCourseMaterials: legacyAPI.searchCourseMaterials.bind(legacyAPI),
 
   // ============================================
   // Instructor Tools (TODO: Extract to instructor.ts)
