@@ -4,7 +4,6 @@
 
 import { BaseLLMProvider } from "./BaseLLMProvider";
 import type {
-  LLMConfig,
   LLMRequest,
   LLMResponse,
   TokenUsage,
@@ -49,6 +48,9 @@ export class AnthropicProvider extends BaseLLMProvider {
         content: request.userPrompt,
       });
 
+      // Prepare system prompt with caching if enabled
+      const systemPrompt = this.prepareSystemPrompt(request);
+
       // Make API request
       const response = await fetch(AnthropicProvider.API_URL, {
         method: "POST",
@@ -60,7 +62,7 @@ export class AnthropicProvider extends BaseLLMProvider {
         body: JSON.stringify({
           model: this.config.model,
           messages,
-          system: request.systemPrompt || undefined,
+          system: systemPrompt,
           temperature: request.temperature ?? this.config.temperature,
           top_p: request.topP ?? this.config.topP,
           max_tokens: request.maxTokens ?? this.config.maxTokens,
@@ -85,15 +87,19 @@ export class AnthropicProvider extends BaseLLMProvider {
         throw new Error("No completion returned from Anthropic");
       }
 
-      // Extract token usage
+      // Extract token usage (including cache metrics)
       const usage: TokenUsage = {
         promptTokens: data.usage?.input_tokens || 0,
         completionTokens: data.usage?.output_tokens || 0,
         totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
+        cacheCreationTokens: data.usage?.cache_creation_input_tokens,
+        cacheReadTokens: data.usage?.cache_read_input_tokens,
         estimatedCost: this.calculateCost({
           promptTokens: data.usage?.input_tokens || 0,
           completionTokens: data.usage?.output_tokens || 0,
           totalTokens: 0,
+          cacheCreationTokens: data.usage?.cache_creation_input_tokens,
+          cacheReadTokens: data.usage?.cache_read_input_tokens,
           estimatedCost: 0, // Will be calculated
         }),
       };
@@ -124,20 +130,63 @@ export class AnthropicProvider extends BaseLLMProvider {
   }
 
   /**
+   * Prepare system prompt with caching if enabled
+   *
+   * Anthropic prompt caching uses cache_control blocks to mark
+   * content for caching. System prompts >1024 tokens benefit most.
+   */
+  private prepareSystemPrompt(request: LLMRequest): string | object {
+    const enableCaching = request.enableCaching ?? true; // Default to enabled
+    const systemPrompt = request.systemPrompt;
+
+    // Only use caching for longer system prompts (saves cost/latency)
+    const estimatedTokens = this.estimateTokens(systemPrompt);
+    const shouldCache = enableCaching && estimatedTokens >= 1024;
+
+    if (!shouldCache) {
+      return systemPrompt; // Simple string format
+    }
+
+    // Use cache_control format for Anthropic
+    // See: https://docs.anthropic.com/claude/docs/prompt-caching
+    return [
+      {
+        type: "text",
+        text: systemPrompt,
+        cache_control: { type: "ephemeral" },
+      },
+    ];
+  }
+
+  /**
    * Calculate cost based on token usage
    *
    * Pricing for Claude 3 Haiku (default):
    * - Input: $0.25 per 1M tokens
    * - Output: $1.25 per 1M tokens
+   * - Cache writes: 1.25x input cost
+   * - Cache reads: 90% discount (0.1x input cost)
    */
   protected calculateCost(usage: TokenUsage): number {
     // Pricing per 1M tokens
     const pricing = this.getPricing(this.config.model);
 
+    // Standard input/output costs
     const inputCost = (usage.promptTokens / 1_000_000) * pricing.input;
     const outputCost = (usage.completionTokens / 1_000_000) * pricing.output;
 
-    return inputCost + outputCost;
+    // Cache costs (Anthropic pricing model)
+    let cacheCost = 0;
+    if (usage.cacheCreationTokens) {
+      // Cache writes cost 1.25x normal input
+      cacheCost += (usage.cacheCreationTokens / 1_000_000) * pricing.input * 1.25;
+    }
+    if (usage.cacheReadTokens) {
+      // Cache reads cost 0.1x normal input (90% discount!)
+      cacheCost += (usage.cacheReadTokens / 1_000_000) * pricing.input * 0.1;
+    }
+
+    return inputCost + outputCost + cacheCost;
   }
 
   /**

@@ -4,7 +4,6 @@
 
 import { BaseLLMProvider } from "./BaseLLMProvider";
 import type {
-  LLMConfig,
   LLMRequest,
   LLMResponse,
   TokenUsage,

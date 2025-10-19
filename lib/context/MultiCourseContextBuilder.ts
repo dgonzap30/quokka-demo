@@ -37,11 +37,11 @@ export class MultiCourseContextBuilder {
    * @param options - Build options
    * @returns MultiCourseContext with detected courses and combined text
    */
-  buildContext(
+  async buildContext(
     userId: string,
     question: string,
     options?: ContextBuildOptions
-  ): MultiCourseContext {
+  ): Promise<MultiCourseContext> {
     const opts = this.normalizeOptions(options);
 
     // Auto-detect relevant courses
@@ -59,7 +59,7 @@ export class MultiCourseContextBuilder {
       const remainingTokens = opts.maxTokens - totalTokens;
       const perCourseTokenLimit = Math.floor(remainingTokens / (relevantCourses.length - courseContexts.length));
 
-      const context = builder.buildContext(question, {
+      const context = await builder.buildContext(question, {
         ...opts,
         maxTokens: perCourseTokenLimit,
       });
@@ -96,12 +96,12 @@ export class MultiCourseContextBuilder {
    * @param courseIds - Specific course IDs to include
    * @param options - Build options
    */
-  buildContextForCourses(
+  async buildContextForCourses(
     userId: string,
     question: string,
     courseIds: string[],
     options?: ContextBuildOptions
-  ): MultiCourseContext {
+  ): Promise<MultiCourseContext> {
     const opts = this.normalizeOptions(options);
 
     // Filter to specified courses
@@ -119,7 +119,7 @@ export class MultiCourseContextBuilder {
       const remainingTokens = opts.maxTokens - totalTokens;
       const perCourseTokenLimit = Math.floor(remainingTokens / (selectedCourses.length - courseContexts.length));
 
-      const context = builder.buildContext(question, {
+      const context = await builder.buildContext(question, {
         ...opts,
         maxTokens: perCourseTokenLimit,
       });

@@ -26,14 +26,14 @@ export { MultiCourseContextBuilder } from "./MultiCourseContextBuilder";
  * @param question - User's question
  * @param options - Build options
  */
-export function buildCourseContext(
+export async function buildCourseContext(
   course: Course,
   materials: CourseMaterial[],
   question: string,
   options?: ContextBuildOptions
-): CourseContext {
+): Promise<CourseContext> {
   const builder = new CourseContextBuilder(course, materials);
-  return builder.buildContext(question, options);
+  return await builder.buildContext(question, options);
 }
 
 /**
@@ -48,15 +48,15 @@ export function buildCourseContext(
  * @param question - User's question
  * @param options - Build options
  */
-export function buildMultiCourseContext(
+export async function buildMultiCourseContext(
   userId: string,
   courses: Course[],
   materials: CourseMaterial[],
   question: string,
   options?: ContextBuildOptions
-): MultiCourseContext {
+): Promise<MultiCourseContext> {
   const builder = new MultiCourseContextBuilder(courses, materials);
-  return builder.buildContext(userId, question, options);
+  return await builder.buildContext(userId, question, options);
 }
 
 /**
@@ -71,16 +71,16 @@ export function buildMultiCourseContext(
  * @param courseIds - Specific course IDs to include
  * @param options - Build options
  */
-export function buildContextForCourses(
+export async function buildContextForCourses(
   userId: string,
   courses: Course[],
   materials: CourseMaterial[],
   question: string,
   courseIds: string[],
   options?: ContextBuildOptions
-): MultiCourseContext {
+): Promise<MultiCourseContext> {
   const builder = new MultiCourseContextBuilder(courses, materials);
-  return builder.buildContextForCourses(userId, question, courseIds, options);
+  return await builder.buildContextForCourses(userId, question, courseIds, options);
 }
 
 /**
@@ -93,14 +93,14 @@ export function buildContextForCourses(
  * @param question - User's question
  * @param limit - Maximum number of courses to return (default: 3)
  */
-export function detectRelevantCourses(
+export async function detectRelevantCourses(
   courses: Course[],
   materials: CourseMaterial[],
   question: string,
   limit: number = 3
-): string[] {
+): Promise<string[]> {
   const builder = new MultiCourseContextBuilder(courses, materials);
-  const context = builder.buildContext("system", question, { maxMaterials: 1 });
+  const context = await builder.buildContext("system", question, { maxMaterials: 1 });
   return context.courseIds.slice(0, limit);
 }
 
