@@ -10,6 +10,7 @@ export interface Citation {
   title: string;
   type: string;
   materialId?: string;
+  url?: string; // Link to view the material (for frontend-only demo, this can be a placeholder)
 }
 
 export interface ParsedCitations {
@@ -76,10 +77,18 @@ export function parseCitations(responseText: string): ParsedCitations {
     const title = match[2].trim();
     const type = match[3].trim();
 
+    // Try to extract material ID from title
+    const materialId = extractMaterialId(title);
+
+    // Generate URL for material (placeholder for frontend-only demo)
+    const url = materialId ? `/materials/${materialId}` : undefined;
+
     citations.push({
       id,
       title,
       type,
+      materialId,
+      url,
     });
   }
 

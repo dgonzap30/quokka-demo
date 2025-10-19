@@ -8,7 +8,8 @@
 // Shows inline citations with material titles and types.
 
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Citation } from "@/lib/llm/utils/citations";
 
@@ -110,12 +111,38 @@ export function SourcesPanel({
 
               {/* Citation Details */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
-                  {citation.title}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  {formatCitationType(citation.type)}
-                </p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
+                      {citation.title}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {formatCitationType(citation.type)}
+                    </p>
+                  </div>
+
+                  {/* View Material Link */}
+                  {citation.url && (
+                    <Link
+                      href={citation.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        "flex-shrink-0 flex items-center gap-1",
+                        "px-2 py-1 rounded-md",
+                        "text-xs font-medium",
+                        "text-accent hover:text-accent-foreground",
+                        "hover:bg-accent/10",
+                        "transition-colors",
+                        "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
+                      )}
+                      aria-label={`View ${citation.title}`}
+                    >
+                      <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                      <span>View</span>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           ))}
