@@ -5,8 +5,8 @@
 // This file aggregates all API modules into a single client instance.
 // As modules are extracted from the monolithic client.ts, they are imported here.
 //
-// **Phase 3.1 Progress:** 7/9 modules extracted (auth, notifications, courses, materials, posts, conversations, ai-answers)
-// **Remaining:** threads, instructor
+// **Phase 3.1 Progress:** 8/9 modules extracted (auth, notifications, courses, materials, posts, conversations, ai-answers, threads)
+// **Remaining:** instructor
 
 import { authAPI } from "./auth";
 import { notificationsAPI } from "./notifications";
@@ -15,9 +15,9 @@ import { materialsAPI } from "./materials";
 import { postsAPI } from "./posts";
 import { conversationsAPI } from "./conversations";
 import { aiAnswersAPI } from "./ai-answers";
+import { threadsAPI } from "./threads";
 
 // TODO: Import remaining modules as they are extracted
-// import { threadsAPI } from "./threads";
 // import { instructorAPI } from "./instructor";
 
 // Temporary: Import all methods from original client.ts for non-extracted modules
@@ -40,7 +40,7 @@ import { api as legacyAPI } from "../client";
  * - ✅ posts (1 method)
  * - ✅ conversations (6 methods)
  * - ✅ ai-answers (5 methods)
- * - ⏳ threads (8 methods) - TODO
+ * - ✅ threads (8 methods)
  * - ⏳ instructor (8 methods) - TODO
  *
  * @example
@@ -91,16 +91,9 @@ export const api = {
   ...aiAnswersAPI,
 
   // ============================================
-  // Threads (TODO: Extract to threads.ts)
+  // Threads (Extracted Module)
   // ============================================
-  getCourseThreads: legacyAPI.getCourseThreads.bind(legacyAPI),
-  getThread: legacyAPI.getThread.bind(legacyAPI),
-  createThread: legacyAPI.createThread.bind(legacyAPI),
-  endorseThread: legacyAPI.endorseThread.bind(legacyAPI),
-  upvoteThread: legacyAPI.upvoteThread.bind(legacyAPI),
-  removeUpvote: legacyAPI.removeUpvote.bind(legacyAPI),
-  checkThreadDuplicates: legacyAPI.checkThreadDuplicates.bind(legacyAPI),
-  mergeThreads: legacyAPI.mergeThreads.bind(legacyAPI),
+  ...threadsAPI,
 
   // ============================================
   // Instructor Tools (TODO: Extract to instructor.ts)
