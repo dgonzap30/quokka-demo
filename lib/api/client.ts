@@ -64,6 +64,13 @@ import {
 
 import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
 import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
+import {
+  trackConversationCreated,
+  trackMessageSent,
+  trackResponseGenerated,
+  trackPreviewGenerated,
+  trackThreadCreated,
+} from "@/lib/store/metrics";
 
 // Legacy LLM imports removed - production uses AI SDK via /api/chat and /api/answer
 // These mock functions now use template fallback only
@@ -959,6 +966,9 @@ export const api = {
 
     addThread(newThread);
 
+    // Track metrics
+    trackThreadCreated();
+
     // Auto-generate AI answer for the new thread
     let aiAnswer: AIAnswer | null = null;
     try {
@@ -1444,6 +1454,9 @@ export const api = {
       aiAnswerId: aiAnswer.id,
       updatedAt: new Date().toISOString(),
     });
+
+    // Track metrics
+    trackPreviewGenerated();
 
     return aiAnswer;
   },
@@ -1987,6 +2000,9 @@ export const api = {
     };
 
     addConversation(newConversation);
+
+    // Track metrics
+    trackConversationCreated();
 
     return newConversation;
   },

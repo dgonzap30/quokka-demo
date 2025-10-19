@@ -4,6 +4,7 @@ import { useChat, type UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useEffect, useMemo, useState } from "react";
 import { getConversationMessages, addMessage } from "@/lib/store/localStore";
+import { trackMessageSent, trackResponseGenerated } from "@/lib/store/metrics";
 import { toast } from "sonner";
 import type { AIMessage } from "@/lib/models/types";
 
@@ -132,6 +133,9 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
         addMessage(aiMessage);
 
         onMessageAdded?.(aiMessage);
+
+        // Track metrics
+        trackResponseGenerated();
       }
 
       onStreamFinish?.();
@@ -170,6 +174,9 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
         const aiMessage = uiMessageToAIMessage(lastMessage, conversationId);
         addMessage(aiMessage);
         onMessageAdded?.(aiMessage);
+
+        // Track metrics
+        trackMessageSent();
       }
     }
   }, [chat.messages, conversationId, onMessageAdded]);
