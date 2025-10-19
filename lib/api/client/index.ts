@@ -5,19 +5,19 @@
 // This file aggregates all API modules into a single client instance.
 // As modules are extracted from the monolithic client.ts, they are imported here.
 //
-// **Phase 3.1 Progress:** 5/9 modules extracted (auth, notifications, courses, materials, posts)
-// **Remaining:** threads, ai-answers, conversations, instructor
+// **Phase 3.1 Progress:** 6/9 modules extracted (auth, notifications, courses, materials, posts, conversations)
+// **Remaining:** threads, ai-answers, instructor
 
 import { authAPI } from "./auth";
 import { notificationsAPI } from "./notifications";
 import { coursesAPI } from "./courses";
 import { materialsAPI } from "./materials";
 import { postsAPI } from "./posts";
+import { conversationsAPI } from "./conversations";
 
 // TODO: Import remaining modules as they are extracted
 // import { threadsAPI } from "./threads";
 // import { aiAnswersAPI } from "./ai-answers";
-// import { conversationsAPI } from "./conversations";
 // import { instructorAPI } from "./instructor";
 
 // Temporary: Import all methods from original client.ts for non-extracted modules
@@ -38,9 +38,9 @@ import { api as legacyAPI } from "../client";
  * - ✅ courses (5 methods)
  * - ✅ materials (2 methods)
  * - ✅ posts (1 method)
+ * - ✅ conversations (6 methods)
  * - ⏳ threads (8 methods) - TODO
  * - ⏳ ai-answers (5 methods) - TODO
- * - ⏳ conversations (6 methods) - TODO
  * - ⏳ instructor (8 methods) - TODO
  *
  * @example
@@ -81,6 +81,11 @@ export const api = {
   ...postsAPI,
 
   // ============================================
+  // Conversations (Extracted Module)
+  // ============================================
+  ...conversationsAPI,
+
+  // ============================================
   // Threads (TODO: Extract to threads.ts)
   // ============================================
   getCourseThreads: legacyAPI.getCourseThreads.bind(legacyAPI),
@@ -100,16 +105,6 @@ export const api = {
   getAIAnswer: legacyAPI.getAIAnswer.bind(legacyAPI),
   endorseAIAnswer: legacyAPI.endorseAIAnswer.bind(legacyAPI),
   bulkEndorseAIAnswers: legacyAPI.bulkEndorseAIAnswers.bind(legacyAPI),
-
-  // ============================================
-  // Conversations (TODO: Extract to conversations.ts)
-  // ============================================
-  createConversation: legacyAPI.createConversation.bind(legacyAPI),
-  getAIConversations: legacyAPI.getAIConversations.bind(legacyAPI),
-  getConversationMessages: legacyAPI.getConversationMessages.bind(legacyAPI),
-  sendMessage: legacyAPI.sendMessage.bind(legacyAPI),
-  deleteAIConversation: legacyAPI.deleteAIConversation.bind(legacyAPI),
-  convertConversationToThread: legacyAPI.convertConversationToThread.bind(legacyAPI),
 
   // ============================================
   // Instructor Tools (TODO: Extract to instructor.ts)
