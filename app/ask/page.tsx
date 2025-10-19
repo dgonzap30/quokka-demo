@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCurrentUser, useUserCourses, useCreateThread, useGenerateAIPreview } from "@/lib/api/hooks";
+import { useCurrentUser, useUserCourses, useCreateThread, useGenerateAIPreview, useCheckDuplicates } from "@/lib/api/hooks";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AIAnswerCard } from "@/components/course/ai-answer-card";
+import { DuplicateWarningDialog } from "@/components/course/duplicate-warning-dialog";
+import type { SimilarThread } from "@/lib/models/types";
 
 function AskQuestionForm() {
   const router = useRouter();
@@ -20,6 +22,7 @@ function AskQuestionForm() {
   const { data: courses, isLoading: coursesLoading } = useUserCourses(user?.id);
   const createThreadMutation = useCreateThread();
   const previewMutation = useGenerateAIPreview();
+  const checkDuplicatesMutation = useCheckDuplicates();
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [title, setTitle] = useState("");
@@ -27,6 +30,8 @@ function AskQuestionForm() {
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [duplicates, setDuplicates] = useState<SimilarThread[]>([]);
 
   // Set preselected course when data loads
   useEffect(() => {
@@ -67,8 +72,8 @@ function AskQuestionForm() {
     );
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  // Function to actually create the thread (called after duplicate check or when proceeding anyway)
+  const createThread = async () => {
     if (!selectedCourseId || !title.trim() || !content.trim() || !user) return;
 
     setIsSubmitting(true);
@@ -91,6 +96,42 @@ function AskQuestionForm() {
     } catch (error) {
       console.error("Failed to create thread:", error);
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle form submission - check for duplicates first
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedCourseId || !title.trim() || !content.trim() || !user) return;
+
+    // Check for duplicate threads
+    setIsSubmitting(true);
+    try {
+      const foundDuplicates = await checkDuplicatesMutation.mutateAsync({
+        courseId: selectedCourseId,
+        title: title.trim(),
+        content: content.trim(),
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0),
+      });
+
+      setIsSubmitting(false);
+
+      // If duplicates found, show warning dialog
+      if (foundDuplicates.length > 0) {
+        setDuplicates(foundDuplicates);
+        setShowDuplicateWarning(true);
+      } else {
+        // No duplicates, proceed with posting
+        await createThread();
+      }
+    } catch (error) {
+      console.error("Failed to check for duplicates:", error);
+      setIsSubmitting(false);
+      // On error, proceed anyway (don't block posting)
+      await createThread();
     }
   };
 
@@ -318,6 +359,18 @@ function AskQuestionForm() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Duplicate Warning Dialog */}
+        <DuplicateWarningDialog
+          isOpen={showDuplicateWarning}
+          onClose={() => setShowDuplicateWarning(false)}
+          duplicates={duplicates}
+          onProceed={async () => {
+            setShowDuplicateWarning(false);
+            await createThread();
+          }}
+          isPosting={isSubmitting}
+        />
 
         {/* Tips */}
         <Card variant="glass">
