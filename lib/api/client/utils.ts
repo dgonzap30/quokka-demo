@@ -96,3 +96,23 @@ export function generateSnippet(content: string, keywords: string[], maxLength: 
 
   return snippet;
 }
+
+/**
+ * Calculate keyword match ratio between two keyword arrays
+ *
+ * Used for FAQ clustering and similarity detection.
+ *
+ * @param keywords1 - First set of keywords
+ * @param keywords2 - Second set of keywords
+ * @returns Match ratio (0-1), where 1 = perfect match
+ *
+ * @example
+ * ```ts
+ * const ratio = calculateMatchRatio(["binary", "search"], ["binary", "tree", "search"]);
+ * // Returns: 1.0 (both keywords from first set matched)
+ * ```
+ */
+export function calculateMatchRatio(keywords1: string[], keywords2: string[]): number {
+  const matches = keywords1.filter(k => keywords2.includes(k)).length;
+  return keywords1.length > 0 ? matches / keywords1.length : 0;
+}

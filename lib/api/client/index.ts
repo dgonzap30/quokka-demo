@@ -5,8 +5,8 @@
 // This file aggregates all API modules into a single client instance.
 // As modules are extracted from the monolithic client.ts, they are imported here.
 //
-// **Phase 3.1 Progress:** 8/9 modules extracted (auth, notifications, courses, materials, posts, conversations, ai-answers, threads)
-// **Remaining:** instructor
+// **Phase 3.1 Progress:** 9/9 modules extracted (auth, notifications, courses, materials, posts, conversations, ai-answers, threads, instructor) ✅
+// **Status:** All modules extracted - ready to remove legacy client.ts
 
 import { authAPI } from "./auth";
 import { notificationsAPI } from "./notifications";
@@ -16,13 +16,7 @@ import { postsAPI } from "./posts";
 import { conversationsAPI } from "./conversations";
 import { aiAnswersAPI } from "./ai-answers";
 import { threadsAPI } from "./threads";
-
-// TODO: Import remaining modules as they are extracted
-// import { instructorAPI } from "./instructor";
-
-// Temporary: Import all methods from original client.ts for non-extracted modules
-// These will be removed as modules are extracted
-import { api as legacyAPI } from "../client";
+import { instructorAPI } from "./instructor";
 
 /**
  * Main API client - Aggregated from domain modules
@@ -41,7 +35,7 @@ import { api as legacyAPI } from "../client";
  * - ✅ conversations (6 methods)
  * - ✅ ai-answers (5 methods)
  * - ✅ threads (8 methods)
- * - ⏳ instructor (8 methods) - TODO
+ * - ✅ instructor (9 methods)
  *
  * @example
  * ```ts
@@ -96,15 +90,7 @@ export const api = {
   ...threadsAPI,
 
   // ============================================
-  // Instructor Tools (TODO: Extract to instructor.ts)
+  // Instructor (Extracted Module)
   // ============================================
-  getStudentDashboard: legacyAPI.getStudentDashboard.bind(legacyAPI),
-  getInstructorDashboard: legacyAPI.getInstructorDashboard.bind(legacyAPI),
-  getFrequentlyAskedQuestions: legacyAPI.getFrequentlyAskedQuestions.bind(legacyAPI),
-  getTrendingTopics: legacyAPI.getTrendingTopics.bind(legacyAPI),
-  getInstructorInsights: legacyAPI.getInstructorInsights.bind(legacyAPI),
-  searchQuestions: legacyAPI.searchQuestions.bind(legacyAPI),
-  getResponseTemplates: legacyAPI.getResponseTemplates.bind(legacyAPI),
-  saveResponseTemplate: legacyAPI.saveResponseTemplate.bind(legacyAPI),
-  deleteResponseTemplate: legacyAPI.deleteResponseTemplate.bind(legacyAPI),
+  ...instructorAPI,
 };
