@@ -378,7 +378,7 @@ export function QuokkaAssistantModal({
             {/* Header */}
             <DialogHeader className="p-4 border-b border-[var(--border-glass)] space-y-3">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full ai-gradient flex items-center justify-center shrink-0">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1">

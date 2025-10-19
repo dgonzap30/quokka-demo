@@ -77,7 +77,7 @@ export function QDSMessage({
           "h-10 w-10 shrink-0 ring-2",
           isUser
             ? "bg-accent/10 ring-accent/20"
-            : "ai-gradient ring-primary/20"
+            : "bg-gradient-to-br from-primary to-accent ring-primary/20"
         )}>
           <AvatarFallback className={cn(
             "text-sm font-medium",
