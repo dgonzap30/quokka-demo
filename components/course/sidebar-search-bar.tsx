@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Search, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export interface SidebarSearchBarProps {
@@ -102,48 +103,50 @@ export function SidebarSearchBar({
   };
 
   return (
-    <div
-      className={cn(
-        "relative flex items-center gap-2 px-3 py-2 border-b border-glass",
-        className
-      )}
-    >
-      {/* Search Icon */}
-      <Search
-        className="h-4 w-4 text-muted-foreground flex-shrink-0"
-        aria-hidden="true"
-      />
+    <div className={cn("space-y-1.5", className)}>
+      {/* Visible Label for Accessibility */}
+      <Label htmlFor="search-threads" className="sr-only">
+        Search Threads
+      </Label>
 
-      {/* Search Input */}
-      <input
-        type="search"
-        value={localValue}
-        onChange={handleChange}
-        placeholder={placeholder}
-        className={cn(
-          "flex-1 bg-transparent text-sm placeholder:text-muted-foreground",
-          "focus:outline-none focus:ring-0",
-          "glass-text"
-        )}
-        aria-label="Search threads"
-        autoComplete="off"
-        spellCheck="false"
-      />
+      <div className="relative flex items-center gap-2 px-3 py-2 border-b border-glass">
+        {/* Search Icon */}
+        <Search
+          className="h-4 w-4 text-muted-foreground flex-shrink-0"
+          aria-hidden="true"
+        />
 
-      {/* Clear Button */}
-      {localValue && (
-        <button
-          type="button"
-          onClick={handleClear}
+        {/* Search Input */}
+        <input
+          id="search-threads"
+          type="search"
+          value={localValue}
+          onChange={handleChange}
+          placeholder={placeholder}
           className={cn(
-            "flex-shrink-0 p-1 rounded hover:bg-glass-medium transition-colors",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            "flex-1 bg-transparent text-sm placeholder:text-muted-foreground",
+            "focus:outline-none focus:ring-0",
+            "glass-text"
           )}
-          aria-label="Clear search"
-        >
-          <X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-        </button>
-      )}
+          autoComplete="off"
+          spellCheck="false"
+        />
+
+        {/* Clear Button */}
+        {localValue && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className={cn(
+              "flex-shrink-0 p-1 rounded hover:bg-glass-medium transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            )}
+            aria-label="Clear search"
+          >
+            <X className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

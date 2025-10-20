@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Search, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -78,48 +79,54 @@ export function QuickSearchBar({
   }, [onSearch]);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("space-y-1.5", className)}>
+      {/* Visible Label for Accessibility */}
+      <Label htmlFor="instructor-search-input" className="sr-only">
+        Quick Search
+      </Label>
+
       <div className="relative">
-        <Search
-          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-          aria-hidden="true"
-        />
-        <Input
-          id="instructor-search-input"
-          type="text"
-          value={localValue}
-          onChange={(e) => setLocalValue(e.target.value)}
-          placeholder={placeholder}
-          className="pl-9 pr-20"
-          aria-label="Search questions"
-          aria-describedby={isLoading ? "search-status" : undefined}
-        />
-        <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
-          {isLoading && (
-            <Loader2
-              className="h-4 w-4 animate-spin text-muted-foreground"
-              aria-hidden="true"
-            />
-          )}
-          {localValue && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleClear}
-              className="h-6 w-6 p-0"
-              aria-label="Clear search"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          )}
+        <div className="relative">
+          <Search
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            id="instructor-search-input"
+            type="text"
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            placeholder={placeholder}
+            className="pl-9 pr-20"
+            aria-describedby={isLoading ? "search-status" : undefined}
+          />
+          <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
+            {isLoading && (
+              <Loader2
+                className="h-4 w-4 animate-spin text-muted-foreground"
+                aria-hidden="true"
+              />
+            )}
+            {localValue && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleClear}
+                className="h-6 w-6 p-0"
+                aria-label="Clear search"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
+        {isLoading && (
+          <span id="search-status" className="sr-only" role="status">
+            Searching questions...
+          </span>
+        )}
       </div>
-      {isLoading && (
-        <span id="search-status" className="sr-only" role="status">
-          Searching questions...
-        </span>
-      )}
     </div>
   );
 }
