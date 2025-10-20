@@ -337,7 +337,6 @@ async function seed() {
         userId: template.userId,
         title: template.title,
         content: template.content,
-        category: template.category,
         tags: template.tags ? JSON.stringify(template.tags) : null,
         courseId: template.courseId || null,
         createdAt: template.createdAt,

@@ -20,14 +20,11 @@ export default function InstructorError({
       <ErrorState
         title="Failed to load instructor dashboard"
         message="There was a problem loading the instructor dashboard. Please try again."
-        action={
-          <div className="flex gap-2">
-            <Button onClick={reset}>Try Again</Button>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>
-              Back to Home
-            </Button>
-          </div>
-        }
+        onRetry={reset}
+        fallbackAction={{
+          label: "Back to Home",
+          onClick: () => window.location.href = '/',
+        }}
       />
     </div>
   );

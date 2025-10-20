@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
 
@@ -53,8 +54,28 @@ export function ThreadModal({
   threadId,
   className,
 }: ThreadModalProps) {
+  const triggerRef = React.useRef<HTMLElement | null>(null);
+
+  // Store the trigger element when modal opens (WCAG 2.4.3 Level A)
+  React.useEffect(() => {
+    if (open && !triggerRef.current) {
+      triggerRef.current = document.activeElement as HTMLElement;
+    }
+  }, [open]);
+
+  // Return focus to trigger element when modal closes
+  const handleClose = () => {
+    onOpenChange(false);
+    setTimeout(() => {
+      if (triggerRef.current) {
+        triggerRef.current.focus();
+        triggerRef.current = null;
+      }
+    }, 100);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         className={`flex flex-col max-w-[95vw] lg:max-w-7xl h-[95vh] glass-panel-strong p-0 ${className || ''}`}
         showCloseButton={false}
@@ -69,7 +90,7 @@ export function ThreadModal({
         <div className="flex-1 min-h-0 overflow-y-auto sidebar-scroll">
           <ThreadDetailPanel
             threadId={threadId}
-            onClose={() => onOpenChange(false)}
+            onClose={handleClose}
           />
         </div>
       </DialogContent>

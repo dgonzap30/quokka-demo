@@ -20,14 +20,11 @@ export default function DashboardError({
       <ErrorState
         title="Failed to load dashboard"
         message="There was a problem loading your dashboard. Please try again."
-        action={
-          <div className="flex gap-2">
-            <Button onClick={reset}>Try Again</Button>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>
-              Refresh
-            </Button>
-          </div>
-        }
+        onRetry={reset}
+        fallbackAction={{
+          label: "Back to Home",
+          onClick: () => window.location.href = '/',
+        }}
       />
     </div>
   );

@@ -20,14 +20,11 @@ export default function ThreadError({
       <ErrorState
         title="Failed to load thread"
         message="This thread could not be loaded. It may have been deleted or you may not have permission to view it."
-        action={
-          <div className="flex gap-2">
-            <Button onClick={reset}>Try Again</Button>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>
-              Back to Home
-            </Button>
-          </div>
-        }
+        onRetry={reset}
+        fallbackAction={{
+          label: "Back to Home",
+          onClick: () => window.location.href = '/',
+        }}
       />
     </div>
   );

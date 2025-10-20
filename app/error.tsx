@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { ErrorState } from '@/components/ui/error-state';
 
 export default function GlobalError({
@@ -24,14 +23,11 @@ export default function GlobalError({
             <ErrorState
               title="Something went wrong"
               message={error.message || 'An unexpected error occurred. Please try again.'}
-              action={
-                <div className="flex gap-2">
-                  <Button onClick={reset}>Try Again</Button>
-                  <Button variant="outline" onClick={() => window.location.href = '/'}>
-                    Go Home
-                  </Button>
-                </div>
-              }
+              onRetry={reset}
+              fallbackAction={{
+                label: "Go Home",
+                onClick: () => window.location.href = '/',
+              }}
             />
           </div>
         </div>

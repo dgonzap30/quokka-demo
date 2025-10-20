@@ -20,14 +20,11 @@ export default function AskError({
       <ErrorState
         title="Failed to load question form"
         message="There was a problem loading the question form. Please try again."
-        action={
-          <div className="flex gap-2">
-            <Button onClick={reset}>Try Again</Button>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>
-              Back to Home
-            </Button>
-          </div>
-        }
+        onRetry={reset}
+        fallbackAction={{
+          label: "Back to Home",
+          onClick: () => window.location.href = '/',
+        }}
       />
     </div>
   );
