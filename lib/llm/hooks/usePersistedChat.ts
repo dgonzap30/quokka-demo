@@ -137,6 +137,14 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
       // Save assistant message to localStorage after streaming completes
       if (conversationId && message.role === "assistant") {
         const aiMessage = uiMessageToAIMessage(message, conversationId);
+
+        // Skip if content is empty (validation requirement: min 1 character)
+        if (!aiMessage.content || aiMessage.content.trim().length === 0) {
+          console.warn('[usePersistedChat] Skipping message with empty content');
+          onStreamFinish?.();
+          return;
+        }
+
         addMessage(aiMessage);
 
         // Persist to backend database
