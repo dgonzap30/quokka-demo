@@ -197,7 +197,7 @@ export async function conversationsRoutes(fastify: FastifyInstance) {
       const messages = await conversationsRepository.findMessages(conversationId);
 
       return {
-        messages,
+        messages: messages as any,
       };
     }
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser, useCreateThread, useGenerateAIPreview, useCheckDuplicates } from "@/lib/api/hooks";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -48,6 +48,31 @@ export function AskQuestionModal({
   const [showPreview, setShowPreview] = useState(false);
   const [similarThreads, setSimilarThreads] = useState<SimilarThread[]>([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+
+  // Focus management (WCAG 2.4.3 Level A)
+  const triggerElementRef = useRef<HTMLElement | null>(null);
+
+  // Capture trigger element when modal opens
+  useEffect(() => {
+    if (isOpen && !showPreview && !triggerElementRef.current) {
+      triggerElementRef.current = document.activeElement as HTMLElement;
+    }
+  }, [isOpen, showPreview]);
+
+  // Return focus to trigger element when modal fully closes
+  useEffect(() => {
+    if (!isOpen && !showPreview && !showDuplicateWarning) {
+      // Modal is fully closed, return focus
+      if (triggerElementRef.current) {
+        setTimeout(() => {
+          if (triggerElementRef.current) {
+            triggerElementRef.current.focus();
+            triggerElementRef.current = null;
+          }
+        }, 100);
+      }
+    }
+  }, [isOpen, showPreview, showDuplicateWarning]);
 
   // Reset form when modal closes
   const handleClose = () => {
