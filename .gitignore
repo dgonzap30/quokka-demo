@@ -42,3 +42,16 @@ next-env.d.ts
 
 # Local Netlify folder
 .netlify
+
+# Backend
+backend/node_modules/
+backend/dev.db
+backend/dev.db-shm
+backend/dev.db-wal
+backend/cookies.txt
+
+# Test artifacts
+.playwright-mcp/
+
+# Local task context
+doccloud/
