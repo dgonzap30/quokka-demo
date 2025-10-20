@@ -278,6 +278,7 @@ export function useCourseMaterials(courseId: string | undefined) {
     enabled: !!courseId,
     staleTime: 10 * 60 * 1000, // 10 minutes (materials are static)
     gcTime: 15 * 60 * 1000,    // 15 minutes
+    refetchOnWindowFocus: false, // Static content, no need to refetch
   });
 }
 
@@ -381,8 +382,8 @@ export function useThread(threadId: string | undefined) {
     queryKey: threadId ? queryKeys.thread(threadId) : ["thread"],
     queryFn: () => (threadId ? api.getThread(threadId) : Promise.resolve(null)),
     enabled: !!threadId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes (threads update via mutations)
+    gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 }
 
@@ -492,6 +493,7 @@ export function useAIAnswer(threadId: string | undefined) {
     enabled: !!threadId,
     staleTime: 10 * 60 * 1000, // 10 minutes (AI content is immutable)
     gcTime: 15 * 60 * 1000,     // 15 minutes (keep in cache longer)
+    refetchOnWindowFocus: false, // Immutable content, no need to refetch
   });
 }
 
@@ -612,8 +614,8 @@ export function useInstructorInsights(userId: string | undefined) {
     queryKey: userId ? queryKeys.instructorInsights(userId) : ["instructorInsights"],
     queryFn: () => (userId ? api.getInstructorInsights(userId) : Promise.resolve([])),
     enabled: !!userId,
-    staleTime: 1 * 60 * 1000, // 1 minute (near-real-time)
-    gcTime: 3 * 60 * 1000,    // 3 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes (analytics don't need real-time updates)
+    gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 }
 
@@ -695,6 +697,7 @@ export function useResponseTemplates(userId: string | undefined) {
     enabled: !!userId,
     staleTime: Infinity,      // Immutable until user edits
     gcTime: 15 * 60 * 1000,   // 15 minutes
+    refetchOnWindowFocus: false, // User-managed templates, no need to refetch
   });
 }
 
@@ -897,6 +900,7 @@ export function useConversationMessages(conversationId: string | undefined) {
     enabled: !!conversationId,
     staleTime: 2 * 60 * 1000,     // 2 minutes - rely on mutation invalidations
     gcTime: 5 * 60 * 1000,        // 5 minutes
+    refetchOnWindowFocus: false,  // Append-only messages, rely on mutation invalidation
   });
 }
 
@@ -1303,7 +1307,7 @@ export function useInstructorMetrics(
   return useQuery({
     queryKey: ['instructorMetrics', courseId, timeRange],
     queryFn: () => api.getInstructorMetrics(courseId, timeRange),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes (aggregated metrics, slow-changing)
+    gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 }
