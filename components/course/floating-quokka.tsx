@@ -364,7 +364,7 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
           {/* Post as Thread Button */}
           {isValidConversation(messages) && (
             <Button
-              variant="glass"
+              variant="ghost"
               size="default"
               onClick={() => setShowPostModal(true)}
               className="w-full mb-2 min-h-[44px] justify-start"
