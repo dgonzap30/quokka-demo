@@ -105,7 +105,7 @@ export async function coursesRoutes(fastify: FastifyInstance) {
       const enrollments = await enrollmentsRepository.findByUserId(userId);
 
       return {
-        items: enrollments,
+        items: enrollments as any,
       };
     }
   );

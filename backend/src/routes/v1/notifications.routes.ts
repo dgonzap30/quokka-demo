@@ -57,7 +57,7 @@ export async function notificationsRoutes(fastify: FastifyInstance) {
       const unreadCount = await notificationsRepository.countUnread(userId);
 
       return {
-        notifications,
+        notifications: notifications as any,
         unreadCount,
       };
     }
@@ -136,7 +136,7 @@ export async function notificationsRoutes(fastify: FastifyInstance) {
       const unreadCount = await notificationsRepository.countUnread(userId);
 
       return {
-        notifications,
+        notifications: notifications as any,
         unreadCount,
       };
     }
@@ -172,7 +172,7 @@ export async function notificationsRoutes(fastify: FastifyInstance) {
         throw new NotFoundError("Notification");
       }
 
-      return updated;
+      return updated as any;
     }
   );
 

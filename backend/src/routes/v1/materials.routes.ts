@@ -65,7 +65,7 @@ export async function materialsRoutes(fastify: FastifyInstance) {
       });
 
       return {
-        items: sorted,
+        items: sorted as any,
       };
     }
   );
@@ -96,7 +96,7 @@ export async function materialsRoutes(fastify: FastifyInstance) {
         throw new NotFoundError("Material");
       }
 
-      return material;
+      return material as any;
     }
   );
 
@@ -142,7 +142,7 @@ export async function materialsRoutes(fastify: FastifyInstance) {
       });
 
       return {
-        items: sorted,
+        items: sorted as any,
       };
     }
   );
@@ -184,7 +184,7 @@ export async function materialsRoutes(fastify: FastifyInstance) {
       );
 
       return {
-        results,
+        results: results as any,
       };
     }
   );

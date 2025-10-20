@@ -45,7 +45,7 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       const templates = await instructorRepository.findByUserId(userId);
 
       return {
-        templates,
+        templates: templates as any,
       };
     }
   );
@@ -235,7 +235,7 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       const templates = await instructorRepository.findByUserId(userId);
 
       return {
-        templates,
+        templates: templates as any,
       };
     }
   );
