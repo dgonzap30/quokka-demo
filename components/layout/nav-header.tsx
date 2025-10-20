@@ -1,14 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCurrentUser, useLogout, useCourse, useStudentDashboard } from "@/lib/api/hooks";
 import { GlobalNavBar } from "@/components/layout/global-nav-bar";
 import { CourseContextBar } from "@/components/layout/course-context-bar";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
-import { QuokkaAssistantModal } from "@/components/ai/quokka-assistant-modal";
 import { CourseSelectionModal } from "@/components/course/course-selection-modal";
 import { getNavContext } from "@/lib/utils/nav-config";
+
+// Lazy load AI Assistant Modal (only loads when user opens it)
+const QuokkaAssistantModal = dynamic(
+  () => import("@/components/ai/quokka-assistant-modal").then(mod => ({ default: mod.QuokkaAssistantModal })),
+  { ssr: false }
+);
 
 export function NavHeader() {
   const router = useRouter();
