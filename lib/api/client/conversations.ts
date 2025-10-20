@@ -3,6 +3,7 @@
 // ============================================
 //
 // Handles AI conversation creation, messaging, and management
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type {
   AIConversation,
@@ -30,6 +31,8 @@ import {
 import { trackConversationCreated } from "@/lib/store/metrics";
 
 import { delay, generateId } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet, httpPost, httpDelete } from "./http.client";
 
 /**
  * Simple fallback message when AI SDK is unavailable
@@ -73,6 +76,30 @@ export const conversationsAPI = {
   async createConversation(
     input: CreateConversationInput
   ): Promise<AIConversation> {
+    // Check feature flag for backend
+    if (useBackendFor('conversations')) {
+      try {
+        // Call backend endpoint
+        const conversation = await httpPost<AIConversation>(
+          `/api/v1/conversations`,
+          {
+            userId: input.userId,
+            courseId: input.courseId || null,
+            title: input.title || "New Conversation",
+          }
+        );
+
+        // Track metrics
+        trackConversationCreated();
+
+        return conversation;
+      } catch (error) {
+        console.error('[Conversations] Backend create failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100 + Math.random() * 50); // 100-150ms
     seedData();
 
@@ -112,6 +139,21 @@ export const conversationsAPI = {
    * ```
    */
   async getAIConversations(userId: string): Promise<AIConversation[]> {
+    // Check feature flag for backend
+    if (useBackendFor('conversations')) {
+      try {
+        // Call backend endpoint
+        const response = await httpGet<{ conversations: AIConversation[] }>(
+          `/api/v1/users/${userId}/conversations`
+        );
+        return response.conversations;
+      } catch (error) {
+        console.error('[Conversations] Backend list failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(200 + Math.random() * 100); // 200-300ms
     seedData();
 
@@ -136,10 +178,71 @@ export const conversationsAPI = {
    * ```
    */
   async getConversationMessages(conversationId: string): Promise<AIMessage[]> {
+    // Check feature flag for backend
+    if (useBackendFor('conversations')) {
+      try {
+        // Call backend endpoint
+        const response = await httpGet<{ messages: AIMessage[] }>(
+          `/api/v1/conversations/${conversationId}/messages`
+        );
+        return response.messages;
+      } catch (error) {
+        console.error('[Conversations] Backend get messages failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100 + Math.random() * 100); // 100-200ms
     seedData();
 
     return getMessagesFromStore(conversationId);
+  },
+
+  /**
+   * Create a message in a conversation (backend only)
+   *
+   * Persists a single message to the database. Used by usePersistedChat
+   * to sync localStorage messages with the backend.
+   *
+   * @param message - Message object to persist
+   * @param userId - ID of the user creating the message
+   * @returns Created message
+   *
+   * @example
+   * ```ts
+   * await conversationsAPI.createMessage({
+   *   id: "msg-123",
+   *   conversationId: "conv-456",
+   *   role: "user",
+   *   content: "What is binary search?",
+   *   timestamp: "2025-10-19T12:00:00Z"
+   * }, "user-123");
+   * ```
+   */
+  async createMessage(message: AIMessage, userId: string): Promise<AIMessage> {
+    // Only use backend if enabled
+    if (useBackendFor('conversations')) {
+      try {
+        // Call backend endpoint
+        const response = await httpPost<{ userMessage: AIMessage }>(
+          `/api/v1/conversations/${message.conversationId}/messages`,
+          {
+            userId,
+            role: message.role,
+            content: message.content,
+          }
+        );
+        return response.userMessage;
+      } catch (error) {
+        console.error('[Conversations] Backend createMessage failed:', error);
+        // Fall through to localStorage
+      }
+    }
+
+    // Mock fallback - just save to localStorage
+    addMessage(message);
+    return message;
   },
 
   /**
@@ -272,6 +375,19 @@ export const conversationsAPI = {
    * ```
    */
   async deleteAIConversation(conversationId: string): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('conversations')) {
+      try {
+        // Call backend endpoint
+        await httpDelete<void>(`/api/v1/conversations/${conversationId}`);
+        return;
+      } catch (error) {
+        console.error('[Conversations] Backend delete failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100); // Quick action
     seedData();
 
@@ -307,6 +423,31 @@ export const conversationsAPI = {
     userId: string,
     courseId: string
   ): Promise<{ thread: Thread; aiAnswer: AIAnswer | null }> {
+    // Check feature flag for backend
+    if (useBackendFor('conversations')) {
+      try {
+        // Call backend endpoint
+        const response = await httpPost<{ threadId: string; aiAnswerId: string | null }>(
+          `/api/v1/conversations/${conversationId}/convert-to-thread`,
+          {
+            userId,
+            courseId,
+          }
+        );
+
+        // Note: Backend returns IDs, we'd need to fetch the full objects
+        // For now, return a simplified response (frontend will need to refetch)
+        return {
+          thread: { id: response.threadId } as Thread,
+          aiAnswer: response.aiAnswerId ? { id: response.aiAnswerId } as AIAnswer : null,
+        };
+      } catch (error) {
+        console.error('[Conversations] Backend convert failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(300 + Math.random() * 200); // 300-500ms
     seedData();
 

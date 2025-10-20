@@ -144,6 +144,24 @@ export class AIAnswersRepository extends BaseRepository<
   }
 
   /**
+   * Get existing endorsement by user
+   */
+  async getEndorsement(aiAnswerId: string, userId: string) {
+    const [endorsement] = await db
+      .select()
+      .from(aiAnswerEndorsements)
+      .where(
+        and(
+          eq(aiAnswerEndorsements.aiAnswerId, aiAnswerId),
+          eq(aiAnswerEndorsements.userId, userId)
+        )
+      )
+      .limit(1);
+
+    return endorsement || null;
+  }
+
+  /**
    * Private: Enrich AI answer with citations and endorsements
    */
   private async enrichAIAnswer(aiAnswer: AIAnswer): Promise<AIAnswerWithDetails> {

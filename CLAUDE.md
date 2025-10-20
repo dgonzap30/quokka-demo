@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Product Name:** QuokkaQ Demo - Frontend-Only Academic Q&A Showcase
+**Product Name:** QuokkaQ - Full-Stack Academic Q&A Platform
 
-**Purpose:** A production-ready frontend demonstration of an AI-powered academic Q&A platform. Showcases discussion threads, instructor moderation tools, AI-generated answers with citations, and similar question suggestions - all without requiring backend infrastructure.
+**Purpose:** A production-ready AI-powered academic Q&A platform with a Next.js frontend and Fastify backend. Features discussion threads, instructor moderation tools, AI-generated answers with citations (via Vercel AI SDK), and similar question suggestions. Supports gradual migration from mock data to real backend via feature flags.
 
-**Development Philosophy:** Frontend-first with mock data, designed for easy backend integration. Emphasizes component reusability, type safety, and clean separation of concerns.
+**Development Philosophy:** Clean architecture with feature-flagged backend integration. Frontend uses modular API client layer for seamless mock/backend switching. Backend uses repository pattern with Drizzle ORM (SQLite dev, Postgres prod). Emphasizes type safety, component reusability, and production-ready patterns.
 
 **Key Features:**
 1. **Discussion Threads** - Browse, filter, and view Q&A threads with status tracking
@@ -68,9 +68,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Focus states and keyboard navigation
    - Meet **WCAG 2.2 AA** minimum
 
-8. **No Real Backend**
-   - Stay within mock API boundaries
-   - No network calls beyond project scope
+8. **Backend Integration**
+   - Use feature flags for gradual rollout
+   - Frontend API client supports both mock and HTTP backends
+   - Backend follows repository pattern with Drizzle ORM
+   - Session management via HTTP-only cookies
 
 ---
 
@@ -159,19 +161,24 @@ Copy to `context.md`:
 ## Architecture & Tech Stack
 
 ### Core Principles
-1. **Frontend-Only** - No backend required, all data mocked in-memory
-2. **Type Safety** - TypeScript strict mode throughout
+1. **Full-Stack Architecture** - Next.js frontend + Fastify backend with feature-flagged integration
+2. **Type Safety** - TypeScript strict mode throughout (frontend + backend)
 3. **Component Reusability** - Props-driven, no hardcoded values
-4. **Ready for Backend** - Clean API abstraction layer for easy swap
+4. **Production-Ready Backend** - Repository pattern, cursor pagination, session cookies
 
 | Layer              | Choice                                | Reason                                    |
 | ------------------ | ------------------------------------- | ----------------------------------------- |
-| **Framework**      | Next.js 15 + TypeScript               | App Router, Server Components, SSR        |
+| **Frontend Framework** | Next.js 15 + TypeScript           | App Router, Server Components, SSR        |
+| **Backend Framework**  | Fastify + TypeScript              | Fast, type-safe, plugin architecture      |
 | **Styling**        | Tailwind CSS v4                       | Utility-first, fast development           |
 | **Design System**  | Quokka Design System (QDS) v1.0       | Warm, approachable, academic-grade        |
 | **UI Components**  | shadcn/ui + Radix UI                  | Accessible, composable, customizable      |
 | **State**          | React Query                           | Caching, mutations, optimistic updates    |
-| **Data Layer**     | In-memory mock API                    | Simulates network delay, deterministic    |
+| **Database (Dev)** | SQLite + Drizzle ORM                  | Zero-config local development             |
+| **Database (Prod)**| Postgres + Drizzle ORM                | Production scalability with AWS RDS       |
+| **Data Layer**     | Feature-flagged (mock OR HTTP)        | Gradual backend migration                 |
+| **Session Mgmt**   | HTTP-only signed cookies              | Secure, stateless, Lambda-compatible      |
+| **AI/LLM**         | Vercel AI SDK (OpenAI/Anthropic/Google) | Streaming responses, tool calling, RAG |
 | **Fonts**          | Geist Sans & Mono                     | Modern, readable, variable fonts          |
 | **Icons**          | Lucide React                          | Lightweight, tree-shakeable               |
 
@@ -184,6 +191,7 @@ quokka-demo/
 │   ├── page.tsx                  # Threads list (home)
 │   ├── globals.css               # Design tokens, Tailwind
 │   ├── ask/                      # New question form
+│   ├── quokka/                   # AI chat interface
 │   ├── instructor/               # Dashboard with metrics
 │   └── threads/[id]/             # Thread detail + replies
 ├── components/                   # Feature components
@@ -194,26 +202,76 @@ quokka-demo/
 │   └── ui/                       # shadcn/ui primitives
 ├── lib/
 │   ├── api/
-│   │   ├── client.ts             # Mock API implementation
-│   │   └── hooks.ts              # React Query hooks
+│   │   ├── client/               # Modular API clients (9 modules)
+│   │   │   ├── index.ts          # Barrel export
+│   │   │   ├── auth.ts           # Auth module (feature-flagged)
+│   │   │   ├── threads.ts        # Threads module
+│   │   │   ├── posts.ts          # Posts module
+│   │   │   ├── courses.ts        # Courses module
+│   │   │   ├── materials.ts      # Materials module
+│   │   │   ├── ai-answers.ts     # AI answers module
+│   │   │   ├── conversations.ts  # Conversations module
+│   │   │   ├── instructor.ts     # Instructor module
+│   │   │   ├── notifications.ts  # Notifications module
+│   │   │   └── http.client.ts    # HTTP adapter (fetch wrapper)
+│   │   └── hooks.ts              # React Query hooks (stable)
+│   ├── config/
+│   │   └── features.ts           # Feature flag system
 │   ├── models/
-│   │   └── types.ts              # Core data models
+│   │   └── types.ts              # Core data models (frontend)
+│   ├── llm/                      # AI SDK integration
+│   │   ├── ai-sdk-providers.ts   # OpenAI/Anthropic/Google
+│   │   ├── tools/                # RAG tools (kb_search, kb_fetch)
+│   │   └── utils/                # Citation parsing
+│   ├── store/
+│   │   └── localStore.ts         # localStorage mock (fallback)
 │   └── utils.ts                  # Utilities (cn, formatters)
-├── mocks/                        # Seed data
+├── backend/                      # Fastify backend
+│   ├── src/
+│   │   ├── server.ts             # Fastify app entry
+│   │   ├── db/
+│   │   │   ├── schema.ts         # Drizzle schema (18 tables)
+│   │   │   ├── client.ts         # DB connection (SQLite/Postgres)
+│   │   │   ├── seed.ts           # Seed script
+│   │   │   └── migrate.ts        # Migration runner
+│   │   ├── repositories/         # Repository pattern (9 repos)
+│   │   │   ├── base.repository.ts
+│   │   │   ├── users.repository.ts
+│   │   │   ├── threads.repository.ts
+│   │   │   ├── posts.repository.ts
+│   │   │   └── ...
+│   │   ├── routes/v1/            # API endpoints (12/44 working)
+│   │   │   ├── auth.routes.ts    # 3 endpoints
+│   │   │   ├── threads.routes.ts # 4 endpoints
+│   │   │   ├── posts.routes.ts   # 2 endpoints
+│   │   │   ├── courses.routes.ts # 2 endpoints
+│   │   │   └── ...
+│   │   ├── plugins/              # Fastify plugins
+│   │   │   ├── session.plugin.ts # Session cookies
+│   │   │   ├── validation.plugin.ts # Zod validation
+│   │   │   └── error.plugin.ts   # Error handling
+│   │   ├── schemas/              # Zod schemas
+│   │   │   ├── threads.schema.ts
+│   │   │   └── ...
+│   │   └── utils/
+│   │       └── errors.ts         # Stable error codes
+│   ├── drizzle/                  # Migrations
+│   ├── dev.db                    # SQLite database (dev)
+│   ├── package.json
+│   └── tsconfig.json
+├── mocks/                        # Seed data (migrated to backend)
 │   ├── threads.json
 │   ├── users.json
 │   ├── ai-responses.json
-│   └── kb-docs.json
+│   └── course-materials.json
 ├── doccloud/                     # Agentic workflow context
-│   ├── tasks/<slug>/
+│   ├── tasks/production-backend/
 │   │   ├── context.md
 │   │   ├── research/
 │   │   ├── plans/
 │   │   └── artifacts/
 │   ├── TASK-TEMPLATE.md
 │   └── AGENT-TASK-TEMPLATE.md
-├── scripts/
-│   └── seed-demo.mjs
 └── README.md
 ```
 
@@ -224,23 +282,26 @@ quokka-demo/
 ### Local Development
 
 ```bash
-# Install dependencies
-npm install
+# Frontend (from root directory)
+npm install                       # Install dependencies
+npm run dev                       # Start dev server (localhost:3000)
+npm run build                     # Build for production
+npm start                         # Start production server
+npm run lint                      # Lint code
 
-# Start dev server (Turbopack enabled)
-npm run dev                       # localhost:3000
+# Backend (from backend/ directory)
+cd backend
+npm install                       # Install dependencies
+npm run dev                       # Start Fastify server (localhost:3001)
+npm run db:generate               # Generate migrations
+npm run db:migrate                # Run migrations
+npm run db:seed                   # Seed database with mock data
+npm run build                     # Build for production
+npm start                         # Start production server
 
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
-
-# Reseed mock data (if needed)
-npm run seed
+# Full-stack development (run both in separate terminals)
+# Terminal 1: npm run dev         # Frontend on :3000
+# Terminal 2: cd backend && npm run dev  # Backend on :3001
 ```
 
 ### Key Routes

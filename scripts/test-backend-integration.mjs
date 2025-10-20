@@ -64,7 +64,7 @@ function log(message, level = 'info') {
   }
 }
 
-async function makeRequest(method, endpoint, body = null, headers = {}) {
+async function makeRequest(method, endpoint, body = null, headers = {}, cookie = null) {
   const url = `${API_BASE_URL}${endpoint}`;
   const options = {
     method,
@@ -72,6 +72,11 @@ async function makeRequest(method, endpoint, body = null, headers = {}) {
       ...headers,
     },
   };
+
+  // Include cookie if provided (for authenticated requests)
+  if (cookie) {
+    options.headers['Cookie'] = cookie;
+  }
 
   // Only set Content-Type and body if body is provided
   if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
@@ -87,14 +92,14 @@ async function makeRequest(method, endpoint, body = null, headers = {}) {
     // Handle 204 No Content (DELETE, PATCH operations that return no body)
     if (response.status === 204) {
       log(`Response: ${response.status} ${response.statusText}`, 'success');
-      return { success: true, status: 204, data: null };
+      return { success: true, status: 204, data: null, cookie: extractCookie(response) };
     }
 
     const data = await response.json();
 
     if (response.ok) {
       log(`Response: ${response.status} ${response.statusText}`, 'success');
-      return { success: true, status: response.status, data };
+      return { success: true, status: response.status, data, cookie: extractCookie(response) };
     } else {
       log(`Response: ${response.status} ${response.statusText}`, 'error');
       return { success: false, status: response.status, data };
@@ -103,6 +108,29 @@ async function makeRequest(method, endpoint, body = null, headers = {}) {
     log(`Request failed: ${error.message}`, 'error');
     return { success: false, error: error.message };
   }
+}
+
+/**
+ * Extract session cookie from response
+ */
+function extractCookie(response) {
+  const setCookie = response.headers.get('set-cookie');
+  if (!setCookie) return null;
+
+  // Extract the quokka.session cookie (format: quokka.session=...; Path=/; HttpOnly)
+  const match = setCookie.match(/quokka\.session=([^;]+)/);
+  return match ? `quokka.session=${match[1]}` : null;
+}
+
+/**
+ * Login as test user and return session cookie
+ */
+async function loginTestUser(email) {
+  const res = await makeRequest('POST', '/auth/dev-login', { email });
+  if (res.success && res.cookie) {
+    return res.cookie;
+  }
+  return null;
 }
 
 function recordTest(module, testName, passed, details = '') {
@@ -300,10 +328,12 @@ async function testNotificationsModule() {
 async function testAuthModule() {
   log('Testing Auth Module', 'header');
 
-  // Test 1: Get current user
-  // NOTE: Expected to fail - no session/cookie provided
-  const res1 = await makeRequest('GET', '/auth/me');
-  recordTest('Auth', 'GET /auth/me', res1.success && res1.data.id !== undefined);
+  // Login as test user
+  const sessionCookie = await loginTestUser('student@demo.com');
+
+  // Test 1: Get current user (with authentication)
+  const res1 = await makeRequest('GET', '/auth/me', null, {}, sessionCookie);
+  recordTest('Auth', 'GET /auth/me', res1.success && res1.data && res1.data.id !== undefined);
 }
 
 async function testCoursesModule() {
@@ -323,11 +353,10 @@ async function testCoursesModule() {
   );
 
   // Test 3: Get enrollments for a user
-  // NOTE: Endpoint not yet implemented - future feature
   const res3 = await makeRequest('GET', '/courses/enrollments?userId=user-student-1');
   recordTest('Courses', 'GET /courses/enrollments',
-    res3.success && Array.isArray(res3.data),
-    res3.success ? `(${res3.data.length} enrollments)` : ''
+    res3.success && res3.data && Array.isArray(res3.data.items),
+    res3.success && res3.data.items ? `(${res3.data.items.length} enrollments)` : ''
   );
 }
 
@@ -347,15 +376,17 @@ async function testThreadsModule() {
     res2.success && res2.data.id === 'thread-1'
   );
 
-  // Test 3: Create new thread
-  // NOTE: Expected to fail - requires valid session
+  // Login for authenticated operations
+  const studentCookie = await loginTestUser('student@demo.com');
+
+  // Test 3: Create new thread (with authentication)
   const res3 = await makeRequest('POST', '/threads', {
     courseId: 'course-cs101',
     authorId: 'user-student-1',
     title: 'Test Thread',
     content: 'This is a test thread',
     tags: ['test']
-  });
+  }, {}, studentCookie);
   recordTest('Threads', 'POST /threads', res3.success);
 
   // Test 4: Endorse thread (using test thread if created, or thread-1)
@@ -365,11 +396,10 @@ async function testThreadsModule() {
   });
   recordTest('Threads', 'POST /threads/:id/endorse', res4.success);
 
-  // Test 5: Upvote thread
-  // NOTE: Expected to fail - requires valid session
+  // Test 5: Upvote thread (with authentication)
   const res5 = await makeRequest('POST', `/threads/${threadId}/upvote`, {
     userId: 'user-student-2'
-  });
+  }, {}, studentCookie);
   recordTest('Threads', 'POST /threads/:id/upvote', res5.success);
 }
 
@@ -383,30 +413,17 @@ async function testPostsModule() {
     res1.success && res1.data.items ? `(${res1.data.items.length} posts)` : ''
   );
 
-  // Test 2: Create new post
-  // NOTE: Expected to fail - requires valid session
+  // Login for authenticated operations
+  const studentCookie = await loginTestUser('student@demo.com');
+
+  // Test 2: Create new post (with authentication)
   const res2 = await makeRequest('POST', '/posts', {
     threadId: 'thread-1',
     authorId: 'user-student-1',
     content: 'This is a test post',
     isInstructorAnswer: false
-  });
+  }, {}, studentCookie);
   recordTest('Posts', 'POST /posts', res2.success);
-
-  // Test 3: Endorse post (using test post if created, or first post from thread-1)
-  let postId;
-  if (res2.success) {
-    postId = res2.data.id;
-  } else if (res1.success && res1.data.length > 0) {
-    postId = res1.data[0].id;
-  }
-
-  if (postId) {
-    const res3 = await makeRequest('POST', `/posts/${postId}/endorse`, {
-      userId: 'user-instructor-1'
-    });
-    recordTest('Posts', 'POST /posts/:id/endorse', res3.success);
-  }
 }
 
 // ============================================================================

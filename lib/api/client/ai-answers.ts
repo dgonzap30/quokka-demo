@@ -3,6 +3,7 @@
 // ============================================
 //
 // Handles AI answer generation, preview, and endorsements
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type {
   AIAnswer,
@@ -26,6 +27,8 @@ import {
 import { trackPreviewGenerated } from "@/lib/store/metrics";
 
 import { delay, generateId } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet, httpPost } from "./http.client";
 
 /**
  * AI Answers API methods
@@ -180,6 +183,25 @@ export const aiAnswersAPI = {
    * ```
    */
   async getAIAnswer(threadId: string): Promise<AIAnswer | null> {
+    // Check feature flag for backend
+    if (useBackendFor('aiAnswers')) {
+      try {
+        // Call backend endpoint
+        const aiAnswer = await httpGet<AIAnswer>(
+          `/api/v1/threads/${threadId}/ai-answer`
+        );
+        return aiAnswer;
+      } catch (error) {
+        // If 404, return null (no AI answer exists)
+        if (error instanceof Error && error.message.includes('404')) {
+          return null;
+        }
+        console.error('[AI Answers] Backend fetch failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(200 + Math.random() * 200); // 200-400ms
     seedData();
 
@@ -222,6 +244,25 @@ export const aiAnswersAPI = {
    * ```
    */
   async endorseAIAnswer(input: EndorseAIAnswerInput): Promise<AIAnswer> {
+    // Check feature flag for backend
+    if (useBackendFor('aiAnswers')) {
+      try {
+        // Call backend endpoint
+        const updatedAnswer = await httpPost<AIAnswer>(
+          `/api/v1/ai-answers/${input.aiAnswerId}/endorse`,
+          {
+            userId: input.userId,
+            isInstructor: input.isInstructor,
+          }
+        );
+        return updatedAnswer;
+      } catch (error) {
+        console.error('[AI Answers] Backend endorse failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100); // Quick action
     seedData();
 
@@ -295,6 +336,25 @@ export const aiAnswersAPI = {
   async bulkEndorseAIAnswers(
     input: BulkEndorseInput
   ): Promise<BulkActionResult> {
+    // Check feature flag for backend
+    if (useBackendFor('aiAnswers')) {
+      try {
+        // Call backend endpoint
+        const result = await httpPost<BulkActionResult>(
+          `/api/v1/ai-answers/bulk-endorse`,
+          {
+            aiAnswerIds: input.aiAnswerIds,
+            userId: input.userId,
+          }
+        );
+        return result;
+      } catch (error) {
+        console.error('[AI Answers] Backend bulk endorse failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(200 + Math.random() * 100); // 200-300ms (faster than sequential)
     seedData();
 

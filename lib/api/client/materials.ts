@@ -3,6 +3,7 @@
 // ============================================
 //
 // Handles course materials retrieval and search
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type {
   CourseMaterial,
@@ -16,6 +17,8 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay, extractKeywords, generateSnippet } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet, httpPost } from "./http.client";
 
 /**
  * Materials API methods
@@ -42,6 +45,22 @@ export const materialsAPI = {
    * ```
    */
   async getCourseMaterials(courseId: string): Promise<CourseMaterial[]> {
+    // Check feature flag for backend
+    if (useBackendFor('materials')) {
+      try {
+        // Call backend endpoint
+        const response = await httpGet<{ items: CourseMaterial[] }>(
+          `/api/v1/courses/${courseId}/materials`
+        );
+
+        return response.items;
+      } catch (error) {
+        console.error('[Materials] Backend fetch failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(); // 200-500ms
     seedData();
 
@@ -99,15 +118,37 @@ export const materialsAPI = {
   async searchCourseMaterials(
     input: SearchCourseMaterialsInput
   ): Promise<CourseMaterialSearchResult[]> {
-    await delay(200 + Math.random() * 100); // 200-300ms
-    seedData();
-
     const { courseId, query, types, limit = 20, minRelevance = 20 } = input;
 
     // Validate query length
     if (query.trim().length < 3) {
       throw new Error("Search query must be at least 3 characters");
     }
+
+    // Check feature flag for backend
+    if (useBackendFor('materials')) {
+      try {
+        // Call backend search endpoint
+        const response = await httpPost<{ results: CourseMaterialSearchResult[] }>(
+          `/api/v1/courses/${courseId}/materials/search`,
+          {
+            query,
+            types,
+            limit,
+            minRelevance,
+          }
+        );
+
+        return response.results;
+      } catch (error) {
+        console.error('[Materials] Backend search failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
+    await delay(200 + Math.random() * 100); // 200-300ms
+    seedData();
 
     // Extract keywords from query
     const queryKeywords = extractKeywords(query);

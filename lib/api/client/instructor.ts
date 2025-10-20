@@ -57,6 +57,8 @@ import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
 import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
 
 import { delay, generateId, extractKeywords, calculateMatchRatio } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet, httpPost, httpDelete } from "./http.client";
 
 /**
  * Instructor API methods
@@ -893,6 +895,21 @@ export const instructorAPI = {
    * ```
    */
   async getResponseTemplates(userId: string): Promise<ResponseTemplate[]> {
+    // Check feature flag for backend
+    if (useBackendFor('instructor')) {
+      try {
+        // Call backend endpoint
+        const response = await httpGet<{ templates: ResponseTemplate[] }>(
+          `/api/v1/users/${userId}/response-templates`
+        );
+        return response.templates;
+      } catch (error) {
+        console.error('[Instructor] Backend get templates failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100 + Math.random() * 50); // 100-150ms (fast)
     seedData();
 
@@ -922,6 +939,29 @@ export const instructorAPI = {
    * ```
    */
   async saveResponseTemplate(input: CreateResponseTemplateInput, userId: string): Promise<ResponseTemplate> {
+    // Check feature flag for backend
+    if (useBackendFor('instructor')) {
+      try {
+        // Call backend endpoint
+        // Note: Backend uses courseId, frontend uses category. Using "course-general" as fallback.
+        const response = await httpPost<ResponseTemplate>(
+          `/api/v1/response-templates`,
+          {
+            userId,
+            courseId: "course-general", // TODO: Get from context or make category-to-courseId mapping
+            title: input.title,
+            content: input.content,
+            tags: input.tags,
+          }
+        );
+        return response;
+      } catch (error) {
+        console.error('[Instructor] Backend save template failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100 + Math.random() * 50); // 100-150ms
     seedData();
 
@@ -954,6 +994,19 @@ export const instructorAPI = {
    * ```
    */
   async deleteResponseTemplate(templateId: string): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('instructor')) {
+      try {
+        // Call backend endpoint
+        await httpDelete<void>(`/api/v1/response-templates/${templateId}`);
+        return;
+      } catch (error) {
+        console.error('[Instructor] Backend delete template failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(50); // Quick action
     seedData();
 

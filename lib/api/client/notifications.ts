@@ -14,6 +14,8 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet, httpPost } from "./http.client";
 
 /**
  * Notifications API methods
@@ -39,6 +41,27 @@ export const notificationsAPI = {
     userId: string,
     courseId?: string
   ): Promise<Notification[]> {
+    // Check feature flag for backend
+    if (useBackendFor('notifications')) {
+      try {
+        // Build query params
+        const params = new URLSearchParams();
+        if (courseId) {
+          params.append('courseId', courseId);
+        }
+
+        // Call backend endpoint
+        const response = await httpGet<{ notifications: Notification[] }>(
+          `/api/v1/users/${userId}/notifications${params.toString() ? `?${params.toString()}` : ''}`
+        );
+        return response.notifications;
+      } catch (error) {
+        console.error('[Notifications] Backend fetch failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(200 + Math.random() * 200); // 200-400ms
     seedData();
 
@@ -60,6 +83,22 @@ export const notificationsAPI = {
    * ```
    */
   async markNotificationRead(notificationId: string): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('notifications')) {
+      try {
+        // Call backend endpoint
+        await httpPost<void>(
+          `/api/v1/notifications/${notificationId}/read`,
+          {}
+        );
+        return;
+      } catch (error) {
+        console.error('[Notifications] Backend mark read failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(50); // Quick action
     seedData();
 
@@ -85,6 +124,24 @@ export const notificationsAPI = {
     userId: string,
     courseId?: string
   ): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('notifications')) {
+      try {
+        // Call backend endpoint
+        await httpPost<void>(
+          `/api/v1/users/${userId}/notifications/read-all`,
+          {
+            courseId: courseId || null,
+          }
+        );
+        return;
+      } catch (error) {
+        console.error('[Notifications] Backend mark all read failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use localStorage
     await delay(100);
     seedData();
 

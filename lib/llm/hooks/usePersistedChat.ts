@@ -8,6 +8,7 @@ import { trackMessageSent, trackResponseGenerated } from "@/lib/store/metrics";
 import { trackRequest, getRateLimitStatus } from "@/lib/store/rateLimit";
 import { toast } from "sonner";
 import type { AIMessage } from "@/lib/models/types";
+import { api } from "@/lib/api/client";
 
 /**
  * Options for usePersistedChat hook
@@ -132,11 +133,18 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
     id: conversationId || undefined,
     messages: initialMessages,
     transport,
-    onFinish: ({ message }) => {
+    onFinish: async ({ message }) => {
       // Save assistant message to localStorage after streaming completes
       if (conversationId && message.role === "assistant") {
         const aiMessage = uiMessageToAIMessage(message, conversationId);
         addMessage(aiMessage);
+
+        // Persist to backend database
+        try {
+          await api.createMessage(aiMessage, userId);
+        } catch (error) {
+          console.error('[usePersistedChat] Failed to persist assistant message to backend:', error);
+        }
 
         onMessageAdded?.(aiMessage);
 
@@ -179,13 +187,19 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
       if (!alreadySaved) {
         const aiMessage = uiMessageToAIMessage(lastMessage, conversationId);
         addMessage(aiMessage);
+
+        // Persist to backend database
+        api.createMessage(aiMessage, userId).catch((error) => {
+          console.error('[usePersistedChat] Failed to persist user message to backend:', error);
+        });
+
         onMessageAdded?.(aiMessage);
 
         // Track metrics
         trackMessageSent();
       }
     }
-  }, [chat.messages, conversationId, onMessageAdded]);
+  }, [chat.messages, conversationId, userId, onMessageAdded]);
 
   // Wrap sendMessage with rate limit check
   const sendMessageWithRateLimit: typeof chat.sendMessage = async (input) => {

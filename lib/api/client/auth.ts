@@ -3,7 +3,7 @@
 // ============================================
 //
 // Handles user authentication, registration, and session management.
-// WARNING: This is a mock implementation for frontend-only demos.
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type {
   User,
@@ -25,13 +25,15 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay, generateId } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpPost, httpGet } from "./http.client";
 
 /**
  * Authentication API methods
  */
 export const authAPI = {
   /**
-   * Login with email and password
+   * Login with email and password (or email-only for dev-login)
    *
    * @param input - Login credentials
    * @returns AuthResult with session if successful
@@ -39,12 +41,44 @@ export const authAPI = {
    * @example
    * ```ts
    * const result = await authAPI.login({
-   *   email: "alice@example.com",
-   *   password: "password123"
+   *   email: "student@demo.com",
+   *   password: "password123" // optional for dev-login
    * });
    * ```
    */
   async login(input: LoginInput): Promise<AuthResult> {
+    // Check feature flag for backend
+    if (useBackendFor('auth')) {
+      try {
+        // Call backend dev-login endpoint (email-only)
+        const response = await httpPost<{ user: User; message: string }>(
+          '/api/v1/auth/dev-login',
+          { email: input.email }
+        );
+
+        // Backend sets cookie automatically, we just store user in session for UI
+        const session: AuthSession = {
+          user: response.user,
+          token: '', // Not needed with cookies
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date().toISOString(),
+        };
+
+        // Store in localStorage for UI consistency (not for auth)
+        setAuthSession(session);
+
+        return {
+          success: true,
+          session,
+          message: response.message,
+        };
+      } catch (error) {
+        console.error('[Auth] Backend login failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(300 + Math.random() * 200); // 300-500ms
 
     seedData(); // Ensure data is seeded
@@ -159,9 +193,22 @@ export const authAPI = {
   /**
    * Logout current user
    *
-   * Clears the current session from localStorage
+   * Clears the current session from localStorage and backend cookie
    */
   async logout(): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('auth')) {
+      try {
+        // Call backend logout endpoint
+        await httpPost('/api/v1/auth/logout', {});
+        // Continue to clear local session even if backend fails
+      } catch (error) {
+        console.error('[Auth] Backend logout failed:', error);
+        // Continue to clear local session
+      }
+    }
+
+    // Always clear localStorage (fallback or cleanup)
     await delay(50 + Math.random() * 50); // 50-100ms
     clearAuthSession();
   },
@@ -180,6 +227,29 @@ export const authAPI = {
    * ```
    */
   async getCurrentUser(): Promise<User | null> {
+    // Check feature flag for backend
+    if (useBackendFor('auth')) {
+      try {
+        // Call backend /me endpoint
+        const user = await httpGet<User>('/api/v1/auth/me');
+
+        // Store in localStorage for UI consistency
+        const session: AuthSession = {
+          user,
+          token: '',
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date().toISOString(),
+        };
+        setAuthSession(session);
+
+        return user;
+      } catch (error) {
+        console.error('[Auth] Backend getCurrentUser failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(200 + Math.random() * 200); // 200-400ms
 
     const session = getAuthSession();

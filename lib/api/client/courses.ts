@@ -3,6 +3,7 @@
 // ============================================
 //
 // Handles course retrieval, metrics, and insights
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type { Course, CourseMetrics, CourseInsight } from "@/lib/models/types";
 
@@ -16,6 +17,8 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet } from "./http.client";
 
 /**
  * Courses API methods
@@ -33,6 +36,20 @@ export const coursesAPI = {
    * ```
    */
   async getAllCourses(): Promise<Course[]> {
+    // Check feature flag for backend
+    if (useBackendFor('courses')) {
+      try {
+        // Call backend endpoint
+        const response = await httpGet<{ items: Course[] }>('/api/v1/courses');
+        // Backend already filters active courses and sorts them
+        return response.items;
+      } catch (error) {
+        console.error('[Courses] Backend getAllCourses failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay();
     seedData();
 
@@ -84,6 +101,19 @@ export const coursesAPI = {
    * ```
    */
   async getCourse(courseId: string): Promise<Course | null> {
+    // Check feature flag for backend
+    if (useBackendFor('courses')) {
+      try {
+        // Call backend endpoint
+        const course = await httpGet<Course>(`/api/v1/courses/${courseId}`);
+        return course;
+      } catch (error) {
+        console.error('[Courses] Backend getCourse failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay();
     seedData();
 

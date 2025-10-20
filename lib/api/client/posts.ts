@@ -3,12 +3,15 @@
 // ============================================
 //
 // Handles post creation and management
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type { Post, CreatePostInput } from "@/lib/models/types";
 
 import { seedData, addPost, updateThread } from "@/lib/store/localStore";
 
 import { delay, generateId } from "./utils";
+import { useBackendFor } from "@/lib/config/features";
+import { httpPost } from "./http.client";
 
 /**
  * Posts API methods
@@ -37,6 +40,22 @@ export const postsAPI = {
    * ```
    */
   async createPost(input: CreatePostInput, authorId: string): Promise<Post> {
+    // Check feature flag for backend
+    if (useBackendFor('posts')) {
+      try {
+        // Call backend endpoint
+        const post = await httpPost<Post>('/api/v1/posts', {
+          threadId: input.threadId,
+          content: input.content,
+        });
+        return post;
+      } catch (error) {
+        console.error('[Posts] Backend createPost failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(300 + Math.random() * 200); // 300-500ms
     seedData();
 

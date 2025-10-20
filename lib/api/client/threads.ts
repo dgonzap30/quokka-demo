@@ -3,6 +3,7 @@
 // ============================================
 //
 // Handles thread creation, retrieval, endorsements, and duplicate detection
+// Supports both backend (HTTP) and fallback (localStorage) modes via feature flags.
 
 import type {
   Thread,
@@ -32,6 +33,8 @@ import { findSimilarDocuments } from "@/lib/utils/similarity";
 
 import { delay, generateId } from "./utils";
 import { aiAnswersAPI } from "./ai-answers";
+import { useBackendFor } from "@/lib/config/features";
+import { httpGet, httpPost } from "./http.client";
 
 /**
  * Threads API methods
@@ -57,6 +60,30 @@ export const threadsAPI = {
    * ```
    */
   async getCourseThreads(courseId: string): Promise<ThreadWithAIAnswer[]> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint (returns paginated results)
+        const response = await httpGet<{
+          items: ThreadWithAIAnswer[];
+          nextCursor: string | null;
+          hasNextPage: boolean;
+        }>(`/api/v1/courses/${courseId}/threads?limit=100`);
+
+        // Extract items for backward compatibility
+        // Backend already returns threads with author, counts, etc.
+        // AI answers are not embedded yet (backend doesn't have that endpoint)
+        return response.items.map(thread => ({
+          ...thread,
+          aiAnswer: undefined, // AI answers not fetched from backend yet
+        }));
+      } catch (error) {
+        console.error('[Threads] Backend getCourseThreads failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay();
     seedData();
 
@@ -106,6 +133,33 @@ export const threadsAPI = {
   async getThread(
     threadId: string
   ): Promise<{ thread: Thread; posts: Post[]; aiAnswer: AIAnswer | null } | null> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Fetch thread and posts in parallel
+        const [thread, postsResponse] = await Promise.all([
+          httpGet<Thread>(`/api/v1/threads/${threadId}`),
+          httpGet<{
+            items: Post[];
+            nextCursor: string | null;
+            hasNextPage: boolean;
+          }>(`/api/v1/threads/${threadId}/posts?limit=100`),
+        ]);
+
+        // Backend increments view count automatically
+        // AI answer not fetched yet (no backend endpoint)
+        return {
+          thread,
+          posts: postsResponse.items,
+          aiAnswer: null, // AI answers not fetched from backend yet
+        };
+      } catch (error) {
+        console.error('[Threads] Backend getThread failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay();
     seedData();
 
@@ -159,6 +213,40 @@ export const threadsAPI = {
     input: CreateThreadInput,
     authorId: string
   ): Promise<{ thread: Thread; aiAnswer: AIAnswer | null }> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint to create thread
+        const thread = await httpPost<Thread>('/api/v1/threads', {
+          courseId: input.courseId,
+          title: input.title,
+          content: input.content,
+        });
+
+        // AI answer generation still happens in frontend (for now)
+        // This keeps the existing AI/LLM integration working
+        let aiAnswer: AIAnswer | null = null;
+        try {
+          aiAnswer = await aiAnswersAPI.generateAIAnswer({
+            threadId: thread.id,
+            courseId: input.courseId,
+            userId: authorId,
+            title: input.title,
+            content: input.content,
+            tags: input.tags,
+          });
+        } catch (error) {
+          console.error('[Threads] AI answer generation failed:', error);
+        }
+
+        return { thread, aiAnswer };
+      } catch (error) {
+        console.error('[Threads] Backend createThread failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(400 + Math.random() * 200); // 400-600ms
     seedData();
 
@@ -219,6 +307,19 @@ export const threadsAPI = {
    * ```
    */
   async endorseThread(threadId: string, userId: string): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint
+        await httpPost(`/api/v1/threads/${threadId}/endorse`, {});
+        return;
+      } catch (error) {
+        console.error('[Threads] Backend endorseThread failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(300 + Math.random() * 200); // 300-500ms
     seedData();
 
@@ -280,6 +381,19 @@ export const threadsAPI = {
    * ```
    */
   async upvoteThread(threadId: string, userId: string): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint (toggle upvote)
+        await httpPost(`/api/v1/threads/${threadId}/upvote`, {});
+        return;
+      } catch (error) {
+        console.error('[Threads] Backend upvoteThread failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(100); // 100ms (fast operation)
     seedData();
 
@@ -333,6 +447,19 @@ export const threadsAPI = {
    * ```
    */
   async removeUpvote(threadId: string, userId: string): Promise<void> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint (same as upvote - it toggles)
+        await httpPost(`/api/v1/threads/${threadId}/upvote`, {});
+        return;
+      } catch (error) {
+        console.error('[Threads] Backend removeUpvote failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(100); // 100ms (fast operation)
     seedData();
 
@@ -381,6 +508,25 @@ export const threadsAPI = {
   async checkThreadDuplicates(
     input: CreateThreadInput
   ): Promise<SimilarThread[]> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint
+        const response = await httpPost<SimilarThread[]>(
+          `/api/v1/courses/${input.courseId}/threads/check-duplicates`,
+          {
+            title: input.title,
+            content: input.content,
+          }
+        );
+        return response;
+      } catch (error) {
+        console.error('[Threads] Backend checkThreadDuplicates failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(200 + Math.random() * 200); // 200-400ms
     seedData();
 
@@ -448,6 +594,22 @@ export const threadsAPI = {
     targetId: string,
     userId: string
   ): Promise<Thread> {
+    // Check feature flag for backend
+    if (useBackendFor('threads')) {
+      try {
+        // Call backend endpoint
+        const mergedThread = await httpPost<Thread>('/api/v1/threads/merge', {
+          sourceId,
+          targetId,
+        });
+        return mergedThread;
+      } catch (error) {
+        console.error('[Threads] Backend mergeThreads failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback to localStorage (existing implementation)
     await delay(300 + Math.random() * 200); // 300-500ms
     seedData();
 
