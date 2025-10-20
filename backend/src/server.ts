@@ -16,6 +16,7 @@ import validationPlugin from "./plugins/validation.plugin.js";
 import errorPlugin from "./plugins/error.plugin.js";
 
 // Routes
+import healthRoutes from "./routes/v1/health.routes.js";
 import { authRoutes } from "./routes/v1/auth.routes.js";
 import { threadsRoutes } from "./routes/v1/threads.routes.js";
 import { postsRoutes } from "./routes/v1/posts.routes.js";
@@ -108,6 +109,9 @@ fastify.get("/api/v1/_status", async (request, reply) => {
 // ============================================================================
 // API ROUTES
 // ============================================================================
+
+// Health check routes (v1 API endpoints)
+await fastify.register(healthRoutes, { prefix: "/api/v1" });
 
 // Auth routes
 await fastify.register(authRoutes, { prefix: "/api/v1/auth" });
