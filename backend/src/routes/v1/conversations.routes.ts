@@ -251,7 +251,7 @@ export async function conversationsRoutes(fastify: FastifyInstance) {
 
       reply.code(201);
       return {
-        userMessage,
+        userMessage: userMessage as any,
         aiMessage: null, // AI response handled by /api/chat on frontend
       };
     }
