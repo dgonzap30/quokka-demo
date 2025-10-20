@@ -32,8 +32,16 @@ export class InstructorRepository extends BaseRepository<
   /**
    * Implement abstract method: Field equality check
    */
-  protected fieldEquals(field: string, value: any): SQL {
-    return eq(this.table[field as keyof typeof this.table], value);
+  protected fieldEquals<K extends keyof typeof this.table>(
+    field: K,
+    value: any
+  ): SQL {
+    const column = this.table[field];
+    // Type guard: ensure we have a column, not a method or undefined
+    if (!column || typeof column === 'function') {
+      throw new Error(`Invalid field: ${String(field)}`);
+    }
+    return eq(column as any, value);
   }
 
   /**

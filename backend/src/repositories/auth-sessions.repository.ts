@@ -5,7 +5,7 @@
  * Manages user sessions (future: can migrate to Redis for production)
  */
 
-import { eq, lt, and, type SQL } from "drizzle-orm";
+import { eq, lt, gt, and, type SQL } from "drizzle-orm";
 import { BaseRepository } from "./base.repository.js";
 import { authSessions, type AuthSession, type NewAuthSession } from "../db/schema.js";
 import { db } from "../db/client.js";
@@ -29,8 +29,16 @@ export class AuthSessionsRepository extends BaseRepository<
   /**
    * Implement abstract method: Field equality check
    */
-  protected fieldEquals(field: string, value: any): SQL {
-    return eq(this.table[field as keyof typeof this.table], value);
+  protected fieldEquals<K extends keyof typeof this.table>(
+    field: K,
+    value: any
+  ): SQL {
+    const column = this.table[field];
+    // Type guard: ensure we have a column, not a method or undefined
+    if (!column || typeof column === 'function') {
+      throw new Error(`Invalid field: ${String(field)}`);
+    }
+    return eq(column as any, value);
   }
 
   /**
@@ -55,7 +63,7 @@ export class AuthSessionsRepository extends BaseRepository<
     const results = await db
       .select()
       .from(this.table)
-      .where(and(eq(this.table.token, token), lt(now, this.table.expiresAt))!)
+      .where(and(eq(this.table.token, token), gt(this.table.expiresAt, now))!)
       .limit(1);
 
     return results[0] || null;

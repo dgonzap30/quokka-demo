@@ -39,8 +39,16 @@ export class PostsRepository extends BaseRepository<typeof posts, Post, NewPost>
   /**
    * Implement abstract method: Field equality check
    */
-  protected fieldEquals(field: string, value: any): SQL {
-    return eq(this.table[field as keyof typeof this.table], value);
+  protected fieldEquals<K extends keyof typeof this.table>(
+    field: K,
+    value: any
+  ): SQL {
+    const column = this.table[field];
+    // Type guard: ensure we have a column, not a method or undefined
+    if (!column || typeof column === 'function') {
+      throw new Error(`Invalid field: ${String(field)}`);
+    }
+    return eq(column as any, value);
   }
 
   /**
@@ -95,7 +103,7 @@ export class PostsRepository extends BaseRepository<typeof posts, Post, NewPost>
         const authorResults = await db
           .select()
           .from(users)
-          .where(eq(users.id, post.authorId))
+          .where(eq(users.id as any, post.authorId))
           .limit(1);
         const author = authorResults[0];
 
@@ -124,9 +132,11 @@ export class PostsRepository extends BaseRepository<typeof posts, Post, NewPost>
     }));
 
     return {
-      items: postsWithAuthor,
-      nextCursor,
-      hasNextPage,
+      data: postsWithAuthor,
+      pagination: {
+        nextCursor: nextCursor || undefined,
+        hasMore: hasNextPage,
+      },
     };
   }
 

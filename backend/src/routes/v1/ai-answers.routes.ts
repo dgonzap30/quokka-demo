@@ -48,7 +48,7 @@ export async function aiAnswersRoutes(fastify: FastifyInstance) {
       const aiAnswer = await aiAnswersRepository.findByThreadId(threadId);
 
       return {
-        aiAnswer,
+        aiAnswer: aiAnswer as any,
       };
     }
   );
@@ -87,7 +87,7 @@ export async function aiAnswersRoutes(fastify: FastifyInstance) {
         throw new NotFoundError("AI answer");
       }
 
-      return aiAnswer;
+      return aiAnswer as any;
     }
   );
 
@@ -152,7 +152,7 @@ export async function aiAnswersRoutes(fastify: FastifyInstance) {
       const aiAnswer = await aiAnswersRepository.findByThreadId(threadId);
 
       return {
-        aiAnswer,
+        aiAnswer: aiAnswer as any,
       };
     }
   );
@@ -192,7 +192,7 @@ export async function aiAnswersRoutes(fastify: FastifyInstance) {
         if (!existing) {
           throw new NotFoundError("AI answer");
         }
-        return existing;
+        return existing as any;
       }
 
       // Get user to determine tenant
@@ -210,7 +210,7 @@ export async function aiAnswersRoutes(fastify: FastifyInstance) {
         throw new NotFoundError("AI answer");
       }
 
-      return updated;
+      return updated as any;
     }
   );
 

@@ -76,7 +76,7 @@ export abstract class BaseRepository<
    * Create new entity
    */
   async create(data: TInsert): Promise<TSelect> {
-    const results = await db.insert(this.table).values(data).returning();
+    const results = await db.insert(this.table).values(data as any).returning();
     return results[0] as TSelect;
   }
 
@@ -86,7 +86,7 @@ export abstract class BaseRepository<
   async update(id: string, data: Partial<TInsert>): Promise<TSelect | null> {
     const results = await db
       .update(this.table)
-      .set(data)
+      .set(data as any)
       .where(this.idEquals(id))
       .returning();
 
@@ -171,17 +171,17 @@ export abstract class BaseRepository<
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions)!);
+      query = query.where(and(...conditions)!) as any;
     }
 
-    // Apply ordering
+    // Apply ordering (cast needed due to where() narrowing)
     const orderFn = direction === "desc" ? desc : asc;
-    query = query
-      .orderBy(orderFn(this.table[orderByField as keyof TTable]))
-      .orderBy(orderFn(this.table.id));
+    query = (query as any)
+      .orderBy(orderFn(this.table[orderByField as keyof TTable] as any))
+      .orderBy(orderFn((this.table as any).id));
 
     // Fetch limit + 1 to detect if there are more results
-    query = query.limit(safeLimit + 1);
+    query = (query as any).limit(safeLimit + 1);
 
     const results = (await query) as TSelect[];
 
@@ -215,10 +215,10 @@ export abstract class BaseRepository<
    */
   private buildDescCursor(field: string, cursor: Cursor): SQL {
     return or(
-      lt(this.table[field as keyof TTable], cursor.timestamp),
+      lt(this.table[field as keyof TTable] as any, cursor.timestamp),
       and(
-        this.fieldEquals(field, cursor.timestamp),
-        lt(this.table.id, cursor.id)
+        this.fieldEquals(field as keyof TTable, cursor.timestamp),
+        lt((this.table as any).id, cursor.id)
       )!
     )!;
   }
@@ -229,10 +229,10 @@ export abstract class BaseRepository<
    */
   private buildAscCursor(field: string, cursor: Cursor): SQL {
     return or(
-      gt(this.table[field as keyof TTable], cursor.timestamp),
+      gt(this.table[field as keyof TTable] as any, cursor.timestamp),
       and(
-        this.fieldEquals(field, cursor.timestamp),
-        gt(this.table.id, cursor.id)
+        this.fieldEquals(field as keyof TTable, cursor.timestamp),
+        gt((this.table as any).id, cursor.id)
       )!
     )!;
   }
@@ -245,6 +245,10 @@ export abstract class BaseRepository<
 
   /**
    * Helper: Create field equality condition
+   * Generic K ensures field is a valid column name
    */
-  protected abstract fieldEquals(field: string, value: any): SQL;
+  protected abstract fieldEquals<K extends keyof TTable>(
+    field: K,
+    value: any
+  ): SQL;
 }

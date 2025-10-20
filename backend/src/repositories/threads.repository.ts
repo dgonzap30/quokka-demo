@@ -50,8 +50,16 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
   /**
    * Implement abstract method: Field equality check
    */
-  protected fieldEquals(field: string, value: any): SQL {
-    return eq(this.table[field as keyof typeof this.table], value);
+  protected fieldEquals<K extends keyof typeof this.table>(
+    field: K,
+    value: any
+  ): SQL {
+    const column = this.table[field];
+    // Type guard: ensure we have a column, not a method or undefined
+    if (!column || typeof column === 'function') {
+      throw new Error(`Invalid field: ${String(field)}`);
+    }
+    return eq(column as any, value);
   }
 
   /**
@@ -106,7 +114,7 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
         const authorResults = await db
           .select()
           .from(users)
-          .where(eq(users.id, thread.authorId))
+          .where(eq(users.id as any, thread.authorId))
           .limit(1);
         const author = authorResults[0];
 
@@ -152,17 +160,9 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
       nextCursor = Buffer.from(JSON.stringify(cursorObj)).toString("base64");
     }
 
-    // Transform results
+    // Transform results - include all Thread fields
     const threadsWithAuthor: ThreadWithAuthor[] = results.map((row) => ({
-      id: row.thread.id,
-      courseId: row.thread.courseId,
-      authorId: row.thread.authorId, // Keep as authorId for frontend compatibility
-      title: row.thread.title,
-      content: row.thread.content,
-      status: row.thread.status,
-      views: row.thread.viewCount, // Map viewCount -> views for API response
-      createdAt: row.thread.createdAt,
-      updatedAt: row.thread.updatedAt,
+      ...row.thread, // Spread all Thread fields
       author: row.author,
       upvoteCount: row.upvoteCount,
       postCount: row.postCount,
@@ -170,9 +170,11 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
     }));
 
     return {
-      items: threadsWithAuthor,
-      nextCursor,
-      hasNextPage,
+      data: threadsWithAuthor,
+      pagination: {
+        nextCursor: nextCursor || undefined,
+        hasMore: hasNextPage,
+      },
     };
   }
 
@@ -194,7 +196,7 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
     const authorResults = await db
       .select()
       .from(users)
-      .where(eq(users.id, thread.authorId))
+      .where(eq(users.id as any, thread.authorId))
       .limit(1);
     const author = authorResults[0];
 
@@ -220,15 +222,7 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
     const hasAiAnswer = (aiResults[0]?.count || 0) > 0;
 
     return {
-      id: thread.id,
-      courseId: thread.courseId,
-      authorId: thread.authorId, // Keep as authorId for frontend compatibility
-      title: thread.title,
-      content: thread.content,
-      status: thread.status,
-      views: thread.viewCount, // Map viewCount -> views for API response
-      createdAt: thread.createdAt,
-      updatedAt: thread.updatedAt,
+      ...thread, // Include all Thread fields
       author,
       upvoteCount,
       postCount,

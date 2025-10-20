@@ -39,8 +39,16 @@ export class CourseMaterialsRepository extends BaseRepository<
   /**
    * Implement abstract method: Field equality check
    */
-  protected fieldEquals(field: string, value: any): SQL {
-    return eq(this.table[field as keyof typeof this.table], value);
+  protected fieldEquals<K extends keyof typeof this.table>(
+    field: K,
+    value: any
+  ): SQL {
+    const column = this.table[field];
+    // Type guard: ensure we have a column, not a method or undefined
+    if (!column || typeof column === 'function') {
+      throw new Error(`Invalid field: ${String(field)}`);
+    }
+    return eq(column as any, value);
   }
 
   /**
@@ -55,11 +63,10 @@ export class CourseMaterialsRepository extends BaseRepository<
     // Parse metadata and extract keywords
     return results.map((material) => {
       let keywords: string[] = [];
-      let parsedMetadata: MaterialMetadata | undefined;
 
       if (material.metadata) {
         try {
-          parsedMetadata = JSON.parse(material.metadata) as MaterialMetadata;
+          const parsedMetadata = JSON.parse(material.metadata) as MaterialMetadata;
           keywords = parsedMetadata.keywords || [];
         } catch (error) {
           console.error("[Materials] Failed to parse metadata:", error);
@@ -68,7 +75,6 @@ export class CourseMaterialsRepository extends BaseRepository<
 
       return {
         ...material,
-        metadata: parsedMetadata,
         keywords,
       };
     });
@@ -98,11 +104,10 @@ export class CourseMaterialsRepository extends BaseRepository<
     // Parse metadata and extract keywords
     return results.map((material) => {
       let keywords: string[] = [];
-      let parsedMetadata: MaterialMetadata | undefined;
 
       if (material.metadata) {
         try {
-          parsedMetadata = JSON.parse(material.metadata) as MaterialMetadata;
+          const parsedMetadata = JSON.parse(material.metadata) as MaterialMetadata;
           keywords = parsedMetadata.keywords || [];
         } catch (error) {
           console.error("[Materials] Failed to parse metadata:", error);
@@ -111,7 +116,6 @@ export class CourseMaterialsRepository extends BaseRepository<
 
       return {
         ...material,
-        metadata: parsedMetadata,
         keywords,
       };
     });
