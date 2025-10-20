@@ -25,8 +25,10 @@ export function LayoutMain({ children }: LayoutMainProps) {
 
   return (
     <main
+      id="main-content"
+      tabIndex={-1}
       className={cn(
-        "flex-1 overflow-y-auto sidebar-scroll relative pb-20 md:pb-0",
+        "flex-1 overflow-y-auto sidebar-scroll relative pb-20 md:pb-0 outline-none",
         // Dynamic top padding based on navbar height
         inCourseContext
           ? "pt-[104px]" // Course pages: GlobalNav (56px) + CourseContextBar (48px)
