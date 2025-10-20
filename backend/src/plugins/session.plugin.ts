@@ -68,6 +68,7 @@ async function sessionPlugin(fastify: FastifyInstance) {
       sameSite: "lax",
       maxAge: SESSION_MAX_AGE,
       path: "/",
+      domain: process.env.NODE_ENV === "production" ? undefined : "localhost", // Allow cross-port cookies in dev
     });
   });
 

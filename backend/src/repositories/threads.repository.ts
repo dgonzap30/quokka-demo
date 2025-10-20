@@ -20,9 +20,11 @@ import { db } from "../db/client.js";
 import { NotFoundError } from "../utils/errors.js";
 
 /**
- * Thread with author details
+ * Thread with author details (API response format)
+ * Note: Uses 'views' instead of 'viewCount' to match API schema
  */
-export interface ThreadWithAuthor extends Thread {
+export interface ThreadWithAuthor extends Omit<Thread, 'viewCount' | 'replyCount' | 'hasAIAnswer'> {
+  views: number; // Transformed from viewCount
   author: {
     id: string;
     name: string;
@@ -31,8 +33,8 @@ export interface ThreadWithAuthor extends Thread {
     avatar: string | null;
   };
   upvoteCount: number;
-  postCount: number;
-  hasAiAnswer: boolean;
+  postCount: number; // Computed from posts table, not from Thread.replyCount
+  hasAiAnswer: boolean; // Computed from aiAnswers table
 }
 
 export class ThreadsRepository extends BaseRepository<typeof threads, Thread, NewThread> {
@@ -160,14 +162,18 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
       nextCursor = Buffer.from(JSON.stringify(cursorObj)).toString("base64");
     }
 
-    // Transform results - include all Thread fields
-    const threadsWithAuthor: ThreadWithAuthor[] = results.map((row) => ({
-      ...row.thread, // Spread all Thread fields
-      author: row.author,
-      upvoteCount: row.upvoteCount,
-      postCount: row.postCount,
-      hasAiAnswer: row.hasAiAnswer,
-    }));
+    // Transform results - include all Thread fields with schema-compatible naming
+    const threadsWithAuthor: ThreadWithAuthor[] = results.map((row) => {
+      const { viewCount, replyCount, hasAIAnswer, ...threadFields } = row.thread;
+      return {
+        ...threadFields,
+        views: viewCount, // Transform viewCount -> views
+        author: row.author,
+        upvoteCount: row.upvoteCount,
+        postCount: row.postCount, // Use computed postCount
+        hasAiAnswer: row.hasAiAnswer, // Use computed hasAiAnswer
+      };
+    });
 
     return {
       data: threadsWithAuthor,
@@ -221,8 +227,11 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
       .where(eq(aiAnswers.threadId, thread.id));
     const hasAiAnswer = (aiResults[0]?.count || 0) > 0;
 
+    // Transform field names for schema compatibility
+    const { viewCount, replyCount, hasAIAnswer, ...threadFields } = thread;
     return {
-      ...thread, // Include all Thread fields
+      ...threadFields,
+      views: viewCount, // Transform viewCount -> views
       author,
       upvoteCount,
       postCount,
