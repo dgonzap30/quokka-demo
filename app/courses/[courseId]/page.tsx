@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCourse, useCourseThreads, useCurrentUser } from "@/lib/api/hooks";
 import { useMediaQuery } from "@/lib/hooks/use-media-query";
@@ -12,12 +13,27 @@ import { AskQuestionModal } from "@/components/course/ask-question-modal";
 import { SidebarLayout } from "@/components/course/sidebar-layout";
 import { FilterSidebar } from "@/components/course/filter-sidebar";
 import { ThreadListSidebar } from "@/components/course/thread-list-sidebar";
-import { ThreadModal } from "@/components/course/thread-modal";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
 import { CourseOverviewPanel } from "@/components/course/course-overview-panel";
 import { MobileFilterSheet } from "@/components/course/mobile-filter-sheet";
 import type { FilterType } from "@/components/course/sidebar-filter-panel";
 import type { TagWithCount } from "@/components/course/tag-cloud";
+
+// Lazy load ThreadModal (mobile only, conditionally rendered)
+const ThreadModal = dynamic(
+  () => import("@/components/course/thread-modal").then(mod => ({ default: mod.ThreadModal })),
+  {
+    loading: () => (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+        <div className="bg-background rounded-lg p-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-64 w-96" />
+        </div>
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 function CourseDetailContent({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = use(params);
