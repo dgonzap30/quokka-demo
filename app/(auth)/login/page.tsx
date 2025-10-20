@@ -110,6 +110,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@demo.com"
                 required
+                aria-required="true"
               />
             </div>
 
@@ -124,6 +125,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                aria-required="true"
               />
             </div>
 
