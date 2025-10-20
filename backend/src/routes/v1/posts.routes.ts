@@ -54,7 +54,11 @@ export async function postsRoutes(fastify: FastifyInstance) {
         limit,
       });
 
-      return result;
+      return {
+        items: result.data,
+        nextCursor: result.pagination.nextCursor || null,
+        hasNextPage: result.pagination.hasMore,
+      } as any;
     }
   );
 
@@ -90,7 +94,11 @@ export async function postsRoutes(fastify: FastifyInstance) {
         limit,
       });
 
-      return result;
+      return {
+        items: result.data,
+        nextCursor: result.pagination.nextCursor || null,
+        hasNextPage: result.pagination.hasMore,
+      } as any;
     }
   );
 
@@ -145,14 +153,14 @@ export async function postsRoutes(fastify: FastifyInstance) {
 
       // Fetch author details
       const postResults = await postsRepository.findByThread(threadId);
-      const postWithAuthor = postResults.items.find((p) => p.id === newPost.id);
+      const postWithAuthor = postResults.data.find((p) => p.id === newPost.id);
 
       if (!postWithAuthor) {
         throw new Error("Failed to fetch created post");
       }
 
       reply.code(201);
-      return postWithAuthor;
+      return postWithAuthor as any;
     }
   );
 }

@@ -51,7 +51,11 @@ export async function threadsRoutes(fastify: FastifyInstance) {
         limit,
       });
 
-      return result;
+      return {
+        items: result.data,
+        nextCursor: result.pagination.nextCursor || null,
+        hasNextPage: result.pagination.hasMore,
+      } as any;
     }
   );
 
@@ -81,7 +85,11 @@ export async function threadsRoutes(fastify: FastifyInstance) {
         limit,
       });
 
-      return result;
+      return {
+        items: result.data,
+        nextCursor: result.pagination.nextCursor || null,
+        hasNextPage: result.pagination.hasMore,
+      } as any;
     }
   );
 
