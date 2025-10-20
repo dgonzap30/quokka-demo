@@ -265,9 +265,10 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
         createdAt: new Date().toISOString(),
       });
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if it's a unique constraint violation (already upvoted)
-      if (error.code === "SQLITE_CONSTRAINT_UNIQUE" || error.message?.includes("UNIQUE")) {
+      const err = error as { code?: string; message?: string };
+      if (err.code === "SQLITE_CONSTRAINT_UNIQUE" || err.message?.includes("UNIQUE")) {
         return false;
       }
       throw error;

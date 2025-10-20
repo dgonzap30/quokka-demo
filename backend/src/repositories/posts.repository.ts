@@ -169,9 +169,10 @@ export class PostsRepository extends BaseRepository<typeof posts, Post, NewPost>
         .where(eq(posts.id, postId));
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if it's a unique constraint violation (already endorsed)
-      if (error.code === "SQLITE_CONSTRAINT_UNIQUE" || error.message?.includes("UNIQUE")) {
+      const err = error as { code?: string; message?: string };
+      if (err.code === "SQLITE_CONSTRAINT_UNIQUE" || err.message?.includes("UNIQUE")) {
         return false;
       }
       throw error;
