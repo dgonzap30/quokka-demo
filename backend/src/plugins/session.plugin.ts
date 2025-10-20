@@ -5,7 +5,7 @@
  * Stores session data in signed cookies (good for demo, easy to scale to Redis later)
  */
 
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fp from "fastify-plugin";
 
@@ -58,7 +58,7 @@ async function sessionPlugin(fastify: FastifyInstance) {
   });
 
   // Helper to set session
-  fastify.decorate("setSession", function (reply: any, sessionData: SessionData) {
+  fastify.decorate("setSession", function (reply: FastifyReply, sessionData: SessionData) {
     const cookieValue = JSON.stringify(sessionData);
 
     reply.setCookie(SESSION_COOKIE_NAME, cookieValue, {
@@ -72,7 +72,7 @@ async function sessionPlugin(fastify: FastifyInstance) {
   });
 
   // Helper to clear session
-  fastify.decorate("clearSession", function (reply: any) {
+  fastify.decorate("clearSession", function (reply: FastifyReply) {
     reply.clearCookie(SESSION_COOKIE_NAME, {
       path: "/",
     });
@@ -87,7 +87,7 @@ export default fp(sessionPlugin, {
 // Type augmentation for fastify instance
 declare module "fastify" {
   interface FastifyInstance {
-    setSession(reply: any, sessionData: SessionData): void;
-    clearSession(reply: any): void;
+    setSession(reply: FastifyReply, sessionData: SessionData): void;
+    clearSession(reply: FastifyReply): void;
   }
 }
