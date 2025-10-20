@@ -895,7 +895,7 @@ export function useConversationMessages(conversationId: string | undefined) {
     queryKey: conversationId ? queryKeys.conversationMessages(conversationId) : ["conversationMessages"],
     queryFn: () => (conversationId ? api.getConversationMessages(conversationId) : Promise.resolve([])),
     enabled: !!conversationId,
-    staleTime: 30 * 1000,         // 30 seconds
+    staleTime: 2 * 60 * 1000,     // 2 minutes - rely on mutation invalidations
     gcTime: 5 * 60 * 1000,        // 5 minutes
   });
 }
