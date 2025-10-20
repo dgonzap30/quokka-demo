@@ -332,9 +332,9 @@ export function useNotifications(userId: string | undefined, courseId?: string) 
     queryKey: userId ? queryKeys.notifications(userId, courseId) : ["notifications"],
     queryFn: () => (userId ? api.getNotifications(userId, courseId) : Promise.resolve([])),
     enabled: !!userId,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 2 * 60 * 1000, // 2 minutes - rely on mutation invalidations instead of polling
     gcTime: 5 * 60 * 1000,
-    refetchInterval: 60 * 1000, // Poll every minute
+    // Removed polling - notifications refresh via mutation invalidations from useCreateThread, useCreatePost, etc.
   });
 }
 
