@@ -398,15 +398,15 @@ export function useCreateThread() {
   return useMutation({
     mutationFn: ({ input, authorId }: { input: CreateThreadInput; authorId: string }) =>
       api.createThread(input, authorId),
-    onSuccess: (result) => {
+    onSuccess: (result, { authorId }) => {
       const { thread, aiAnswer } = result; // Destructure response
 
       // Invalidate course threads query
       queryClient.invalidateQueries({ queryKey: queryKeys.courseThreads(thread.courseId) });
 
-      // Invalidate dashboards (activity feeds need update)
-      queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+      // Surgical invalidation - only this user's dashboard
+      queryClient.invalidateQueries({ queryKey: queryKeys.studentDashboard(authorId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructorDashboard(authorId) });
 
       // OPTIONAL: Pre-populate thread cache with AI answer
       // This prevents useThread from refetching when user navigates to thread
@@ -430,12 +430,16 @@ export function useCreatePost() {
   return useMutation({
     mutationFn: ({ input, authorId }: { input: CreatePostInput; authorId: string }) =>
       api.createPost(input, authorId),
-    onSuccess: (newPost) => {
+    onSuccess: (newPost, { authorId }) => {
       // Invalidate thread query to refetch with new post
       queryClient.invalidateQueries({ queryKey: queryKeys.thread(newPost.threadId) });
-      // Invalidate dashboards (activity feeds need update)
-      queryClient.invalidateQueries({ queryKey: ["studentDashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+
+      // Surgical invalidation - only this user's dashboard
+      queryClient.invalidateQueries({ queryKey: queryKeys.studentDashboard(authorId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructorDashboard(authorId) });
+
+      // Also invalidate notifications (user may get replies)
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications(authorId) });
     },
   });
 }
