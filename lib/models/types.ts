@@ -401,6 +401,7 @@ export interface Thread {
   updatedAt: string;
   hasAIAnswer?: boolean;
   aiAnswerId?: string;
+  replyCount?: number;        // Number of replies/posts in this thread
 
   // Phase 3: Endorsement system
   endorsements?: Endorsement[];

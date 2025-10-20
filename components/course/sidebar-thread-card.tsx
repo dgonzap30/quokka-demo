@@ -74,8 +74,8 @@ export function SidebarThreadCard({
   isUnread = false,
   className,
 }: SidebarThreadCardProps) {
-  // Calculate reply count (mock - in real app would come from API)
-  const replyCount = 0; // TODO: Add replyCount to Thread type
+  // Get reply count from thread (defaults to 0 if not provided)
+  const replyCount = thread.replyCount || 0;
 
   // Format time ago
   const timeAgo = formatTimeAgo(thread.createdAt);
