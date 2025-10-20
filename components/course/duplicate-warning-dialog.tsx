@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import type { SimilarThread } from "@/lib/models/types";
+import { cn } from "@/lib/utils";
 
 export interface DuplicateWarningDialogProps {
   /** Whether dialog is open */
@@ -81,16 +82,18 @@ export function DuplicateWarningDialog({
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg ${
-              severity === "high" ? "bg-destructive/10" :
-              severity === "medium" ? "bg-warning/10" :
-              "bg-muted"
-            }`}>
-              <AlertTriangle className={`h-5 w-5 ${
-                severity === "high" ? "text-destructive" :
-                severity === "medium" ? "text-warning" :
-                "text-muted-foreground"
-              }`} />
+            <div className={cn(
+              "p-2 rounded-lg",
+              severity === "high" && "bg-destructive/10",
+              severity === "medium" && "bg-warning/10",
+              severity === "low" && "bg-muted"
+            )}>
+              <AlertTriangle className={cn(
+                "h-5 w-5",
+                severity === "high" && "text-destructive",
+                severity === "medium" && "text-warning",
+                severity === "low" && "text-muted-foreground"
+              )} />
             </div>
             <div className="flex-1">
               <DialogTitle>Similar Questions Found</DialogTitle>
@@ -111,11 +114,12 @@ export function DuplicateWarningDialog({
             const thread = similarThread.thread; // Extract the actual thread
 
             return (
-              <Card key={thread.id} className={`border-l-4 ${
-                isHighSimilarity ? "border-l-destructive" :
-                isMediumSimilarity ? "border-l-warning" :
-                "border-l-muted"
-              }`}>
+              <Card key={thread.id} className={cn(
+                "border-l-4",
+                isHighSimilarity && "border-l-destructive",
+                isMediumSimilarity && "border-l-warning",
+                !isHighSimilarity && !isMediumSimilarity && "border-l-muted"
+              )}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="text-sm font-medium line-clamp-2 flex-1">

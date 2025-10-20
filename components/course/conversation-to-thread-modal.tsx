@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Message } from "@/lib/models/types";
 import { convertConversationToThread, isValidConversation } from "@/lib/utils/conversation-to-thread";
+import { cn } from "@/lib/utils";
 
 export interface ConversationToThreadModalProps {
   /** Whether the modal is open */
@@ -171,9 +172,10 @@ export function ConversationToThreadModal({
               {formattedMessages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`p-3 ${
+                  className={cn(
+                    "p-3",
                     msg.roleLabel === "You" ? "message-user" : "message-assistant"
-                  }`}
+                  )}
                 >
                   <p className="text-sm font-semibold mb-1">{msg.roleLabel}</p>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>

@@ -9,6 +9,7 @@ import { X, Send, Sparkles, MessageSquarePlus, Trash2 } from "lucide-react";
 import type { Message } from "@/lib/models/types";
 import { isValidConversation } from "@/lib/utils/conversation-to-thread";
 import { ConversationToThreadModal } from "./conversation-to-thread-modal";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -226,9 +227,10 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
         <Button
           ref={fabButtonRef}
           onClick={handleExpand}
-          className={`h-14 w-14 rounded-full ai-gradient ai-glow shadow-e3 hover:shadow-e3 transition-all ${
-            isFirstVisit ? "animate-pulse" : ""
-          }`}
+          className={cn(
+            "h-14 w-14 rounded-full ai-gradient ai-glow shadow-e3 hover:shadow-e3 transition-all",
+            isFirstVisit && "animate-pulse"
+          )}
           aria-label="Open Quokka AI Assistant"
         >
           <Sparkles className="h-6 w-6 text-white" />
@@ -327,12 +329,16 @@ export function FloatingQuokka({ courseId, courseName, courseCode }: FloatingQuo
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={cn(
+                  "flex",
+                  message.role === "user" ? "justify-end" : "justify-start"
+                )}
               >
                 <div
-                  className={`max-w-[85%] p-3 ${
+                  className={cn(
+                    "max-w-[85%] p-3",
                     message.role === "user" ? "message-user" : "message-assistant"
-                  }`}
+                  )}
                   aria-label={message.role === "user" ? "You said" : "Quokka said"}
                 >
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThreadDetailPanel } from "@/components/course/thread-detail-panel";
+import { cn } from "@/lib/utils";
 
 export interface ThreadModalProps {
   /**
@@ -77,7 +78,7 @@ export function ThreadModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className={`flex flex-col max-w-[95vw] lg:max-w-7xl h-[95vh] glass-panel-strong p-0 ${className || ''}`}
+        className={cn("flex flex-col max-w-[95vw] lg:max-w-7xl h-[95vh] glass-panel-strong p-0", className)}
         showCloseButton={false}
         aria-label="Thread detail modal"
       >

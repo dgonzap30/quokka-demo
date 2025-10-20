@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { NavHeader } from "@/components/layout/nav-header";
 import { LayoutMain } from "@/components/layout/layout-main";
+import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen overflow-hidden flex flex-col`}>
+      <body className={cn(geistSans.variable, geistMono.variable, "antialiased h-screen overflow-hidden flex flex-col")}>
         {/* Skip to main content link for accessibility */}
         <a
           href="#main-content"
