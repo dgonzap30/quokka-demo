@@ -180,7 +180,7 @@ export function ThreadDetailPanel({
       {onClose && (
         <div className="flex items-center gap-4">
           <Button
-            variant="glass"
+            variant="ghost"
             size="sm"
             onClick={onClose}
             className="gap-2"

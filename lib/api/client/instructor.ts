@@ -11,6 +11,7 @@ import type {
   FrequentlyAskedQuestion,
   TrendingTopic,
   InstructorInsight,
+  InstructorMetrics,
   SearchQuestionsInput,
   QuestionSearchResult,
   ResponseTemplate,
@@ -1011,5 +1012,77 @@ export const instructorAPI = {
     seedData();
 
     deleteResponseTemplateFromStore(templateId);
+  },
+
+  /**
+   * Get instructor metrics for a course
+   *
+   * Returns ROI metrics, engagement stats, and top contributors for a course.
+   *
+   * @param courseId - ID of the course
+   * @param timeRange - Time range for metrics
+   * @returns Instructor metrics data
+   *
+   * @example
+   * ```ts
+   * const metrics = await instructorAPI.getInstructorMetrics('course-cs101', 'week');
+   * ```
+   */
+  async getInstructorMetrics(
+    courseId: string,
+    timeRange: 'week' | 'month' | 'quarter' | 'all-time' = 'week'
+  ): Promise<InstructorMetrics> {
+    // Check feature flag for backend
+    if (BACKEND_FEATURE_FLAGS.instructor) {
+      try {
+        // Call backend endpoint
+        const metrics = await httpGet<InstructorMetrics>(
+          `/api/v1/instructor/metrics?courseId=${courseId}&timeRange=${timeRange}`
+        );
+        return metrics;
+      } catch (error) {
+        console.error('[Instructor] Backend getInstructorMetrics failed:', error);
+        // Fall through to localStorage fallback
+      }
+    }
+
+    // Fallback: Use mock data
+    await delay(300);
+
+    // Return mock metrics data
+    const metrics: InstructorMetrics = {
+      courseId,
+      timeRange,
+      questionsAutoAnswered: 42,
+      timeSavedMinutes: 210, // 3.5 hours
+      citationCoverage: 85,
+      endorsedThreadsCount: 15,
+      endorsedThreadsViews: 450,
+      averageViewsPerEndorsed: 30,
+      totalThreads: 87,
+      totalReplies: 234,
+      activeStudents: 45,
+      topContributors: [
+        {
+          userId: 'user-alice',
+          name: 'Alice Chen',
+          threadCount: 12,
+          replyCount: 34,
+        },
+        {
+          userId: 'user-bob',
+          name: 'Bob Smith',
+          threadCount: 9,
+          replyCount: 28,
+        },
+      ],
+      topTopics: [
+        { tag: 'algorithms', count: 15, trend: 'up' as const },
+        { tag: 'data-structures', count: 12, trend: 'stable' as const },
+        { tag: 'recursion', count: 8, trend: 'down' as const },
+      ],
+    };
+
+    return metrics;
   },
 };

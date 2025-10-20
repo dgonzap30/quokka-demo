@@ -64,8 +64,11 @@ export const threadsAPI = {
     if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint (returns paginated results)
+        // Backend doesn't have AI answers embedded yet, using any for flexibility
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await httpGet<{
-          items: ThreadWithAIAnswer[];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          items: any[];
           nextCursor: string | null;
           hasNextPage: boolean;
         }>(`/api/v1/courses/${courseId}/threads?limit=100`);
@@ -73,10 +76,11 @@ export const threadsAPI = {
         // Extract items for backward compatibility
         // Backend already returns threads with author, counts, etc.
         // AI answers are not embedded yet (backend doesn't have that endpoint)
-        return response.items.map(thread => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return response.items.map((thread: any) => ({
           ...thread,
           aiAnswer: undefined, // AI answers not fetched from backend yet
-        }));
+        })) as ThreadWithAIAnswer[];
       } catch (error) {
         console.error('[Threads] Backend getCourseThreads failed:', error);
         // Fall through to localStorage fallback

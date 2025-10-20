@@ -187,7 +187,7 @@ export function MetricsDashboard({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {metrics.topContributors.map((contributor, index) => (
+              {metrics.topContributors.map((contributor: { userId: string; name: string; threadCount: number; replyCount: number }, index: number) => (
                 <div key={contributor.userId} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
@@ -216,7 +216,7 @@ export function MetricsDashboard({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {metrics.topTopics.map((topic) => (
+              {metrics.topTopics.map((topic: { tag: string; count: number; trend: 'up' | 'down' | 'stable' }) => (
                 <Badge key={topic.tag} variant="outline" className="text-sm">
                   {topic.tag} ({topic.count})
                 </Badge>

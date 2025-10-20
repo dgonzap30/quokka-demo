@@ -97,7 +97,7 @@ const sizeMap: Record<QuokkaIconSize, { container: number; ear: number; fontSize
  * <QuokkaIcon size="lg" variant="outline" />
  *
  * // Glass variant with pulse animation
- * <QuokkaIcon size="xl" variant="glass" animate="pulse" />
+ * <QuokkaIcon size="xl" variant="ghost" animate="pulse" />
  * ```
  */
 export function QuokkaIcon({
