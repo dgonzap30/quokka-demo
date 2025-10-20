@@ -60,7 +60,7 @@ export default function DashboardPage() {
   }
 
   if ((user.role === "instructor" || user.role === "ta") && instructorData) {
-    return <InstructorDashboard data={instructorData} />;
+    return <InstructorDashboard data={instructorData} user={user} />;
   }
 
   return null;
@@ -282,7 +282,7 @@ import {
   useBulkEndorseAIAnswers,
 } from "@/lib/api/hooks";
 
-function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
+function InstructorDashboard({ data, user }: { data: InstructorDashboardData; user: User }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [timeRange, setTimeRange] = useState<"week" | "month" | "quarter">("week");
@@ -309,8 +309,7 @@ function InstructorDashboard({ data }: { data: InstructorDashboardData }) {
   }, [selectedCourseId]);
 
   // Fetch instructor-specific data
-  // TODO: Get actual user ID from current user context
-  const userId = "instructor-1";
+  const userId = user.id;
   // Use selected course, or first managed course, or fallback
   const courseId = selectedCourseId || data.managedCourses[0]?.id || "course-1";
 
