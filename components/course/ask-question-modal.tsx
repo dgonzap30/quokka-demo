@@ -3,6 +3,7 @@
 import { useState, FormEvent, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser, useCreateThread, useGenerateAIPreview, useCheckDuplicates } from "@/lib/api/hooks";
+import { useDisclosure } from "@/lib/hooks";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,23 +46,23 @@ export function AskQuestionModal({
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const preview = useDisclosure();
   const [similarThreads, setSimilarThreads] = useState<SimilarThread[]>([]);
-  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const duplicateWarning = useDisclosure();
 
   // Focus management (WCAG 2.4.3 Level A)
   const triggerElementRef = useRef<HTMLElement | null>(null);
 
   // Capture trigger element when modal opens
   useEffect(() => {
-    if (isOpen && !showPreview && !triggerElementRef.current) {
+    if (isOpen && !preview.isOpen && !triggerElementRef.current) {
       triggerElementRef.current = document.activeElement as HTMLElement;
     }
-  }, [isOpen, showPreview]);
+  }, [isOpen, preview.isOpen]);
 
   // Return focus to trigger element when modal fully closes
   useEffect(() => {
-    if (!isOpen && !showPreview && !showDuplicateWarning) {
+    if (!isOpen && !preview.isOpen && !duplicateWarning.isOpen) {
       // Modal is fully closed, return focus
       if (triggerElementRef.current) {
         setTimeout(() => {
@@ -72,7 +73,7 @@ export function AskQuestionModal({
         }, 100);
       }
     }
-  }, [isOpen, showPreview, showDuplicateWarning]);
+  }, [isOpen, preview.isOpen, duplicateWarning.isOpen]);
 
   // Reset form when modal closes
   const handleClose = () => {
@@ -80,9 +81,9 @@ export function AskQuestionModal({
       setTitle("");
       setContent("");
       setTags("");
-      setShowPreview(false);
+      preview.onClose();
       setSimilarThreads([]);
-      setShowDuplicateWarning(false);
+      duplicateWarning.onClose();
       onClose();
     }
   };
@@ -104,7 +105,7 @@ export function AskQuestionModal({
       },
       {
         onSuccess: () => {
-          setShowPreview(true);
+          preview.onOpen();
         },
       }
     );
@@ -133,9 +134,9 @@ export function AskQuestionModal({
       setTitle("");
       setContent("");
       setTags("");
-      setShowPreview(false);
+      preview.onClose();
       setSimilarThreads([]);
-      setShowDuplicateWarning(false);
+      duplicateWarning.onClose();
       onClose();
 
       // Call success handler if provided
@@ -172,7 +173,7 @@ export function AskQuestionModal({
           if (duplicates.length > 0) {
             // Found duplicates - show warning
             setSimilarThreads(duplicates);
-            setShowDuplicateWarning(true);
+            duplicateWarning.onOpen();
           } else {
             // No duplicates - post directly
             postThread();
@@ -192,7 +193,7 @@ export function AskQuestionModal({
   return (
     <>
       {/* Main Ask Question Modal */}
-      <Dialog open={isOpen && !showPreview} onOpenChange={handleClose}>
+      <Dialog open={isOpen && !preview.isOpen} onOpenChange={handleClose}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto glass-panel-strong">
           <DialogHeader>
             <DialogTitle className="heading-3 glass-text">Ask a Question</DialogTitle>
@@ -300,7 +301,7 @@ export function AskQuestionModal({
       </Dialog>
 
       {/* AI Preview Dialog */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+      <Dialog open={preview.isOpen} onOpenChange={preview.setIsOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glass-panel-strong">
           <DialogHeader>
             <DialogTitle className="heading-3 glass-text">Quokka&apos;s Answer</DialogTitle>
@@ -349,7 +350,7 @@ export function AskQuestionModal({
               type="button"
               variant="outline"
               size="lg"
-              onClick={() => setShowPreview(false)}
+              onClick={() => preview.onClose()}
             >
               Edit Question
             </Button>
@@ -358,7 +359,7 @@ export function AskQuestionModal({
               variant="glass-primary"
               size="lg"
               onClick={(e) => {
-                setShowPreview(false);
+                preview.onClose();
                 handleSubmit(e as unknown as FormEvent);
               }}
               disabled={isSubmitting}
@@ -371,11 +372,11 @@ export function AskQuestionModal({
 
       {/* Phase 3.2: Duplicate Warning Dialog */}
       <DuplicateWarning
-        isOpen={showDuplicateWarning}
+        isOpen={duplicateWarning.isOpen}
         similarThreads={similarThreads}
-        onClose={() => setShowDuplicateWarning(false)}
+        onClose={() => duplicateWarning.onClose()}
         onProceed={() => {
-          setShowDuplicateWarning(false);
+          duplicateWarning.onClose();
           postThread();
         }}
         courseId={courseId}
