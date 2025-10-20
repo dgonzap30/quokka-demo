@@ -116,7 +116,7 @@ export async function threadsRoutes(fastify: FastifyInstance) {
         throw new NotFoundError("Thread");
       }
 
-      return thread;
+      return thread as any;
     }
   );
 
@@ -176,7 +176,7 @@ export async function threadsRoutes(fastify: FastifyInstance) {
       }
 
       reply.code(201);
-      return threadWithDetails;
+      return threadWithDetails as any;
     }
   );
 
