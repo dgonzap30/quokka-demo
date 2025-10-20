@@ -11,7 +11,7 @@ import { buildSystemPrompt } from '@/lib/llm/utils';
 import { api } from '@/lib/api/client';
 import { ragTools } from '@/lib/llm/tools';
 import { rateLimit } from '@/lib/utils/rate-limit';
-import { apiError, commonErrors } from '@/lib/api/errors';
+import { commonErrors } from '@/lib/api/errors';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;

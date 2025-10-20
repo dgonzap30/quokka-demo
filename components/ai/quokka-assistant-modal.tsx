@@ -21,8 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Sparkles, Trash2, Share2, MoreVertical, AlertCircle } from "lucide-react";
+import { Sparkles, Trash2, Share2, MoreVertical } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
