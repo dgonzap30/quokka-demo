@@ -1,153 +1,208 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, useCallback, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useLogin } from "@/lib/api/hooks";
-import { isAuthSuccess } from "@/lib/models/types";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { api } from "@/lib/api/client";
+import { useCurrentUser } from "@/lib/api/hooks";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, BookOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, Loader2, LogIn } from "lucide-react";
+import { isAuthSuccess, type UserRole } from "@/lib/models/types";
 
+/**
+ * Login Page
+ *
+ * Email-based dev login for demo users
+ * - Supports student@demo.com and instructor@demo.com
+ * - No password required (dev-login endpoint)
+ * - Role-based redirect after successful login
+ */
 export default function LoginPage() {
   const router = useRouter();
-  const loginMutation = useLogin();
+  const { data: user, isLoading: userLoading } = useCurrentUser();
+
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Quick login functions
-  function handleQuickLogin(role: "student" | "instructor") {
+  /**
+   * Redirect user to appropriate dashboard based on role
+   */
+  const redirectToRoleDashboard = useCallback((role: UserRole) => {
     if (role === "student") {
-      setEmail("student@demo.com");
-      setPassword("demo123");
+      router.push("/student");
+    } else if (role === "instructor" || role === "ta") {
+      router.push("/instructor");
     } else {
-      setEmail("instructor@demo.com");
-      setPassword("demo123");
+      router.push("/dashboard");
     }
-    setError("");
-  }
+  }, [router]);
 
-  async function handleSubmit(e: FormEvent) {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!userLoading && user) {
+      redirectToRoleDashboard(user.role);
+    }
+  }, [user, userLoading, redirectToRoleDashboard]);
+
+  /**
+   * Handle login form submission
+   */
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError(null);
 
-    // Basic validation
-    if (!email || !password) {
-      setError("Please fill in all fields");
+    // Basic email validation
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address");
       return;
     }
 
-    const result = await loginMutation.mutateAsync({ email, password });
+    setIsLoading(true);
 
-    if (isAuthSuccess(result)) {
-      router.push("/");
-    } else {
-      setError(result.error);
+    try {
+      // Call backend dev-login endpoint
+      const result = await api.login({ email, password: "" });
+
+      if (isAuthSuccess(result)) {
+        // Redirect based on role
+        redirectToRoleDashboard(result.session.user.role);
+      } else {
+        setError(result.error || "Login failed. Please try again.");
+      }
+    } catch (err) {
+      // Handle backend errors
+      if (err instanceof Error) {
+        if (err.message.includes("404") || err.message.includes("not found")) {
+          setError(
+            "User not found. Try: student@demo.com or instructor@demo.com"
+          );
+        } else if (err.message.includes("fetch")) {
+          setError(
+            "Cannot connect to backend server. Please start the backend: cd backend && npm start"
+          );
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Show loading state while checking auth
+  if (userLoading) {
+    return (
+      <div className="w-full max-w-md space-y-8">
+        <div className="glass-panel p-8 rounded-2xl text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card variant="glass-strong" className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome to QuokkaQ</CardTitle>
-          <CardDescription className="text-center">Sign in to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Quick Login Buttons */}
-          <div className="mb-6 space-y-3">
-            <p className="text-sm font-semibold text-center text-muted-foreground">Quick Login (Demo)</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleQuickLogin("student")}
-                className="flex flex-col items-center gap-2 h-auto py-4"
-              >
-                <GraduationCap className="h-8 w-8 text-primary" />
-                <span className="text-sm font-semibold">Student</span>
-                <span className="text-xs text-muted-foreground">Alice Student</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleQuickLogin("instructor")}
-                className="flex flex-col items-center gap-2 h-auto py-4"
-              >
-                <BookOpen className="h-8 w-8 text-accent" />
-                <span className="text-sm font-semibold">Instructor</span>
-                <span className="text-xs text-muted-foreground">Dr. Bob Teacher</span>
-              </Button>
-            </div>
-          </div>
+    <div className="w-full max-w-md space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold glass-text">QuokkaQ</h1>
+        <p className="text-lg text-muted-foreground">
+          AI-Powered Academic Q&A Platform
+        </p>
+        <p className="text-sm text-muted-foreground">Sign in to continue</p>
+      </div>
 
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[var(--border-glass)]" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[var(--card-bg)] px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-danger/10 border border-danger text-danger px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="student@demo.com"
-                required
-                aria-required="true"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                aria-required="true"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant="glass-primary"
+      {/* Login Form */}
+      <div className="glass-panel p-8 rounded-2xl space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Input */}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium">
+              Email Address
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="student@demo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
               className="w-full"
-              disabled={loginMutation.isPending}
-            >
-              {loginMutation.isPending ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground text-center">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-accent hover:underline">
-              Sign up
-            </Link>
+              aria-describedby={error ? "login-error" : undefined}
+            />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <Alert variant="destructive" id="login-error">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={isLoading || !email}
+            className="w-full"
+            size="lg"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </>
+            )}
+          </Button>
+        </form>
+
+        {/* Demo Users Hint */}
+        <div className="pt-4 border-t border-border/50 space-y-2">
+          <p className="text-xs text-muted-foreground text-center font-medium">
+            Demo Users:
           </p>
-        </CardFooter>
-      </Card>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <button
+              type="button"
+              onClick={() => setEmail("student@demo.com")}
+              disabled={isLoading}
+              className="glass-panel px-3 py-2 rounded-lg text-left hover:bg-accent/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+            >
+              <div className="font-medium">Student</div>
+              <div className="text-muted-foreground">student@demo.com</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setEmail("instructor@demo.com")}
+              disabled={isLoading}
+              className="glass-panel px-3 py-2 rounded-lg text-left hover:bg-accent/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+            >
+              <div className="font-medium">Instructor</div>
+              <div className="text-muted-foreground">instructor@demo.com</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Info */}
+      <div className="text-center">
+        <p className="text-xs text-muted-foreground">
+          This is a demo environment. No password required.
+        </p>
+      </div>
     </div>
   );
 }
