@@ -1,0 +1,182 @@
+[
+  {
+    "id": "conv-1",
+    "userId": "user-student-1",
+    "courseId": "course-cs101",
+    "title": "Binary Search Implementation Help",
+    "messageCount": 4,
+    "createdAt": "2025-09-15T14:30:00.000Z",
+    "updatedAt": "2025-09-15T14:45:00.000Z"
+  },
+  {
+    "id": "conv-2",
+    "userId": "user-student-1",
+    "courseId": "course-cs101",
+    "title": "Recursion vs Iteration Question",
+    "messageCount": 4,
+    "createdAt": "2025-09-18T10:15:00.000Z",
+    "updatedAt": "2025-09-18T10:30:00.000Z"
+  },
+  {
+    "id": "conv-3",
+    "userId": "user-student-1",
+    "courseId": "course-cs101",
+    "title": "Big O Notation Clarification",
+    "messageCount": 4,
+    "createdAt": "2025-09-20T16:20:00.000Z",
+    "updatedAt": "2025-09-20T16:35:00.000Z"
+  },
+  {
+    "id": "conv-4",
+    "userId": "user-student-2",
+    "courseId": "course-cs101",
+    "title": "Merge Sort Time Complexity",
+    "messageCount": 4,
+    "createdAt": "2025-09-14T11:00:00.000Z",
+    "updatedAt": "2025-09-14T11:20:00.000Z"
+  },
+  {
+    "id": "conv-5",
+    "userId": "user-student-2",
+    "courseId": "course-cs101",
+    "title": "Hash Table Collision Strategies",
+    "messageCount": 4,
+    "createdAt": "2025-09-17T13:45:00.000Z",
+    "updatedAt": "2025-09-17T14:00:00.000Z"
+  },
+  {
+    "id": "conv-6",
+    "userId": "user-student-3",
+    "courseId": "course-cs101",
+    "title": "Dynamic Programming Approach",
+    "messageCount": 4,
+    "createdAt": "2025-09-16T09:30:00.000Z",
+    "updatedAt": "2025-09-16T09:50:00.000Z"
+  },
+  {
+    "id": "conv-7",
+    "userId": "user-student-3",
+    "courseId": "course-data201",
+    "title": "SQL JOIN Types Explanation",
+    "messageCount": 4,
+    "createdAt": "2025-09-19T15:10:00.000Z",
+    "updatedAt": "2025-09-19T15:25:00.000Z"
+  },
+  {
+    "id": "conv-8",
+    "userId": "user-student-4",
+    "courseId": "course-data201",
+    "title": "Database Normalization Forms",
+    "messageCount": 4,
+    "createdAt": "2025-09-15T08:00:00.000Z",
+    "updatedAt": "2025-09-15T08:20:00.000Z"
+  },
+  {
+    "id": "conv-9",
+    "userId": "user-student-4",
+    "courseId": "course-data201",
+    "title": "Index Performance Tuning",
+    "messageCount": 4,
+    "createdAt": "2025-09-18T12:30:00.000Z",
+    "updatedAt": "2025-09-18T12:50:00.000Z"
+  },
+  {
+    "id": "conv-10",
+    "userId": "user-student-5",
+    "courseId": "course-web301",
+    "title": "React Hooks Best Practices",
+    "messageCount": 4,
+    "createdAt": "2025-09-16T14:00:00.000Z",
+    "updatedAt": "2025-09-16T14:20:00.000Z"
+  },
+  {
+    "id": "conv-11",
+    "userId": "user-student-5",
+    "courseId": "course-web301",
+    "title": "useEffect Dependency Array",
+    "messageCount": 4,
+    "createdAt": "2025-09-19T10:45:00.000Z",
+    "updatedAt": "2025-09-19T11:00:00.000Z"
+  },
+  {
+    "id": "conv-12",
+    "userId": "user-student-6",
+    "courseId": "course-web301",
+    "title": "State Management with Context",
+    "messageCount": 4,
+    "createdAt": "2025-09-17T16:15:00.000Z",
+    "updatedAt": "2025-09-17T16:35:00.000Z"
+  },
+  {
+    "id": "conv-13",
+    "userId": "user-student-6",
+    "courseId": "course-ml401",
+    "title": "Linear Regression Implementation",
+    "messageCount": 4,
+    "createdAt": "2025-09-14T09:20:00.000Z",
+    "updatedAt": "2025-09-14T09:40:00.000Z"
+  },
+  {
+    "id": "conv-14",
+    "userId": "user-student-7",
+    "courseId": "course-ml401",
+    "title": "Overfitting Prevention Techniques",
+    "messageCount": 4,
+    "createdAt": "2025-09-18T11:00:00.000Z",
+    "updatedAt": "2025-09-18T11:25:00.000Z"
+  },
+  {
+    "id": "conv-15",
+    "userId": "user-student-7",
+    "courseId": "course-ml401",
+    "title": "Neural Network Activation Functions",
+    "messageCount": 4,
+    "createdAt": "2025-09-20T13:30:00.000Z",
+    "updatedAt": "2025-09-20T13:50:00.000Z"
+  },
+  {
+    "id": "conv-16",
+    "userId": "user-student-1",
+    "courseId": null,
+    "title": "General Study Tips for CS Courses",
+    "messageCount": 4,
+    "createdAt": "2025-09-12T10:00:00.000Z",
+    "updatedAt": "2025-09-12T10:20:00.000Z"
+  },
+  {
+    "id": "conv-17",
+    "userId": "user-student-2",
+    "courseId": null,
+    "title": "Career Advice for Software Engineering",
+    "messageCount": 4,
+    "createdAt": "2025-09-13T15:30:00.000Z",
+    "updatedAt": "2025-09-13T15:50:00.000Z"
+  },
+  {
+    "id": "conv-18",
+    "userId": "user-student-3",
+    "courseId": null,
+    "title": "Comparing Different Programming Languages",
+    "messageCount": 4,
+    "createdAt": "2025-09-16T12:00:00.000Z",
+    "updatedAt": "2025-09-16T12:25:00.000Z"
+  },
+  {
+    "id": "conv-19",
+    "userId": "user-student-4",
+    "courseId": null,
+    "title": "Project Management Best Practices",
+    "messageCount": 4,
+    "createdAt": "2025-09-19T08:45:00.000Z",
+    "updatedAt": "2025-09-19T09:10:00.000Z"
+  },
+  {
+    "id": "conv-20",
+    "userId": "user-student-5",
+    "courseId": null,
+    "title": "Interview Preparation Strategies",
+    "messageCount": 4,
+    "createdAt": "2025-09-20T14:15:00.000Z",
+    "updatedAt": "2025-09-20T14:40:00.000Z"
+  }
+]

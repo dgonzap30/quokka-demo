@@ -1,0 +1,152 @@
+[
+  {
+    "id": "template-1",
+    "userId": "user-instructor-1",
+    "title": "Office Hours Reminder",
+    "content": "Thanks for your question! This is a great topic to discuss in depth. Please join my office hours on [DAY] from [TIME] to [TIME] in [LOCATION/ZOOM LINK].",
+    "category": "general",
+    "tags": ["office-hours", "follow-up"],
+    "courseId": null,
+    "createdAt": "2025-08-01T10:00:00.000Z"
+  },
+  {
+    "id": "template-2",
+    "userId": "user-instructor-1",
+    "title": "Check Lecture Slides",
+    "content": "This topic is covered in detail in Lecture [NUMBER], slides [RANGE]. Please review those first, and if you still have questions after going through the material, feel free to ask a follow-up question!",
+    "category": "general",
+    "tags": ["lecture-reference", "self-study"],
+    "courseId": null,
+    "createdAt": "2025-08-01T10:15:00.000Z"
+  },
+  {
+    "id": "template-3",
+    "userId": "user-instructor-1",
+    "title": "Assignment Clarification",
+    "content": "Great question about the assignment! To clarify: [SPECIFIC CLARIFICATION]. The key insight here is [HINT WITHOUT GIVING AWAY SOLUTION]. Does this help point you in the right direction?",
+    "category": "assignments",
+    "tags": ["assignment", "hint"],
+    "courseId": null,
+    "createdAt": "2025-08-01T10:30:00.000Z"
+  },
+  {
+    "id": "template-4",
+    "userId": "user-instructor-1",
+    "title": "Late Submission Policy",
+    "content": "Per the course syllabus, late submissions are accepted up to [X] days late with a [Y]% penalty per day. If you have extenuating circumstances, please email me directly with documentation to discuss an extension.",
+    "category": "policy",
+    "tags": ["late-policy", "extensions"],
+    "courseId": null,
+    "createdAt": "2025-08-01T10:45:00.000Z"
+  },
+  {
+    "id": "template-5",
+    "userId": "user-instructor-1",
+    "title": "Debugging Approach",
+    "content": "When debugging this type of issue, I recommend: 1) Add print statements to trace variable values, 2) Test with simple inputs first, 3) Check edge cases (empty input, single element, etc.), 4) Use a debugger to step through line by line. What have you tried so far?",
+    "category": "technical",
+    "tags": ["debugging", "problem-solving"],
+    "courseId": null,
+    "createdAt": "2025-08-01T11:00:00.000Z"
+  },
+  {
+    "id": "template-6",
+    "userId": "user-ta-1",
+    "title": "Good Effort - Minor Issues",
+    "content": "Nice work on this problem! Your approach is on the right track. A few things to improve: [LIST SPECIFIC ISSUES]. Consider [HINT]. Keep it up!",
+    "category": "grading",
+    "tags": ["feedback", "encouragement"],
+    "courseId": "course-cs101",
+    "createdAt": "2025-08-05T09:00:00.000Z"
+  },
+  {
+    "id": "template-7",
+    "userId": "user-ta-1",
+    "title": "Incorrect Approach",
+    "content": "I see what you're trying to do here, but this approach has a flaw: [SPECIFIC ISSUE]. The correct approach would be to [HIGH-LEVEL HINT]. Review [LECTURE/SECTION] and try again. Feel free to ask questions!",
+    "category": "grading",
+    "tags": ["feedback", "correction"],
+    "courseId": "course-cs101",
+    "createdAt": "2025-08-05T09:15:00.000Z"
+  },
+  {
+    "id": "template-8",
+    "userId": "user-ta-1",
+    "title": "Excellent Solution",
+    "content": "Excellent work! Your solution is correct and efficient. I particularly like how you [SPECIFIC POSITIVE ASPECT]. This demonstrates a strong understanding of [CONCEPT]. Full points!",
+    "category": "grading",
+    "tags": ["feedback", "praise"],
+    "courseId": "course-cs101",
+    "createdAt": "2025-08-05T09:30:00.000Z"
+  },
+  {
+    "id": "template-9",
+    "userId": "user-ta-2",
+    "title": "Test Case Failure",
+    "content": "Your code is failing test case [NUMBER] because [SPECIFIC REASON]. Try testing with this input: [EXAMPLE INPUT]. What output do you expect vs what you're getting?",
+    "category": "technical",
+    "tags": ["testing", "debugging"],
+    "courseId": "course-data201",
+    "createdAt": "2025-08-06T10:00:00.000Z"
+  },
+  {
+    "id": "template-10",
+    "userId": "user-ta-2",
+    "title": "Time Complexity Issue",
+    "content": "Your solution works correctly but has time complexity [CURRENT COMPLEXITY]. For this problem, we need [TARGET COMPLEXITY]. Consider using [DATA STRUCTURE/TECHNIQUE]. Can you think of how to optimize your approach?",
+    "category": "technical",
+    "tags": ["optimization", "complexity"],
+    "courseId": "course-cs101",
+    "createdAt": "2025-08-06T10:15:00.000Z"
+  },
+  {
+    "id": "template-11",
+    "userId": "user-instructor-1",
+    "title": "Exam Preparation",
+    "content": "For the upcoming exam, focus on: [LIST KEY TOPICS]. Practice problems are available in [LOCATION]. The exam format will be [FORMAT]. Make sure you understand [CRITICAL CONCEPTS]. Good luck!",
+    "category": "general",
+    "tags": ["exam", "study-tips"],
+    "courseId": null,
+    "createdAt": "2025-08-10T14:00:00.000Z"
+  },
+  {
+    "id": "template-12",
+    "userId": "user-instructor-2",
+    "title": "Regrade Request Process",
+    "content": "To request a regrade: 1) Submit the regrade request form within [X] days of grade release, 2) Clearly explain which part you believe was graded incorrectly and why, 3) Note that the entire submission may be regraded. Requests are reviewed within [Y] days.",
+    "category": "policy",
+    "tags": ["grading", "regrade"],
+    "courseId": null,
+    "createdAt": "2025-08-12T11:00:00.000Z"
+  },
+  {
+    "id": "template-13",
+    "userId": "user-instructor-2",
+    "title": "Collaboration Policy",
+    "content": "Per the syllabus, you may discuss high-level approaches with classmates, but all code must be written independently. Do not share code or look at others' implementations. Cite any external resources used (Stack Overflow, textbooks, etc.). Violations will be reported to the academic integrity office.",
+    "category": "policy",
+    "tags": ["academic-integrity", "collaboration"],
+    "courseId": null,
+    "createdAt": "2025-08-12T11:15:00.000Z"
+  },
+  {
+    "id": "template-14",
+    "userId": "user-ta-3",
+    "title": "SQL Query Help",
+    "content": "Your SQL query isn't quite right. The issue is: [SPECIFIC PROBLEM]. Remember that [KEY SQL CONCEPT]. Try breaking it down: 1) [STEP 1], 2) [STEP 2], 3) [STEP 3]. What does your current query return?",
+    "category": "technical",
+    "tags": ["sql", "databases"],
+    "courseId": "course-data201",
+    "createdAt": "2025-08-15T13:00:00.000Z"
+  },
+  {
+    "id": "template-15",
+    "userId": "user-instructor-3",
+    "title": "Project Extension Request",
+    "content": "I've received your extension request. Extensions are granted only for documented medical/family emergencies or university-approved absences. Please provide documentation and explain: 1) What you've completed so far, 2) Specific circumstances preventing completion, 3) New proposed deadline. Email me directly (not on the forum).",
+    "category": "policy",
+    "tags": ["extensions", "projects"],
+    "courseId": null,
+    "createdAt": "2025-08-20T09:00:00.000Z"
+  }
+]
