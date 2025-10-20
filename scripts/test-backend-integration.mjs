@@ -69,12 +69,13 @@ async function makeRequest(method, endpoint, body = null, headers = {}) {
   const options = {
     method,
     headers: {
-      'Content-Type': 'application/json',
       ...headers,
     },
   };
 
+  // Only set Content-Type and body if body is provided
   if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    options.headers['Content-Type'] = 'application/json';
     options.body = JSON.stringify(body);
   }
 
@@ -82,6 +83,13 @@ async function makeRequest(method, endpoint, body = null, headers = {}) {
 
   try {
     const response = await fetch(url, options);
+
+    // Handle 204 No Content (DELETE, PATCH operations that return no body)
+    if (response.status === 204) {
+      log(`Response: ${response.status} ${response.statusText}`, 'success');
+      return { success: true, status: 204, data: null };
+    }
+
     const data = await response.json();
 
     if (response.ok) {
@@ -148,7 +156,10 @@ async function testAIAnswersModule() {
   );
 
   // Test 3: Endorse AI answer
-  const res3 = await makeRequest('POST', '/ai-answers/ai-answer-1/endorse');
+  // NOTE: May fail with 409 if already endorsed (test idempotency issue)
+  const res3 = await makeRequest('POST', '/ai-answers/ai-answer-1/endorse', {
+    userId: 'user-instructor-1'
+  });
   recordTest('AI Answers', 'POST /ai-answers/:id/endorse', res3.success);
 
   // Test 4: Get citations for AI answer
@@ -233,6 +244,7 @@ async function testInstructorModule() {
   // Test 4: Create response template
   const res4 = await makeRequest('POST', '/instructor/templates', {
     userId: 'user-instructor-1',
+    courseId: 'course-cs101',
     title: 'Test Template',
     content: 'This is a test template for {{TOPIC}}',
     category: 'general',
@@ -274,14 +286,14 @@ async function testNotificationsModule() {
   // Test 3: Mark notification as read (using a notification from res1)
   if (res1.success && res1.data.notifications && res1.data.notifications.length > 0) {
     const notificationId = res1.data.notifications[0].id;
-    const res3 = await makeRequest('PATCH', `/notifications/${notificationId}/read`);
+    const res3 = await makeRequest('PATCH', `/notifications/${notificationId}/read`, {
+      userId: 'user-student-1'
+    });
     recordTest('Notifications', 'PATCH /notifications/:id/read', res3.success);
   }
 
-  // Test 4: Mark all as read
-  const res4 = await makeRequest('PATCH', '/notifications/mark-all-read', {
-    userId: 'user-student-1'
-  });
+  // Test 4: Mark all as read (query param, not body)
+  const res4 = await makeRequest('PATCH', '/notifications/mark-all-read?userId=user-student-1');
   recordTest('Notifications', 'PATCH /notifications/mark-all-read', res4.success);
 }
 
@@ -289,6 +301,7 @@ async function testAuthModule() {
   log('Testing Auth Module', 'header');
 
   // Test 1: Get current user
+  // NOTE: Expected to fail - no session/cookie provided
   const res1 = await makeRequest('GET', '/auth/me');
   recordTest('Auth', 'GET /auth/me', res1.success && res1.data.id !== undefined);
 }
@@ -299,8 +312,8 @@ async function testCoursesModule() {
   // Test 1: Get all courses
   const res1 = await makeRequest('GET', '/courses');
   recordTest('Courses', 'GET /courses',
-    res1.success && Array.isArray(res1.data),
-    res1.success ? `(${res1.data.length} courses)` : ''
+    res1.success && res1.data && Array.isArray(res1.data.items),
+    res1.success && res1.data.items ? `(${res1.data.items.length} courses)` : ''
   );
 
   // Test 2: Get single course
@@ -310,6 +323,7 @@ async function testCoursesModule() {
   );
 
   // Test 3: Get enrollments for a user
+  // NOTE: Endpoint not yet implemented - future feature
   const res3 = await makeRequest('GET', '/courses/enrollments?userId=user-student-1');
   recordTest('Courses', 'GET /courses/enrollments',
     res3.success && Array.isArray(res3.data),
@@ -334,6 +348,7 @@ async function testThreadsModule() {
   );
 
   // Test 3: Create new thread
+  // NOTE: Expected to fail - requires valid session
   const res3 = await makeRequest('POST', '/threads', {
     courseId: 'course-cs101',
     authorId: 'user-student-1',
@@ -351,6 +366,7 @@ async function testThreadsModule() {
   recordTest('Threads', 'POST /threads/:id/endorse', res4.success);
 
   // Test 5: Upvote thread
+  // NOTE: Expected to fail - requires valid session
   const res5 = await makeRequest('POST', `/threads/${threadId}/upvote`, {
     userId: 'user-student-2'
   });
@@ -368,6 +384,7 @@ async function testPostsModule() {
   );
 
   // Test 2: Create new post
+  // NOTE: Expected to fail - requires valid session
   const res2 = await makeRequest('POST', '/posts', {
     threadId: 'thread-1',
     authorId: 'user-student-1',
