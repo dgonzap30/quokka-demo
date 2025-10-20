@@ -14,7 +14,7 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost } from "./http.client";
 
 /**
@@ -42,7 +42,7 @@ export const notificationsAPI = {
     courseId?: string
   ): Promise<Notification[]> {
     // Check feature flag for backend
-    if (useBackendFor('notifications')) {
+    if (BACKEND_FEATURE_FLAGS.notifications) {
       try {
         // Build query params
         const params = new URLSearchParams();
@@ -84,7 +84,7 @@ export const notificationsAPI = {
    */
   async markNotificationRead(notificationId: string): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('notifications')) {
+    if (BACKEND_FEATURE_FLAGS.notifications) {
       try {
         // Call backend endpoint
         await httpPost<void>(
@@ -125,7 +125,7 @@ export const notificationsAPI = {
     courseId?: string
   ): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('notifications')) {
+    if (BACKEND_FEATURE_FLAGS.notifications) {
       try {
         // Call backend endpoint
         await httpPost<void>(

@@ -25,7 +25,7 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay, generateId } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpPost, httpGet } from "./http.client";
 
 /**
@@ -48,7 +48,7 @@ export const authAPI = {
    */
   async login(input: LoginInput): Promise<AuthResult> {
     // Check feature flag for backend
-    if (useBackendFor('auth')) {
+    if (BACKEND_FEATURE_FLAGS.auth) {
       try {
         // Call backend dev-login endpoint (email-only)
         const response = await httpPost<{ user: User; message: string }>(
@@ -197,7 +197,7 @@ export const authAPI = {
    */
   async logout(): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('auth')) {
+    if (BACKEND_FEATURE_FLAGS.auth) {
       try {
         // Call backend logout endpoint
         await httpPost('/api/v1/auth/logout', {});
@@ -228,7 +228,7 @@ export const authAPI = {
    */
   async getCurrentUser(): Promise<User | null> {
     // Check feature flag for backend
-    if (useBackendFor('auth')) {
+    if (BACKEND_FEATURE_FLAGS.auth) {
       try {
         // Call backend /me endpoint
         const user = await httpGet<User>('/api/v1/auth/me');

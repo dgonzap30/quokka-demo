@@ -17,7 +17,7 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay, extractKeywords, generateSnippet } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost } from "./http.client";
 
 /**
@@ -46,7 +46,7 @@ export const materialsAPI = {
    */
   async getCourseMaterials(courseId: string): Promise<CourseMaterial[]> {
     // Check feature flag for backend
-    if (useBackendFor('materials')) {
+    if (BACKEND_FEATURE_FLAGS.materials) {
       try {
         // Call backend endpoint
         const response = await httpGet<{ items: CourseMaterial[] }>(
@@ -126,7 +126,7 @@ export const materialsAPI = {
     }
 
     // Check feature flag for backend
-    if (useBackendFor('materials')) {
+    if (BACKEND_FEATURE_FLAGS.materials) {
       try {
         // Call backend search endpoint
         const response = await httpPost<{ results: CourseMaterialSearchResult[] }>(

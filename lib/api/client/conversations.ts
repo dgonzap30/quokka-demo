@@ -31,7 +31,7 @@ import {
 import { trackConversationCreated } from "@/lib/store/metrics";
 
 import { delay, generateId } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost, httpDelete } from "./http.client";
 
 /**
@@ -77,7 +77,7 @@ export const conversationsAPI = {
     input: CreateConversationInput
   ): Promise<AIConversation> {
     // Check feature flag for backend
-    if (useBackendFor('conversations')) {
+    if (BACKEND_FEATURE_FLAGS.conversations) {
       try {
         // Call backend endpoint
         const conversation = await httpPost<AIConversation>(
@@ -140,7 +140,7 @@ export const conversationsAPI = {
    */
   async getAIConversations(userId: string): Promise<AIConversation[]> {
     // Check feature flag for backend
-    if (useBackendFor('conversations')) {
+    if (BACKEND_FEATURE_FLAGS.conversations) {
       try {
         // Call backend endpoint
         const response = await httpGet<{ conversations: AIConversation[] }>(
@@ -179,7 +179,7 @@ export const conversationsAPI = {
    */
   async getConversationMessages(conversationId: string): Promise<AIMessage[]> {
     // Check feature flag for backend
-    if (useBackendFor('conversations')) {
+    if (BACKEND_FEATURE_FLAGS.conversations) {
       try {
         // Call backend endpoint
         const response = await httpGet<{ messages: AIMessage[] }>(
@@ -222,7 +222,7 @@ export const conversationsAPI = {
    */
   async createMessage(message: AIMessage, userId: string): Promise<AIMessage> {
     // Only use backend if enabled
-    if (useBackendFor('conversations')) {
+    if (BACKEND_FEATURE_FLAGS.conversations) {
       try {
         // Call backend endpoint
         const response = await httpPost<{ userMessage: AIMessage }>(
@@ -376,7 +376,7 @@ export const conversationsAPI = {
    */
   async deleteAIConversation(conversationId: string): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('conversations')) {
+    if (BACKEND_FEATURE_FLAGS.conversations) {
       try {
         // Call backend endpoint
         await httpDelete<void>(`/api/v1/conversations/${conversationId}`);
@@ -424,7 +424,7 @@ export const conversationsAPI = {
     courseId: string
   ): Promise<{ thread: Thread; aiAnswer: AIAnswer | null }> {
     // Check feature flag for backend
-    if (useBackendFor('conversations')) {
+    if (BACKEND_FEATURE_FLAGS.conversations) {
       try {
         // Call backend endpoint
         const response = await httpPost<{ threadId: string; aiAnswerId: string | null }>(

@@ -17,7 +17,7 @@ import {
 } from "@/lib/store/localStore";
 
 import { delay } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet } from "./http.client";
 
 /**
@@ -37,7 +37,7 @@ export const coursesAPI = {
    */
   async getAllCourses(): Promise<Course[]> {
     // Check feature flag for backend
-    if (useBackendFor('courses')) {
+    if (BACKEND_FEATURE_FLAGS.courses) {
       try {
         // Call backend endpoint
         const response = await httpGet<{ items: Course[] }>('/api/v1/courses');
@@ -102,7 +102,7 @@ export const coursesAPI = {
    */
   async getCourse(courseId: string): Promise<Course | null> {
     // Check feature flag for backend
-    if (useBackendFor('courses')) {
+    if (BACKEND_FEATURE_FLAGS.courses) {
       try {
         // Call backend endpoint
         const course = await httpGet<Course>(`/api/v1/courses/${courseId}`);

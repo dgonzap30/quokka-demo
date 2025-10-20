@@ -57,7 +57,7 @@ import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
 import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
 
 import { delay, generateId, extractKeywords, calculateMatchRatio } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost, httpDelete } from "./http.client";
 
 /**
@@ -896,7 +896,7 @@ export const instructorAPI = {
    */
   async getResponseTemplates(userId: string): Promise<ResponseTemplate[]> {
     // Check feature flag for backend
-    if (useBackendFor('instructor')) {
+    if (BACKEND_FEATURE_FLAGS.instructor) {
       try {
         // Call backend endpoint
         const response = await httpGet<{ templates: ResponseTemplate[] }>(
@@ -940,7 +940,7 @@ export const instructorAPI = {
    */
   async saveResponseTemplate(input: CreateResponseTemplateInput, userId: string): Promise<ResponseTemplate> {
     // Check feature flag for backend
-    if (useBackendFor('instructor')) {
+    if (BACKEND_FEATURE_FLAGS.instructor) {
       try {
         // Call backend endpoint
         // Note: Backend uses courseId, frontend uses category. Using "course-general" as fallback.
@@ -995,7 +995,7 @@ export const instructorAPI = {
    */
   async deleteResponseTemplate(templateId: string): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('instructor')) {
+    if (BACKEND_FEATURE_FLAGS.instructor) {
       try {
         // Call backend endpoint
         await httpDelete<void>(`/api/v1/response-templates/${templateId}`);

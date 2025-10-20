@@ -10,7 +10,7 @@ import type { Post, CreatePostInput } from "@/lib/models/types";
 import { seedData, addPost, updateThread } from "@/lib/store/localStore";
 
 import { delay, generateId } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpPost } from "./http.client";
 
 /**
@@ -41,7 +41,7 @@ export const postsAPI = {
    */
   async createPost(input: CreatePostInput, authorId: string): Promise<Post> {
     // Check feature flag for backend
-    if (useBackendFor('posts')) {
+    if (BACKEND_FEATURE_FLAGS.posts) {
       try {
         // Call backend endpoint
         const post = await httpPost<Post>('/api/v1/posts', {

@@ -33,7 +33,7 @@ import { findSimilarDocuments } from "@/lib/utils/similarity";
 
 import { delay, generateId } from "./utils";
 import { aiAnswersAPI } from "./ai-answers";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost } from "./http.client";
 
 /**
@@ -61,7 +61,7 @@ export const threadsAPI = {
    */
   async getCourseThreads(courseId: string): Promise<ThreadWithAIAnswer[]> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint (returns paginated results)
         const response = await httpGet<{
@@ -134,7 +134,7 @@ export const threadsAPI = {
     threadId: string
   ): Promise<{ thread: Thread; posts: Post[]; aiAnswer: AIAnswer | null } | null> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Fetch thread and posts in parallel
         const [thread, postsResponse] = await Promise.all([
@@ -214,7 +214,7 @@ export const threadsAPI = {
     authorId: string
   ): Promise<{ thread: Thread; aiAnswer: AIAnswer | null }> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint to create thread
         const thread = await httpPost<Thread>('/api/v1/threads', {
@@ -308,7 +308,7 @@ export const threadsAPI = {
    */
   async endorseThread(threadId: string, userId: string): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint
         await httpPost(`/api/v1/threads/${threadId}/endorse`, {});
@@ -382,7 +382,7 @@ export const threadsAPI = {
    */
   async upvoteThread(threadId: string, userId: string): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint (toggle upvote)
         await httpPost(`/api/v1/threads/${threadId}/upvote`, {});
@@ -448,7 +448,7 @@ export const threadsAPI = {
    */
   async removeUpvote(threadId: string, userId: string): Promise<void> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint (same as upvote - it toggles)
         await httpPost(`/api/v1/threads/${threadId}/upvote`, {});
@@ -509,7 +509,7 @@ export const threadsAPI = {
     input: CreateThreadInput
   ): Promise<SimilarThread[]> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint
         const response = await httpPost<SimilarThread[]>(
@@ -595,7 +595,7 @@ export const threadsAPI = {
     userId: string
   ): Promise<Thread> {
     // Check feature flag for backend
-    if (useBackendFor('threads')) {
+    if (BACKEND_FEATURE_FLAGS.threads) {
       try {
         // Call backend endpoint
         const mergedThread = await httpPost<Thread>('/api/v1/threads/merge', {

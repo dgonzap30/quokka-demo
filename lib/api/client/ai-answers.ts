@@ -27,7 +27,7 @@ import {
 import { trackPreviewGenerated } from "@/lib/store/metrics";
 
 import { delay, generateId } from "./utils";
-import { useBackendFor } from "@/lib/config/features";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost } from "./http.client";
 
 /**
@@ -184,7 +184,7 @@ export const aiAnswersAPI = {
    */
   async getAIAnswer(threadId: string): Promise<AIAnswer | null> {
     // Check feature flag for backend
-    if (useBackendFor('aiAnswers')) {
+    if (BACKEND_FEATURE_FLAGS.aiAnswers) {
       try {
         // Call backend endpoint
         const aiAnswer = await httpGet<AIAnswer>(
@@ -245,7 +245,7 @@ export const aiAnswersAPI = {
    */
   async endorseAIAnswer(input: EndorseAIAnswerInput): Promise<AIAnswer> {
     // Check feature flag for backend
-    if (useBackendFor('aiAnswers')) {
+    if (BACKEND_FEATURE_FLAGS.aiAnswers) {
       try {
         // Call backend endpoint
         const updatedAnswer = await httpPost<AIAnswer>(
@@ -337,7 +337,7 @@ export const aiAnswersAPI = {
     input: BulkEndorseInput
   ): Promise<BulkActionResult> {
     // Check feature flag for backend
-    if (useBackendFor('aiAnswers')) {
+    if (BACKEND_FEATURE_FLAGS.aiAnswers) {
       try {
         // Call backend endpoint
         const result = await httpPost<BulkActionResult>(
