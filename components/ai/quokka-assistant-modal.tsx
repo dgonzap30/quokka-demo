@@ -43,7 +43,7 @@ import {
 import { usePersistedChat } from "@/lib/llm/hooks/usePersistedChat";
 import { QDSConversation, QDSPromptInput } from "@/components/ai/elements";
 import { RateLimitIndicator } from "@/components/ai/rate-limit-indicator";
-import type { CourseSummary } from "@/lib/models/types";
+import type { CourseSummary, User } from "@/lib/models/types";
 
 export interface QuokkaAssistantModalProps {
   /** Whether the modal is open */
@@ -78,7 +78,7 @@ function QuokkaAssistantModalContent({
   currentCourseCode,
   availableCourses,
   user,
-}: QuokkaAssistantModalProps & { user: any }) {
+}: QuokkaAssistantModalProps & { user: User }) {
   const router = useRouter();
 
   // Local state
