@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useRef } from "react";
+import { useState, FormEvent, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser, useCreateThread } from "@/lib/api/hooks";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -57,8 +57,28 @@ export function ConversationToThreadModal({
   const [tags, setTags] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Refs for focus management
+  // Refs for focus management (WCAG 2.4.3 Level A)
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const triggerElementRef = useRef<HTMLElement | null>(null);
+
+  // Capture trigger element when modal opens
+  useEffect(() => {
+    if (isOpen && !triggerElementRef.current) {
+      triggerElementRef.current = document.activeElement as HTMLElement;
+    }
+  }, [isOpen]);
+
+  // Return focus to trigger element when modal closes
+  useEffect(() => {
+    if (!isOpen && triggerElementRef.current) {
+      setTimeout(() => {
+        if (triggerElementRef.current) {
+          triggerElementRef.current.focus();
+          triggerElementRef.current = null;
+        }
+      }, 100);
+    }
+  }, [isOpen]);
 
   // Reset form when modal closes
   const handleClose = () => {

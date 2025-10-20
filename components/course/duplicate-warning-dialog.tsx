@@ -13,6 +13,7 @@
  * - Allows posting anyway if desired
  */
 
+import { useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,28 @@ export function DuplicateWarningDialog({
   onProceed,
   isPosting = false,
 }: DuplicateWarningDialogProps) {
+  // Focus management (WCAG 2.4.3 Level A)
+  const triggerElementRef = useRef<HTMLElement | null>(null);
+
+  // Capture trigger element when dialog opens
+  useEffect(() => {
+    if (isOpen && !triggerElementRef.current) {
+      triggerElementRef.current = document.activeElement as HTMLElement;
+    }
+  }, [isOpen]);
+
+  // Return focus to trigger element when dialog closes
+  useEffect(() => {
+    if (!isOpen && triggerElementRef.current) {
+      setTimeout(() => {
+        if (triggerElementRef.current) {
+          triggerElementRef.current.focus();
+          triggerElementRef.current = null;
+        }
+      }, 100);
+    }
+  }, [isOpen]);
+
   // Get highest similarity score
   const maxSimilarity = duplicates.length > 0
     ? Math.max(...duplicates.map(d => d.similarity))

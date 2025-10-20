@@ -59,6 +59,28 @@ export function CourseSelectionModal({
 }: CourseSelectionModalProps) {
   const router = useRouter();
 
+  // Focus management (WCAG 2.4.3 Level A)
+  const triggerElementRef = React.useRef<HTMLElement | null>(null);
+
+  // Capture trigger element when modal opens
+  React.useEffect(() => {
+    if (open && !triggerElementRef.current) {
+      triggerElementRef.current = document.activeElement as HTMLElement;
+    }
+  }, [open]);
+
+  // Return focus to trigger element when modal closes
+  React.useEffect(() => {
+    if (!open && triggerElementRef.current) {
+      setTimeout(() => {
+        if (triggerElementRef.current) {
+          triggerElementRef.current.focus();
+          triggerElementRef.current = null;
+        }
+      }, 100);
+    }
+  }, [open]);
+
   const handleCourseSelect = (courseId: string) => {
     router.push(`/courses/${courseId}`);
     // Modal will close automatically on route change
