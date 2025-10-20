@@ -418,6 +418,34 @@ This demo does **NOT** include:
 
 ---
 
+## 📚 Documentation
+
+### Backend API Reference
+
+Complete REST API documentation for all backend endpoints:
+- **Location:** [`backend/docs/API_REFERENCE.md`](backend/docs/API_REFERENCE.md)
+- **Base URL:** `http://localhost:3001/api/v1`
+- **Includes:** Authentication, threads, posts, courses, AI answers, instructor metrics
+- **Status:** 12 of 44 planned endpoints implemented
+
+### Dependency Audit
+
+Comprehensive dependency documentation and quarterly audit process:
+- **Location:** [`DEPENDENCIES.md`](DEPENDENCIES.md)
+- **Includes:** All frontend/backend dependencies with rationale, bundle impact analysis
+- **Last Audit:** 2025-10-20
+- **Next Audit:** 2026-01-20 (Quarterly)
+- **Metrics:** 59 packages, 730 MB node_modules, 0 vulnerabilities
+
+### Additional Resources
+
+- **Design System:** [`QDS.md`](QDS.md) - Complete Quokka Design System documentation
+- **Development Guide:** [`CLAUDE.md`](CLAUDE.md) - Project guidelines and agentic workflow
+- **Deployment:** Netlify configuration in `netlify.toml`
+- **Environment:** See `.env.local.example` for LLM configuration
+
+---
+
 ## 🧪 Quality Checks
 
 ```bash
