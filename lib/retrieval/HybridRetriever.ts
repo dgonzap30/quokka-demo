@@ -154,7 +154,7 @@ export class HybridRetriever implements IRetriever {
     // Convert to results and sort
     const fusedResults: RetrievalResult[] = [];
 
-    for (const [_materialId, { score, material }] of rrfScores) {
+    for (const [, { score, material }] of rrfScores) {
       fusedResults.push({
         material,
         score,
@@ -211,7 +211,7 @@ export class HybridRetriever implements IRetriever {
     // Convert to results and sort
     const fusedResults: RetrievalResult[] = [];
 
-    for (const [_materialId, { score, material }] of combinedScores) {
+    for (const [, { score, material }] of combinedScores) {
       fusedResults.push({
         material,
         score,
