@@ -226,8 +226,8 @@ async function testInstructorModule() {
   // Test 3: Get response templates
   const res3 = await makeRequest('GET', '/instructor/templates?userId=user-instructor-1');
   recordTest('Instructor', 'GET /instructor/templates',
-    res3.success && Array.isArray(res3.data),
-    res3.success ? `(${res3.data.length} templates)` : ''
+    res3.success && res3.data && Array.isArray(res3.data.templates),
+    res3.success && res3.data.templates ? `(${res3.data.templates.length} templates)` : ''
   );
 
   // Test 4: Create response template
@@ -260,20 +260,20 @@ async function testNotificationsModule() {
   // Test 1: Get notifications for a user
   const res1 = await makeRequest('GET', '/notifications?userId=user-student-1');
   recordTest('Notifications', 'GET /notifications?userId=user-student-1',
-    res1.success && Array.isArray(res1.data),
-    res1.success ? `(${res1.data.length} notifications)` : ''
+    res1.success && res1.data && Array.isArray(res1.data.notifications),
+    res1.success && res1.data.notifications ? `(${res1.data.notifications.length} notifications)` : ''
   );
 
   // Test 2: Get unread count
   const res2 = await makeRequest('GET', '/notifications/unread-count?userId=user-student-1');
   recordTest('Notifications', 'GET /notifications/unread-count',
-    res2.success && res2.data.count !== undefined,
-    res2.success ? `(${res2.data.count} unread)` : ''
+    res2.success && res2.data && res2.data.unreadCount !== undefined,
+    res2.success && res2.data ? `(${res2.data.unreadCount} unread)` : ''
   );
 
   // Test 3: Mark notification as read (using a notification from res1)
-  if (res1.success && res1.data.length > 0) {
-    const notificationId = res1.data[0].id;
+  if (res1.success && res1.data.notifications && res1.data.notifications.length > 0) {
+    const notificationId = res1.data.notifications[0].id;
     const res3 = await makeRequest('PATCH', `/notifications/${notificationId}/read`);
     recordTest('Notifications', 'PATCH /notifications/:id/read', res3.success);
   }
