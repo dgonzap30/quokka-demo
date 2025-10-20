@@ -25,6 +25,10 @@ function Skeleton({
   return (
     <div
       data-slot="skeleton"
+      role="status"
+      aria-label="Loading..."
+      aria-live="polite"
+      aria-busy="true"
       className={cn(skeletonVariants({ variant }), className)}
       {...props}
     />

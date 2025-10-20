@@ -175,9 +175,21 @@ export function StatCard({
 
         {/* Value Row */}
         <div className="flex items-baseline gap-2">
-          <p className="text-2xl sm:text-3xl font-bold glass-text">{value.toLocaleString()}</p>
+          <p
+            className="text-2xl sm:text-3xl font-bold glass-text"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {value.toLocaleString()}
+          </p>
           {trend && (
-            <div className={cn("flex items-center gap-1", getTrendColor(trend.direction))}>
+            <div
+              className={cn("flex items-center gap-1", getTrendColor(trend.direction))}
+              role="status"
+              aria-live="polite"
+              aria-label={`Trend: ${trend.label}`}
+            >
               {getTrendIcon(trend.direction)}
               <span className="text-xs font-semibold">{trend.label}</span>
             </div>
