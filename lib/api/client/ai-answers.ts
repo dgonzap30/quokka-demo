@@ -71,26 +71,15 @@ export const aiAnswersAPI = {
       throw new Error(`Course not found: ${input.courseId}`);
     }
 
-    // Generate AI response using /api/answer endpoint
-    const response = await fetch("/api/answer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question: `${input.title}\n\n${input.content}`,
-        courseId: input.courseId,
-        userId: input.userId,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`AI answer generation failed: ${response.statusText}`);
-    }
-
-    const data = await response.json();
+    // Generate mock AI answer (backend AI generation not yet implemented)
+    // TODO: Add backend endpoint when AI answer generation is implemented
     const aiAnswer: AIAnswer = {
-      ...data.answer,
-      id: generateId("ai"), // Override with our ID
+      id: generateId("ai"),
       threadId: input.threadId,
+      content: `This is a simulated AI response for: "${input.title}". In a production system, this would contain an AI-generated answer based on course materials and context.`,
+      materialReferences: null,
+      confidence: 0.85,
+      createdAt: new Date().toISOString(),
     };
 
     addAIAnswer(aiAnswer);
