@@ -20,7 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, formatTimeAgo } from "@/lib/utils";
 import type { AIConversation } from "@/lib/models/types";
 
 export interface ConversationHistoryItemProps {
@@ -81,27 +81,43 @@ export function ConversationHistoryItem({
             onClick={onClick}
             onKeyDown={handleKeyDown}
             className={cn(
-              "group relative w-full text-left px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer",
+              "group relative w-full text-left px-4 py-3 rounded-lg cursor-pointer",
+              "transition-all duration-200 ease-in-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-              // Active state
+              // Active state - stronger glass effect with accent border
               isActive
-                ? "glass-panel-strong border border-primary/30"
-                : "hover:glass-panel border border-transparent hover:border-primary/10",
+                ? "glass-panel-strong border border-primary/30 shadow-e2"
+                : "hover:glass-panel border border-transparent hover:border-primary/10 hover:scale-[1.02] hover:shadow-e2",
               className
             )}
-            aria-label={`${conversation.title}`}
+            aria-label={`${conversation.title}, ${conversation.updatedAt || conversation.createdAt ? formatTimeAgo(conversation.updatedAt || conversation.createdAt) : 'Recently'}`}
             aria-current={isActive ? "page" : undefined}
           >
-            {/* Title - Single line with ellipsis */}
-            <div className="flex items-center gap-2 pr-8">
+            {/* Content: Title + Timestamp */}
+            <div className="flex flex-col gap-1.5 pr-8">
+              {/* Title - Single line with ellipsis */}
               <h3
                 className={cn(
-                  "text-sm leading-tight truncate glass-text flex-1",
+                  "text-sm leading-tight truncate glass-text",
                   isActive ? "font-semibold" : "font-medium"
                 )}
               >
                 {conversation.title}
               </h3>
+
+              {/* Timestamp - Relative time with fallback */}
+              {(conversation.updatedAt || conversation.createdAt) ? (
+                <time
+                  dateTime={conversation.updatedAt || conversation.createdAt}
+                  className="text-xs text-muted-foreground glass-text opacity-75"
+                >
+                  {formatTimeAgo(conversation.updatedAt || conversation.createdAt)}
+                </time>
+              ) : (
+                <span className="text-xs text-muted-foreground glass-text opacity-75">
+                  Recently
+                </span>
+              )}
             </div>
 
             {/* Delete Button - Appears on hover */}
