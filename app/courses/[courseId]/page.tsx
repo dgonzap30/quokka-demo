@@ -60,6 +60,14 @@ function CourseDetailContent({ params }: { params: Promise<{ courseId: string }>
   // Mobile filter sheet state
   const [mobileFilterSheetOpen, setMobileFilterSheetOpen] = useState(false);
 
+  // Initialize selectedTags from URL params (for assignment deep links)
+  useEffect(() => {
+    const tagParam = searchParams.get('tag');
+    if (tagParam && selectedTags.length === 0) {
+      setSelectedTags([tagParam]);
+    }
+  }, [searchParams, selectedTags.length]);
+
   // Viewport detection for responsive thread display
   // Mobile (< 768px): Thread detail in modal
   // Desktop (≥ 768px): Thread detail inline in third column (Gmail-style)

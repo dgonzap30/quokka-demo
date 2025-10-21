@@ -1,6 +1,7 @@
 @source "../{app,components,lib}";
 @source not "../doccloud";
 @source not "../**/*.md";
+@source "../node_modules/streamdown/dist/index.js";
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -1030,6 +1031,78 @@
 .animate-glass-shimmer {
   background-size: 200% 100%;
   animation: glass-shimmer 3s linear infinite;
+}
+
+/* ===== Prompt Input Animations ===== */
+@keyframes subtle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(138, 107, 61, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px 4px rgba(138, 107, 61, 0.2);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes icon-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(45deg);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(138, 107, 61, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(138, 107, 61, 0.5);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: ripple 0.6s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.3s ease-out;
+}
+
+.animate-icon-rotate {
+  animation: icon-rotate 0.3s ease-out forwards;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
 }
 
 /* ===== Performance Optimizations ===== */

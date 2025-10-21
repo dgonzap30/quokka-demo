@@ -4,29 +4,35 @@
  * QDSResponse - QDS-styled wrapper for AI Elements Response component
  *
  * Renders AI assistant message content with:
- * - Streaming markdown support via Response component
+ * - Streaming markdown support via Response component (Streamdown)
  * - Inline citation markers with QDS accent styling
- * - Integration with existing citation parser
+ * - Proper markdown formatting for ALL messages (with and without citations)
  */
 
 import { Response } from "@/components/ai-elements/response";
 import { cn } from "@/lib/utils";
 import { QDSInlineCitation } from "./qds-inline-citation";
 import type { QDSResponseProps } from "./types";
-import type { ReactNode } from "react";
+import type { ReactNode, ComponentProps } from "react";
 
 /**
- * Render text with highlighted citation markers
+ * Process text content to convert citation markers [N] into QDSInlineCitation components
  *
- * Converts inline [1] markers into styled, clickable QDSInlineCitation components
+ * This function is used by custom component renderers to handle citations
+ * within markdown content while preserving markdown formatting
  */
-function renderTextWithCitations(
-  text: string,
+function processTextWithCitations(
+  children: ReactNode,
   citations: QDSResponseProps["citations"] = []
 ): ReactNode {
-  // No citations - return plain text for Response component
-  if (citations.length === 0) {
-    return text;
+  // No citations or no children - return as-is
+  if (citations.length === 0 || !children) {
+    return children;
+  }
+
+  // If children is not a string, return as-is (could be other React elements)
+  if (typeof children !== "string") {
+    return children;
   }
 
   const citationIds = new Set(citations.map((c) => c.id));
@@ -37,12 +43,12 @@ function renderTextWithCitations(
   const citationRegex = /\[(\d+)\]/g;
   let match;
 
-  while ((match = citationRegex.exec(text)) !== null) {
+  while ((match = citationRegex.exec(children)) !== null) {
     const citationNum = parseInt(match[1], 10);
 
     // Add text before the match
     if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index));
+      parts.push(children.substring(lastIndex, match.index));
     }
 
     // Add citation marker (only if it's a valid citation)
@@ -76,11 +82,11 @@ function renderTextWithCitations(
   }
 
   // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
+  if (lastIndex < children.length) {
+    parts.push(children.substring(lastIndex));
   }
 
-  return parts.length > 0 ? <>{parts}</> : text;
+  return parts.length > 0 ? <>{parts}</> : children;
 }
 
 export function QDSResponse({
@@ -90,30 +96,40 @@ export function QDSResponse({
   className,
 }: QDSResponseProps) {
   /**
-   * Strategy: Use Response (Streamdown) for markdown ONLY when no citations.
-   * When citations exist, render manually with QDSInlineCitation components
-   * to avoid mixing React elements with markdown strings.
+   * Strategy: ALWAYS use Response (Streamdown) for markdown rendering.
+   * Use custom component renderers to process citation markers within text nodes.
+   * This preserves markdown formatting (code blocks, lists, etc.) while supporting citations.
    */
 
-  if (citations.length === 0) {
-    // No citations - use Response for streaming markdown
-    return (
-      <div className={cn("text-sm leading-relaxed", className)}>
-        <Response>{content}</Response>
-        {/* Streaming cursor */}
-        {isStreaming && (
-          <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary animate-pulse" aria-hidden="true" />
-        )}
-      </div>
-    );
-  }
-
-  // Has citations - render manually with citation components
-  const contentWithCitations = renderTextWithCitations(content, citations);
+  // Custom components for rendering markdown with citation support
+  const customComponents: ComponentProps<typeof Response>["components"] = citations.length > 0 ? {
+    // Process paragraphs for citations
+    p: ({ children, ...props }) => (
+      <p {...props}>{processTextWithCitations(children, citations)}</p>
+    ),
+    // Process list items for citations
+    li: ({ children, ...props }) => (
+      <li {...props}>{processTextWithCitations(children, citations)}</li>
+    ),
+    // Process inline code for citations (less common but possible)
+    code: ({ children, ...props }) => (
+      <code {...props}>{processTextWithCitations(children, citations)}</code>
+    ),
+    // Process strong/bold for citations
+    strong: ({ children, ...props }) => (
+      <strong {...props}>{processTextWithCitations(children, citations)}</strong>
+    ),
+    // Process em/italic for citations
+    em: ({ children, ...props }) => (
+      <em {...props}>{processTextWithCitations(children, citations)}</em>
+    ),
+  } : undefined;
 
   return (
-    <div className={cn("text-sm leading-relaxed whitespace-pre-wrap", className)}>
-      {contentWithCitations}
+    <div className={cn("text-sm leading-relaxed", className)}>
+      <Response components={customComponents}>
+        {content}
+      </Response>
       {/* Streaming cursor */}
       {isStreaming && (
         <span className="inline-block w-1.5 h-4 ml-0.5 bg-primary animate-pulse" aria-hidden="true" />

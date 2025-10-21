@@ -164,9 +164,11 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
 
     // Transform results - include all Thread fields with schema-compatible naming
     const threadsWithAuthor: ThreadWithAuthor[] = results.map((row) => {
-      const { viewCount, replyCount, hasAIAnswer, ...threadFields } = row.thread as any;
-      // Drizzle may return view_count instead of viewCount depending on config
-      const views = viewCount ?? (row.thread as any).view_count ?? 0;
+      const threadAny = row.thread as any;
+      // Extract views before destructuring (Drizzle returns snake_case from DB)
+      const views = threadAny.viewCount ?? threadAny.view_count ?? 0;
+      // Now destructure, excluding fields we don't need in the response
+      const { viewCount, replyCount, hasAIAnswer, view_count, reply_count, has_ai_answer, ...threadFields } = threadAny;
       return {
         ...threadFields,
         views, // Transform viewCount/view_count -> views (default to 0 if undefined)
@@ -230,9 +232,11 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
     const hasAiAnswer = (aiResults[0]?.count || 0) > 0;
 
     // Transform field names for schema compatibility
-    const { viewCount, replyCount, hasAIAnswer, ...threadFields } = thread as any;
-    // Drizzle may return view_count instead of viewCount depending on config
-    const views = viewCount ?? (thread as any).view_count ?? 0;
+    const threadAny = thread as any;
+    // Extract views before destructuring (Drizzle returns snake_case from DB)
+    const views = threadAny.viewCount ?? threadAny.view_count ?? 0;
+    // Now destructure, excluding fields we don't need in the response
+    const { viewCount, replyCount, hasAIAnswer, view_count, reply_count, has_ai_answer, ...threadFields } = threadAny;
     return {
       ...threadFields,
       views, // Transform viewCount/view_count -> views (default to 0 if undefined)

@@ -105,9 +105,12 @@ export async function POST(req: Request) {
       system: systemPrompt + courseContextInfo,
       messages: coreMessages,
       tools: ragTools,
+      maxSteps: 5, // Allow up to 5 steps (tool calls + text generation)
       temperature: config.temperature,
       topP: config.topP,
     });
+
+    console.log('[AI Chat] Streaming response started');
 
     // Return streaming response (UI Message Stream for tool calls + useChat compatibility)
     return result.toUIMessageStreamResponse();

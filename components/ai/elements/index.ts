@@ -9,6 +9,7 @@ export { QDSMessage } from "./qds-message";
 export { QDSResponse } from "./qds-response";
 export { QDSActions } from "./qds-actions";
 export { QDSPromptInput } from "./qds-prompt-input";
+export { QDSPromptInputEnhanced } from "./qds-prompt-input-enhanced";
 export { QDSInlineCitation } from "./qds-inline-citation";
 
 export type {

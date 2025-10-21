@@ -100,8 +100,8 @@ export function calculateAssignmentQA(
     actionReason = "Ask questions to clarify concepts";
   }
 
-  // 10. Generate link to assignment Q&A page
-  const link = `/courses/${assignment.courseId}/assignments/${assignment.id}/qa`;
+  // 10. Generate link to course page filtered by assignment tag
+  const link = `/courses/${assignment.courseId}?tag=${assignmentTag}`;
 
   return {
     assignmentId: assignment.id,

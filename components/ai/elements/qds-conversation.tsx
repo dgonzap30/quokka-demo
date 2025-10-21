@@ -13,6 +13,7 @@
  */
 
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -91,18 +92,17 @@ export function QDSConversation({
           />
         ))}
 
-        {/* Streaming Indicator */}
+        {/* Streaming Indicator with Shimmer */}
         {isStreaming && (
           <div className="flex justify-start" role="status" aria-live="polite">
-            <div className="message-assistant p-3">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1" aria-hidden="true">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                </div>
-                <p className="text-sm glass-text">Quokka is thinking...</p>
-              </div>
+            <div className="message-assistant p-4">
+              <Shimmer
+                as="p"
+                className="text-sm font-medium"
+                duration={1.5}
+              >
+                Quokka is thinking...
+              </Shimmer>
             </div>
           </div>
         )}

@@ -21,7 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sparkles, Trash2, Share2, MoreVertical } from "lucide-react";
+import { Sparkles, Trash2, Share2, MoreVertical, Menu } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +42,7 @@ import {
 import { usePersistedChat } from "@/lib/llm/hooks/usePersistedChat";
 import { QDSConversation, QDSPromptInputEnhanced } from "@/components/ai/elements";
 import { RateLimitIndicator } from "@/components/ai/rate-limit-indicator";
+import { ConversationHistorySidebar } from "@/components/ai/conversation-history-sidebar";
 import type { CourseSummary, User } from "@/lib/models/types";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 
@@ -89,6 +90,7 @@ function QuokkaAssistantModalContent({
   const [showPostConfirm, setShowPostConfirm] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4o");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Accessibility state
   const [statusMessage, setStatusMessage] = useState("");
@@ -122,6 +124,12 @@ function QuokkaAssistantModalContent({
     }
     return null;
   }, [pageContext, currentCourseId, currentCourseCode, currentCourseName, activeCourseId, availableCourses]);
+
+  // Filter out conversations that have been converted to threads
+  const activeConversations = useMemo(() => {
+    if (!conversations) return [];
+    return conversations.filter((c) => !c.threadId);
+  }, [conversations]);
 
   // Use persisted chat hook for streaming + localStorage sync
   // User is guaranteed to be loaded at this point (checked in outer component)
@@ -159,6 +167,24 @@ function QuokkaAssistantModalContent({
       }
     );
   }, [isOpen, user, activeCourseId, activeConversationId, activeCourse, createConversation]);
+
+  // Handler for creating new conversation from sidebar
+  const handleNewConversation = () => {
+    createConversation.mutate(
+      {
+        userId: user.id,
+        courseId: activeCourseId || null,
+        title: `Quokka Chat - ${activeCourse?.code || "General"}`,
+      },
+      {
+        onSuccess: (newConversation) => {
+          setActiveConversationId(newConversation.id);
+          // Close sidebar on mobile after creation
+          setIsSidebarOpen(false);
+        },
+      }
+    );
+  };
 
   // Let Radix handle focus management automatically
 
@@ -359,9 +385,44 @@ function QuokkaAssistantModalContent({
             }, 0);
           }}
         >
-          <div className="flex flex-col h-full overflow-hidden">
-            {/* Header */}
-            <DialogHeader className="flex-shrink-0 p-4 border-b border-[var(--border-glass)] space-y-3">
+          {/* Mobile Sidebar Overlay */}
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm md:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+              aria-hidden="true"
+            />
+          )}
+
+          {/* Grid Layout with Sidebar */}
+          <div className="grid h-full md:grid-cols-[280px_1fr]">
+            {/* Conversation Sidebar */}
+            <ConversationHistorySidebar
+              conversations={activeConversations}
+              activeConversationId={activeConversationId}
+              onConversationSelect={setActiveConversationId}
+              onNewConversation={handleNewConversation}
+              isLoading={!conversations}
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+            />
+
+            {/* Main Content */}
+            <div className="flex flex-col h-full overflow-hidden">
+              {/* Header */}
+              <DialogHeader className="flex-shrink-0 p-4 border-b border-[var(--border-glass)] space-y-3">
+                {/* Mobile: Conversations Toggle Button */}
+                <div className="flex items-center gap-3 md:hidden mb-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className="gap-2"
+                  >
+                    <Menu className="h-4 w-4" />
+                    Conversations
+                  </Button>
+                </div>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                   <Sparkles className="h-5 w-5 text-white" />
@@ -482,6 +543,7 @@ function QuokkaAssistantModalContent({
                 model={selectedModel}
                 onModelChange={setSelectedModel}
               />
+            </div>
             </div>
           </div>
         </DialogContent>

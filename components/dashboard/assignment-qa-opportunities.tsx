@@ -244,21 +244,21 @@ function AssignmentQAItem({
           <div className="flex flex-wrap gap-2">
             {assignment.suggestedAction === "ask" && (
               <Button size="sm" variant="default" asChild>
-                <Link href={`${assignment.link}?action=ask`}>
+                <Link href={`${assignment.link}&action=ask`}>
                   Ask Question
                 </Link>
               </Button>
             )}
             {assignment.suggestedAction === "answer" && (
               <Button size="sm" variant="default" asChild>
-                <Link href={`${assignment.link}?action=answer`}>
+                <Link href={`${assignment.link}&action=answer`}>
                   Help Answer
                 </Link>
               </Button>
             )}
             {assignment.suggestedAction === "review" && (
               <Button size="sm" variant="default" asChild>
-                <Link href={`${assignment.link}?action=review`}>
+                <Link href={`${assignment.link}&action=review`}>
                   Review Answers
                 </Link>
               </Button>
