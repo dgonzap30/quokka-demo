@@ -5,8 +5,8 @@
 /**
  * Type-safe environment variable access for LLM configuration
  *
- * All environment variables use NEXT_PUBLIC_ prefix because this is a
- * frontend-only demo. In production, API keys should be server-side only.
+ * SECURITY: API keys are server-side only (no NEXT_PUBLIC_ prefix).
+ * Only API routes can access these keys - they are never sent to the browser.
  *
  * @see .env.local.example for configuration template
  */
@@ -54,26 +54,39 @@ export interface EnvConfig {
 /**
  * Get environment variable with fallback
  *
- * Note: In Next.js, NEXT_PUBLIC_* variables must be accessed directly (not via dynamic keys)
- * for webpack/turbopack to perform static replacement. We map each variable explicitly.
+ * SECURITY NOTES:
+ * - API keys use server-side env vars (no NEXT_PUBLIC_ prefix) - only accessible in API routes
+ * - Feature flags use NEXT_PUBLIC_ prefix - safe to expose to browser
+ * - This function can only be called from server-side code (API routes, Server Components)
  */
 function getEnv(key: string, fallback: string = ""): string {
   // Direct mapping for static replacement by Next.js build process
   const envMap: Record<string, string | undefined> = {
+    // Feature flags (client-safe)
     'NEXT_PUBLIC_USE_LLM': process.env.NEXT_PUBLIC_USE_LLM,
     'NEXT_PUBLIC_LLM_PROVIDER': process.env.NEXT_PUBLIC_LLM_PROVIDER,
-    'NEXT_PUBLIC_OPENAI_API_KEY': process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-    'NEXT_PUBLIC_ANTHROPIC_API_KEY': process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
+
+    // API keys (server-only) - NO NEXT_PUBLIC_ PREFIX
+    'OPENAI_API_KEY': process.env.OPENAI_API_KEY,
+    'ANTHROPIC_API_KEY': process.env.ANTHROPIC_API_KEY,
+
+    // Model configuration (client-safe)
     'NEXT_PUBLIC_OPENAI_MODEL': process.env.NEXT_PUBLIC_OPENAI_MODEL,
     'NEXT_PUBLIC_ANTHROPIC_MODEL': process.env.NEXT_PUBLIC_ANTHROPIC_MODEL,
     'NEXT_PUBLIC_MAX_TOKENS': process.env.NEXT_PUBLIC_MAX_TOKENS,
     'NEXT_PUBLIC_LLM_TEMPERATURE': process.env.NEXT_PUBLIC_LLM_TEMPERATURE,
     'NEXT_PUBLIC_LLM_TOP_P': process.env.NEXT_PUBLIC_LLM_TOP_P,
+
+    // Cost & rate limiting (client-safe)
     'NEXT_PUBLIC_MAX_DAILY_COST': process.env.NEXT_PUBLIC_MAX_DAILY_COST,
     'NEXT_PUBLIC_MAX_REQUESTS_PER_MINUTE': process.env.NEXT_PUBLIC_MAX_REQUESTS_PER_MINUTE,
+
+    // Context configuration (client-safe)
     'NEXT_PUBLIC_MAX_CONTEXT_MATERIALS': process.env.NEXT_PUBLIC_MAX_CONTEXT_MATERIALS,
     'NEXT_PUBLIC_MIN_RELEVANCE_SCORE': process.env.NEXT_PUBLIC_MIN_RELEVANCE_SCORE,
     'NEXT_PUBLIC_AUTO_DETECT_THRESHOLD': process.env.NEXT_PUBLIC_AUTO_DETECT_THRESHOLD,
+
+    // Development options (client-safe)
     'NEXT_PUBLIC_DEBUG_LLM': process.env.NEXT_PUBLIC_DEBUG_LLM,
     'NEXT_PUBLIC_SHOW_COST_TRACKING': process.env.NEXT_PUBLIC_SHOW_COST_TRACKING,
   };
@@ -121,9 +134,9 @@ function loadEnvConfig(): EnvConfig {
     useLLM: getBoolEnv("NEXT_PUBLIC_USE_LLM", false),
     llmProvider: getLLMProvider(),
 
-    // API keys (nullable - only required if useLLM is true)
-    openaiApiKey: getEnv("NEXT_PUBLIC_OPENAI_API_KEY") || null,
-    anthropicApiKey: getEnv("NEXT_PUBLIC_ANTHROPIC_API_KEY") || null,
+    // API keys (server-only, nullable - only required if useLLM is true)
+    openaiApiKey: getEnv("OPENAI_API_KEY") || null,
+    anthropicApiKey: getEnv("ANTHROPIC_API_KEY") || null,
 
     // Models
     openaiModel: getEnv("NEXT_PUBLIC_OPENAI_MODEL", "gpt-4o-mini"),
@@ -170,13 +183,13 @@ function validateLLMConfig(config: EnvConfig): void {
   // Check API keys based on selected provider
   if (config.llmProvider === "openai" && !config.openaiApiKey) {
     errors.push(
-      "NEXT_PUBLIC_OPENAI_API_KEY is required when using OpenAI provider"
+      "OPENAI_API_KEY is required when using OpenAI provider (server-side only, no NEXT_PUBLIC_ prefix)"
     );
   }
 
   if (config.llmProvider === "anthropic" && !config.anthropicApiKey) {
     errors.push(
-      "NEXT_PUBLIC_ANTHROPIC_API_KEY is required when using Anthropic provider"
+      "ANTHROPIC_API_KEY is required when using Anthropic provider (server-side only, no NEXT_PUBLIC_ prefix)"
     );
   }
 
@@ -284,12 +297,12 @@ export function getCurrentModel(): string {
 }
 
 /**
- * Security warning flag
+ * Security status flag
  *
- * True if API keys are exposed client-side (NEXT_PUBLIC_ prefix)
- * Used to display security warnings in UI
+ * False means API keys are server-side only (secure)
+ * API keys are only accessible in API routes and Server Components
  */
-export const CLIENT_SIDE_API_KEYS = true;
+export const CLIENT_SIDE_API_KEYS = false;
 
 /**
  * Configuration cache (singleton pattern)
