@@ -164,10 +164,12 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
 
     // Transform results - include all Thread fields with schema-compatible naming
     const threadsWithAuthor: ThreadWithAuthor[] = results.map((row) => {
-      const { viewCount, replyCount, hasAIAnswer, ...threadFields } = row.thread;
+      const { viewCount, replyCount, hasAIAnswer, ...threadFields } = row.thread as any;
+      // Drizzle may return view_count instead of viewCount depending on config
+      const views = viewCount ?? (row.thread as any).view_count ?? 0;
       return {
         ...threadFields,
-        views: viewCount, // Transform viewCount -> views
+        views, // Transform viewCount/view_count -> views (default to 0 if undefined)
         author: row.author,
         upvoteCount: row.upvoteCount,
         postCount: row.postCount, // Use computed postCount
@@ -228,10 +230,12 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
     const hasAiAnswer = (aiResults[0]?.count || 0) > 0;
 
     // Transform field names for schema compatibility
-    const { viewCount, replyCount, hasAIAnswer, ...threadFields } = thread;
+    const { viewCount, replyCount, hasAIAnswer, ...threadFields } = thread as any;
+    // Drizzle may return view_count instead of viewCount depending on config
+    const views = viewCount ?? (thread as any).view_count ?? 0;
     return {
       ...threadFields,
-      views: viewCount, // Transform viewCount -> views
+      views, // Transform viewCount/view_count -> views (default to 0 if undefined)
       author,
       upvoteCount,
       postCount,
