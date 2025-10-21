@@ -16,56 +16,71 @@
  */
 
 import { useMemo } from "react";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, PanelLeftClose } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AIConversation } from "@/lib/models/types";
 import { ConversationHistoryItem } from "./conversation-history-item";
 import { NewConversationButton } from "./new-conversation-button";
 
-// Timestamp group labels
-type TimeGroup = "Today" | "Yesterday" | "Previous 7 Days" | "Previous 30 Days" | "Older";
+// Import CourseSummary type
+import type { CourseSummary } from "@/lib/models/types";
 
-interface GroupedConversations {
-  group: TimeGroup;
+// Course group interface
+interface CourseGroup {
+  courseId: string | null;
+  courseName: string;
   conversations: AIConversation[];
 }
 
 /**
- * Group conversations by timestamp relative to now
+ * Group conversations by course
+ * @param conversations - Array of conversations to group
+ * @param availableCourses - Optional array of courses for name lookup
  */
-function groupConversationsByTime(conversations: AIConversation[]): GroupedConversations[] {
-  const now = new Date();
-  const groups: Record<TimeGroup, AIConversation[]> = {
-    "Today": [],
-    "Yesterday": [],
-    "Previous 7 Days": [],
-    "Previous 30 Days": [],
-    "Older": [],
-  };
+function groupConversationsByCourse(
+  conversations: AIConversation[],
+  availableCourses?: CourseSummary[]
+): CourseGroup[] {
+  // Group conversations by courseId
+  const courseMap = new Map<string | null, AIConversation[]>();
 
   conversations.forEach((conv) => {
-    const updatedAt = new Date(conv.updatedAt);
-    const diffInHours = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60);
-
-    if (diffInHours < 24) {
-      groups["Today"].push(conv);
-    } else if (diffInHours < 48) {
-      groups["Yesterday"].push(conv);
-    } else if (diffInHours < 24 * 7) {
-      groups["Previous 7 Days"].push(conv);
-    } else if (diffInHours < 24 * 30) {
-      groups["Previous 30 Days"].push(conv);
-    } else {
-      groups["Older"].push(conv);
+    const key = conv.courseId;
+    if (!courseMap.has(key)) {
+      courseMap.set(key, []);
     }
+    courseMap.get(key)!.push(conv);
   });
 
-  // Return only non-empty groups in order
-  const groupOrder: TimeGroup[] = ["Today", "Yesterday", "Previous 7 Days", "Previous 30 Days", "Older"];
-  return groupOrder
-    .filter(group => groups[group].length > 0)
-    .map(group => ({ group, conversations: groups[group] }));
+  // Convert to array and add course names
+  const groups: CourseGroup[] = [];
+
+  courseMap.forEach((convs, courseId) => {
+    let courseName: string;
+
+    if (courseId === null) {
+      courseName = "General";
+    } else {
+      // Look up course name from availableCourses
+      const course = availableCourses?.find(c => c.id === courseId);
+      courseName = course ? `${course.code} - ${course.name}` : courseId;
+    }
+
+    groups.push({
+      courseId,
+      courseName,
+      conversations: convs,
+    });
+  });
+
+  // Sort groups: General last, others by course name
+  return groups.sort((a, b) => {
+    if (a.courseId === null) return 1; // General goes last
+    if (b.courseId === null) return -1;
+    return a.courseName.localeCompare(b.courseName);
+  });
 }
 
 export interface ConversationHistorySidebarProps {
@@ -116,6 +131,18 @@ export interface ConversationHistorySidebarProps {
   onClose?: () => void;
 
   /**
+   * Callback to toggle sidebar (desktop collapse)
+   * Triggered when user clicks collapse button on desktop
+   */
+  onToggle?: () => void;
+
+  /**
+   * Available courses for name lookup (optional)
+   * Used to display course names in group headers
+   */
+  availableCourses?: CourseSummary[];
+
+  /**
    * Optional className for composition
    */
   className?: string;
@@ -130,16 +157,18 @@ export function ConversationHistorySidebar({
   isLoading = false,
   isOpen = true,
   onClose,
+  onToggle,
+  availableCourses,
   className,
 }: ConversationHistorySidebarProps) {
-  // Group conversations by timestamp (Today, Yesterday, etc.)
+  // Group conversations by course
   const groupedConversations = useMemo(() => {
-    // Sort conversations by most recent first
+    // Sort conversations by most recent first within each group
     const sorted = [...conversations].sort((a, b) => {
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
-    return groupConversationsByTime(sorted);
-  }, [conversations]);
+    return groupConversationsByCourse(sorted, availableCourses);
+  }, [conversations, availableCourses]);
 
   // Handle conversation click (with mobile close)
   const handleConversationClick = (conversationId: string) => {
@@ -150,18 +179,36 @@ export function ConversationHistorySidebar({
   return (
     <nav
       className={cn(
-        "flex h-full flex-col overflow-hidden",
-        // Mobile: Fixed drawer overlay
-        "fixed left-0 top-0 z-50 w-[280px] h-screen md:relative md:z-0 md:w-full md:h-full",
-        // Transform for mobile drawer
-        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-        "transition-transform duration-300 ease-in-out",
+        "flex h-full flex-col overflow-hidden bg-background",
+        // Mobile: Absolute overlay with fixed width
+        "absolute left-0 top-0 z-50 h-full md:relative md:z-0",
+        // Width: 280px when open, 0px when closed (allows main content to expand)
+        isOpen ? "w-[280px]" : "w-0",
+        // Slide animation - hidden when closed on all screen sizes
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        "transition-all duration-300 ease-in-out",
+        // Border on desktop for separation (only when open)
+        isOpen && "md:border-r md:border-glass",
         className
       )}
       aria-label="Conversation history"
+      aria-hidden={!isOpen}
     >
-      {/* Header with New Conversation Button */}
-      <div className="flex-shrink-0 p-4 border-b border-glass">
+      {/* Header with New Conversation Button and Collapse Toggle */}
+      <div className="flex-shrink-0 p-4 border-b border-glass space-y-3">
+        {/* Collapse Button (Desktop Only) */}
+        {onToggle && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="hidden md:flex h-8 w-full justify-center items-center"
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        )}
+
         <NewConversationButton onClick={onNewConversation} />
       </div>
 
@@ -195,15 +242,15 @@ export function ConversationHistorySidebar({
           </div>
         )}
 
-        {/* Grouped Conversation Items */}
-        {!isLoading && groupedConversations.map(({ group, conversations: groupConvs }) => (
-          <div key={group} className="mb-6 last:mb-0">
-            {/* Group Header */}
-            <h3 className="px-3 mb-2 text-xs font-medium text-muted-foreground glass-text uppercase tracking-wide">
-              {group}
+        {/* Grouped Conversation Items (by Course) */}
+        {!isLoading && groupedConversations.map(({ courseId, courseName, conversations: groupConvs }) => (
+          <div key={courseId || 'general'} className="mb-6 last:mb-0">
+            {/* Course Group Header */}
+            <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground glass-text uppercase tracking-wide">
+              {courseName}
             </h3>
 
-            {/* Conversations in this group */}
+            {/* Conversations in this course */}
             <div className="space-y-1">
               {groupConvs.map((conversation) => (
                 <div key={conversation.id} role="listitem">

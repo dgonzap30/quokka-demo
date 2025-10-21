@@ -21,7 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Sparkles, Trash2, Share2, MoreVertical, Menu } from "lucide-react";
+import { Sparkles, Trash2, Share2, MoreVertical, Menu, PanelLeftOpen } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,7 +90,23 @@ function QuokkaAssistantModalContent({
   const [showPostConfirm, setShowPostConfirm] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4o");
+  // Sidebar state - default open on desktop (≥768px), closed on mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const isDesktop = window.innerWidth >= 768;
+      setIsSidebarOpen(isDesktop);
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Listen for resize
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
 
   // Accessibility state
@@ -416,17 +432,17 @@ function QuokkaAssistantModalContent({
             }, 0);
           }}
         >
-          {/* Mobile Sidebar Overlay */}
-          {isSidebarOpen && (
-            <div
-              className="fixed inset-0 z-40 bg-neutral-900/20 backdrop-blur-sm md:hidden"
-              onClick={() => setIsSidebarOpen(false)}
-              aria-hidden="true"
-            />
-          )}
+          {/* Flex Layout with Sidebar */}
+          <div className="flex h-full overflow-hidden relative">
+            {/* Sidebar Backdrop (Mobile Only) */}
+            {isSidebarOpen && (
+              <div
+                className="fixed inset-0 z-40 bg-neutral-900/50 backdrop-blur-sm md:hidden"
+                onClick={() => setIsSidebarOpen(false)}
+                aria-hidden="true"
+              />
+            )}
 
-          {/* Grid Layout with Sidebar */}
-          <div className="grid h-full md:grid-cols-[280px_1fr]">
             {/* Conversation Sidebar */}
             <ConversationHistorySidebar
               conversations={activeConversations}
@@ -437,25 +453,41 @@ function QuokkaAssistantModalContent({
               isLoading={!conversations}
               isOpen={isSidebarOpen}
               onClose={() => setIsSidebarOpen(false)}
+              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+              availableCourses={availableCourses}
             />
 
-            {/* Main Content */}
-            <div className="flex flex-col h-full overflow-hidden">
-              {/* Header */}
+            {/* Main Content Area */}
+            <div className="flex flex-col h-full flex-1 min-w-0 overflow-hidden">
+              {/* Header with Hamburger Button */}
               <DialogHeader className="flex-shrink-0 p-4 border-b border-glass space-y-3">
-                {/* Mobile: Conversations Toggle Button */}
-                <div className="flex items-center gap-3 md:hidden mb-2">
+              <div className="flex items-center gap-3">
+                {/* Hamburger Toggle - Mobile Only */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="h-9 w-9 p-0 shrink-0 md:hidden"
+                  aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                  aria-expanded={isSidebarOpen}
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+
+                {/* Expand Sidebar Button - Desktop Only, shown when sidebar is closed */}
+                {!isSidebarOpen && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="gap-2"
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="hidden md:flex h-9 w-9 p-0 shrink-0"
+                    aria-label="Open sidebar"
+                    aria-expanded={false}
                   >
-                    <Menu className="h-4 w-4" />
-                    Conversations
+                    <PanelLeftOpen className="h-4 w-4" />
                   </Button>
-                </div>
-              <div className="flex items-center gap-3">
+                )}
+
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
