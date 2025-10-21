@@ -58,8 +58,8 @@ import { calculateQuokkaPoints } from "@/lib/utils/quokka-points";
 import { calculateAllAssignmentQA } from "@/lib/utils/assignment-qa";
 
 import { delay, generateId, extractKeywords, calculateMatchRatio } from "./utils";
-import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 import { httpGet, httpPost, httpDelete } from "./http.client";
+import { BACKEND_FEATURE_FLAGS } from "@/lib/config/backend";
 
 /**
  * Instructor API methods
@@ -89,6 +89,245 @@ export const instructorAPI = {
    * ```
    */
   async getStudentDashboard(userId: string): Promise<StudentDashboardData> {
+    // Check if backend is enabled
+    if (BACKEND_FEATURE_FLAGS.instructor || BACKEND_FEATURE_FLAGS.courses) {
+      try {
+        // Define response type
+        type EnrollmentResponse = {
+          items: Array<{
+            id: string;
+            userId: string;
+            courseId: string;
+            role: string;
+            enrolledAt: string;
+            tenantId: string;
+            course: {
+              id: string;
+              code: string;
+              name: string;
+              term: string;
+              description: string;
+              status: string;
+            } | null;
+          }>;
+        };
+
+        // Fetch enrollments from backend
+        const enrollmentsResponse = await httpGet<EnrollmentResponse>(`/api/v1/courses/enrollments?userId=${userId}`);
+
+        // Fetch other data from localStorage (for now - will be migrated later)
+        seedData();
+        const allThreads = getThreads();
+        const allPosts = getPosts();
+        const notifications = getNotifications(userId);
+        const users = getUsers();
+
+        // Transform backend enrollments to CourseWithActivity format
+        const enrolledCourses: CourseWithActivity[] = enrollmentsResponse.items
+          .filter(enrollment => enrollment.course !== null)
+          .map(enrollment => {
+            const course = enrollment.course!;
+
+            const courseThreads = allThreads.filter((t) => t.courseId === course.id);
+            const recentThreads = courseThreads
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .slice(0, 3);
+
+            const unreadCount = notifications.filter(
+              (n) => n.courseId === course.id && !n.read
+            ).length;
+
+            return {
+              // Full Course fields
+              id: course.id,
+              code: course.code,
+              name: course.name,
+              term: course.term,
+              description: course.description,
+              status: course.status as 'active' | 'archived',
+              instructorIds: [], // Not provided by backend enrollment endpoint
+              enrollmentCount: 0, // Not provided by backend enrollment endpoint
+              createdAt: enrollment.enrolledAt, // Use enrollment date as fallback
+              // CourseWithActivity fields
+              recentThreads,
+              unreadCount,
+            };
+          });
+
+        // Continue with rest of function using backend enrolledCourses
+        // Generate recent activity (last 10 items)
+        const userThreads = allThreads.filter((t) => t.authorId === userId);
+        const userPosts = allPosts.filter((p) => p.authorId === userId);
+
+        const activities: ActivityItem[] = [];
+
+        // Add thread creations
+        userThreads.forEach((thread) => {
+          const course = enrolledCourses.find((c) => c.id === thread.courseId);
+          const author = users.find((u) => u.id === thread.authorId);
+          if (course && author) {
+            activities.push({
+              id: `activity-${thread.id}`,
+              type: 'thread_created',
+              courseId: course.id,
+              courseName: course.name,
+              threadId: thread.id,
+              threadTitle: thread.title,
+              authorId: author.id,
+              authorName: author.name,
+              timestamp: thread.createdAt,
+              summary: `You created a thread: "${thread.title}"`,
+            });
+          }
+        });
+
+        // Add post creations
+        userPosts.forEach((post) => {
+          const thread = allThreads.find((t) => t.id === post.threadId);
+          const course = thread ? enrolledCourses.find((c) => c.id === thread.courseId) : null;
+          const author = users.find((u) => u.id === post.authorId);
+          if (thread && course && author) {
+            activities.push({
+              id: `activity-${post.id}`,
+              type: 'post_created',
+              courseId: course.id,
+              courseName: course.name,
+              threadId: thread.id,
+              threadTitle: thread.title,
+              authorId: author.id,
+              authorName: author.name,
+              timestamp: post.createdAt,
+              summary: `You replied to "${thread.title}"`,
+            });
+          }
+        });
+
+        // Add endorsed posts
+        userPosts.filter((p) => p.endorsed).forEach((post) => {
+          const thread = allThreads.find((t) => t.id === post.threadId);
+          const course = thread ? enrolledCourses.find((c) => c.id === thread.courseId) : null;
+          const author = users.find((u) => u.id === post.authorId);
+          if (thread && course && author) {
+            activities.push({
+              id: `activity-endorsed-${post.id}`,
+              type: 'post_endorsed',
+              courseId: course.id,
+              courseName: course.name,
+              threadId: thread.id,
+              threadTitle: thread.title,
+              authorId: author.id,
+              authorName: author.name,
+              timestamp: post.updatedAt,
+              summary: `Your reply to "${thread.title}" was endorsed`,
+            });
+          }
+        });
+
+        // Sort by timestamp and take last 10
+        const recentActivity = activities
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 10);
+
+        // Calculate current week stats
+        const currentWeek = getCurrentWeekRange();
+        const previousWeek = getPreviousWeekRange();
+
+        const currentCourses = enrolledCourses.length;
+        const previousCourses = enrolledCourses.length; // Courses don't change weekly in mock
+
+        const currentThreads = countInDateRange(userThreads, currentWeek);
+        const previousThreads = countInDateRange(userThreads, previousWeek);
+
+        const currentPosts = countInDateRange(userPosts, currentWeek);
+        const previousPosts = countInDateRange(userPosts, previousWeek);
+
+        const currentEndorsed = userPosts.filter(
+          (p) => p.endorsed && new Date(p.createdAt) >= currentWeek.start
+        ).length;
+        const previousEndorsed = userPosts.filter(
+          (p) => p.endorsed && new Date(p.createdAt) >= previousWeek.start && new Date(p.createdAt) < currentWeek.start
+        ).length;
+
+        // Generate sparklines
+        const threadSparkline = generateSparkline(`student-${userId}-threads`, 7, userThreads.length / 7);
+        const postSparkline = generateSparkline(`student-${userId}-posts`, 7, userPosts.length / 7);
+        const courseSparkline = generateSparkline(`student-${userId}-courses`, 7, enrolledCourses.length / 7);
+        const endorsedSparkline = generateSparkline(`student-${userId}-endorsed`, 7, userPosts.filter((p) => p.endorsed).length / 7);
+
+        // Create stats with trends
+        const stats = {
+          totalCourses: createStatWithTrend(currentCourses, previousCourses, "Courses", courseSparkline),
+          totalThreads: createStatWithTrend(currentThreads, previousThreads, "Threads", threadSparkline),
+          totalPosts: createStatWithTrend(currentPosts, previousPosts, "Replies", postSparkline),
+          endorsedPosts: createStatWithTrend(currentEndorsed, previousEndorsed, "Endorsed", endorsedSparkline),
+        };
+
+        // Create student goals
+        const goals = [
+          createGoal(
+            "weekly-participation",
+            "Weekly Participation",
+            "Post in 2 threads per week",
+            currentPosts,
+            2,
+            "weekly",
+            "participation"
+          ),
+          createGoal(
+            "weekly-endorsements",
+            "Get Endorsed",
+            "Receive 1 endorsement per week",
+            currentEndorsed,
+            1,
+            "weekly",
+            "quality"
+          ),
+          createGoal(
+            "weekly-questions",
+            "Ask Questions",
+            "Ask 1 question per week",
+            currentThreads,
+            1,
+            "weekly",
+            "engagement"
+          ),
+        ];
+
+        const unreadCount = notifications.filter((n) => !n.read).length;
+
+        // Calculate Quokka Points
+        const quokkaPoints = calculateQuokkaPoints(userId, userThreads, userPosts);
+
+        // Calculate Assignment Q&A Opportunities
+        const assignments = getAssignments();
+        const assignmentQA = calculateAllAssignmentQA(
+          assignments,
+          allThreads,
+          allPosts,
+          users,
+          userId,
+          enrolledCourses.map(c => ({ id: c.id, name: c.name }))
+        );
+
+        console.log('[Instructor API] getStudentDashboard using BACKEND enrollments:', enrolledCourses.length, 'courses');
+
+        return {
+          enrolledCourses,
+          recentActivity,
+          notifications: notifications.slice(0, 5), // Top 5 notifications
+          unreadCount,
+          stats,
+          goals,
+          quokkaPoints,
+          assignmentQA,
+        };
+      } catch (error) {
+        console.error('[Instructor API] Backend getStudentDashboard failed, falling back to localStorage:', error);
+        // Fall through to localStorage implementation below
+      }
+    }
+
+    // Fallback: Use localStorage (original implementation)
     await delay(200 + Math.random() * 200); // 200-400ms (faster for landing page)
     seedData();
 
