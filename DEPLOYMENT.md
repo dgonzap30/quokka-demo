@@ -2,6 +2,20 @@
 
 **Last Updated:** 2025-10-21
 **Status:** Production Demo Ready
+**Security Status:** ✅ Hardened (API keys server-side only)
+
+---
+
+## 🔒 Security Notice
+
+This deployment guide reflects **production-ready security practices**:
+
+- ✅ **API keys are server-side only** - No NEXT_PUBLIC_ prefix on sensitive credentials
+- ✅ **Zero client-side exposure** - API keys never sent to browser or included in JavaScript bundle
+- ✅ **Session security** - HTTP-only signed cookies prevent XSS attacks
+- ✅ **CORS protection** - Backend only accepts requests from configured frontend domain
+
+**Important:** Always verify that sensitive environment variables (API keys, secrets) do NOT have the `NEXT_PUBLIC_` prefix in Netlify settings.
 
 ---
 
@@ -171,13 +185,15 @@ NEXT_PUBLIC_USE_BACKEND=true
 # Railway Backend URL (from Part 1, Step 4)
 NEXT_PUBLIC_API_URL=https://your-app.up.railway.app
 
-# Optional: LLM Integration (for AI chat)
-NEXT_PUBLIC_LLM_PROVIDER=openai
+# LLM Integration (Optional - for AI chat with real LLM)
 NEXT_PUBLIC_USE_LLM=true
-# Only if using LLM:
-OPENAI_API_KEY=sk-...
+NEXT_PUBLIC_LLM_PROVIDER=openai
+
+# ⚠️ SECURITY: API keys are SERVER-SIDE ONLY (no NEXT_PUBLIC_ prefix)
+# These are ONLY accessible in Next.js API routes, never sent to browser
+OPENAI_API_KEY=sk-proj-your-key-here
 # OR
-ANTHROPIC_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-your-key-here
 ```
 
 #### Step 2: Trigger Netlify Redeploy
@@ -242,9 +258,9 @@ Visit your Netlify URL and check:
 | `NEXT_PUBLIC_API_URL` | ✅ | - | Railway backend URL (e.g., `https://your-app.up.railway.app`) |
 | `NEXT_PUBLIC_LLM_PROVIDER` | ❌ | - | `openai`, `anthropic`, or `google` |
 | `NEXT_PUBLIC_USE_LLM` | ❌ | false | Enable real LLM (vs template responses) |
-| `OPENAI_API_KEY` | ❌ | - | OpenAI API key (if using OpenAI) |
-| `ANTHROPIC_API_KEY` | ❌ | - | Anthropic API key (if using Claude) |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | ❌ | - | Google AI API key (if using Gemini) |
+| `OPENAI_API_KEY` | ❌ | - | **Server-side only** - OpenAI API key (no NEXT_PUBLIC_ prefix) |
+| `ANTHROPIC_API_KEY` | ❌ | - | **Server-side only** - Anthropic API key (no NEXT_PUBLIC_ prefix) |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | ❌ | - | **Server-side only** - Google AI API key (no NEXT_PUBLIC_ prefix) |
 
 ---
 
