@@ -4,6 +4,7 @@ import { isDatabaseHealthy, closeDatabase } from "./db/client.js";
 import sessionPlugin from "./plugins/session.plugin.js";
 import validationPlugin from "./plugins/validation.plugin.js";
 import errorPlugin from "./plugins/error.plugin.js";
+import healthRoutes from "./routes/v1/health.routes.js";
 import { authRoutes } from "./routes/v1/auth.routes.js";
 import { threadsRoutes } from "./routes/v1/threads.routes.js";
 import { postsRoutes } from "./routes/v1/posts.routes.js";
@@ -31,8 +32,24 @@ const fastify = Fastify({
             : undefined,
     },
 });
+const allowedOrigins = [
+    "http://localhost:3000",
+    process.env.FRONTEND_URL,
+].filter((url) => typeof url === "string");
 await fastify.register(cors, {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: (origin, callback) => {
+        if (!origin) {
+            callback(null, true);
+            return;
+        }
+        const originStr = origin;
+        if (allowedOrigins.some((allowed) => originStr.startsWith(allowed))) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error(`Origin ${originStr} not allowed by CORS`), false);
+        }
+    },
     credentials: true,
 });
 await fastify.register(sessionPlugin);
@@ -59,6 +76,7 @@ fastify.get("/api/v1/_status", async (request, reply) => {
         timestamp: new Date().toISOString(),
     };
 });
+await fastify.register(healthRoutes, { prefix: "/api/v1" });
 await fastify.register(authRoutes, { prefix: "/api/v1/auth" });
 await fastify.register(threadsRoutes, { prefix: "/api/v1" });
 await fastify.register(postsRoutes, { prefix: "/api/v1" });

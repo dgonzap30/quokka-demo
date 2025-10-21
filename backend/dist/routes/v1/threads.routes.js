@@ -2,7 +2,8 @@ import { z } from "zod";
 import { threadSchema, createThreadSchema, listThreadsQuerySchema, listThreadsResponseSchema, courseIdParamsSchema, getThreadParamsSchema, upvoteThreadParamsSchema, upvoteResponseSchema, } from "../../schemas/threads.schema.js";
 import { threadsRepository } from "../../repositories/threads.repository.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { UnauthorizedError, NotFoundError } from "../../utils/errors.js";
+import { aiAnswersRepository } from "../../repositories/ai-answers.repository.js";
+import { UnauthorizedError, NotFoundError, serializeDates } from "../../utils/errors.js";
 export async function threadsRoutes(fastify) {
     const server = fastify.withTypeProvider();
     server.get("/threads", {
@@ -22,7 +23,15 @@ export async function threadsRoutes(fastify) {
             cursor,
             limit,
         });
-        return result;
+        const threadsWithAI = await Promise.all(result.data.map(async (thread) => {
+            const aiAnswer = await aiAnswersRepository.findByThreadId(thread.id);
+            return serializeDates({ ...thread, aiAnswer: aiAnswer || null });
+        }));
+        return {
+            items: threadsWithAI,
+            nextCursor: result.pagination.nextCursor || null,
+            hasNextPage: result.pagination.hasMore,
+        };
     });
     server.get("/courses/:courseId/threads", {
         schema: {
@@ -41,7 +50,15 @@ export async function threadsRoutes(fastify) {
             cursor,
             limit,
         });
-        return result;
+        const threadsWithAI = await Promise.all(result.data.map(async (thread) => {
+            const aiAnswer = await aiAnswersRepository.findByThreadId(thread.id);
+            return serializeDates({ ...thread, aiAnswer: aiAnswer || null });
+        }));
+        return {
+            items: threadsWithAI,
+            nextCursor: result.pagination.nextCursor || null,
+            hasNextPage: result.pagination.hasMore,
+        };
     });
     server.get("/threads/:id", {
         schema: {
@@ -60,7 +77,7 @@ export async function threadsRoutes(fastify) {
         if (!thread) {
             throw new NotFoundError("Thread");
         }
-        return thread;
+        return serializeDates(thread);
     });
     server.post("/threads", {
         schema: {
@@ -93,8 +110,8 @@ export async function threadsRoutes(fastify) {
             upvoteCount: 0,
             duplicatesOf: null,
             mergedInto: null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
             tenantId: "tenant-demo-001",
         });
         const threadWithDetails = await threadsRepository.findByIdWithDetails(newThread.id);
@@ -102,7 +119,7 @@ export async function threadsRoutes(fastify) {
             throw new Error("Failed to fetch created thread");
         }
         reply.code(201);
-        return threadWithDetails;
+        return serializeDates(threadWithDetails);
     });
     server.post("/threads/:id/upvote", {
         schema: {

@@ -112,3 +112,41 @@ export class DatabaseError extends APIError {
     this.name = "DatabaseError";
   }
 }
+
+/**
+ * Serialize Date objects to ISO strings for API responses
+ * Postgres returns Date objects but Zod schemas expect strings
+ */
+export function serializeDate(date: Date | string | null | undefined): string | null {
+  if (!date) return null;
+  if (typeof date === "string") return date;
+  return date.toISOString();
+}
+
+/**
+ * Serialize an object's Date fields to ISO strings
+ * Recursively handles nested objects and arrays
+ */
+export function serializeDates<T extends Record<string, any>>(obj: T): any {
+  const result: any = { ...obj };
+
+  for (const key in result) {
+    const value = result[key];
+
+    if (value instanceof Date) {
+      result[key] = value.toISOString();
+    } else if (Array.isArray(value)) {
+      result[key] = value.map((item: any) =>
+        typeof item === "object" && item !== null && item instanceof Date
+          ? item.toISOString()
+          : typeof item === "object" && item !== null
+          ? serializeDates(item)
+          : item
+      );
+    } else if (value && typeof value === "object") {
+      result[key] = serializeDates(value);
+    }
+  }
+
+  return result;
+}

@@ -10,8 +10,8 @@ export declare const courseSchema: z.ZodObject<{
     tenantId: z.ZodString;
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     id: string;
+    name: string;
     tenantId: string;
     createdAt: string;
     description: string;
@@ -20,8 +20,8 @@ export declare const courseSchema: z.ZodObject<{
     term: string;
     enrollmentCount: number;
 }, {
-    name: string;
     id: string;
+    name: string;
     tenantId: string;
     createdAt: string;
     description: string;
@@ -43,8 +43,8 @@ export declare const listCoursesResponseSchema: z.ZodObject<{
         tenantId: z.ZodString;
         createdAt: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         tenantId: string;
         createdAt: string;
         description: string;
@@ -53,8 +53,8 @@ export declare const listCoursesResponseSchema: z.ZodObject<{
         term: string;
         enrollmentCount: number;
     }, {
-        name: string;
         id: string;
+        name: string;
         tenantId: string;
         createdAt: string;
         description: string;
@@ -65,8 +65,8 @@ export declare const listCoursesResponseSchema: z.ZodObject<{
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     items: {
-        name: string;
         id: string;
+        name: string;
         tenantId: string;
         createdAt: string;
         description: string;
@@ -77,8 +77,8 @@ export declare const listCoursesResponseSchema: z.ZodObject<{
     }[];
 }, {
     items: {
-        name: string;
         id: string;
+        name: string;
         tenantId: string;
         createdAt: string;
         description: string;

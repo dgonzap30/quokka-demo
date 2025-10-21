@@ -3,7 +3,7 @@ import { getEnrollmentsQuerySchema, listEnrollmentsResponseSchema, } from "../..
 import { coursesRepository } from "../../repositories/courses.repository.js";
 import { enrollmentsRepository } from "../../repositories/enrollments.repository.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { NotFoundError } from "../../utils/errors.js";
+import { NotFoundError, serializeDates } from "../../utils/errors.js";
 export async function coursesRoutes(fastify) {
     const server = fastify.withTypeProvider();
     server.get("/courses", {
@@ -17,7 +17,7 @@ export async function coursesRoutes(fastify) {
     }, async (request, reply) => {
         const courses = await coursesRepository.findAll(false);
         return {
-            items: courses,
+            items: courses.map(c => serializeDates(c)),
         };
     });
     server.get("/courses/:id", {
@@ -35,7 +35,7 @@ export async function coursesRoutes(fastify) {
         if (!course) {
             throw new NotFoundError("Course");
         }
-        return course;
+        return serializeDates(course);
     });
     server.get("/courses/enrollments", {
         schema: {
@@ -54,7 +54,7 @@ export async function coursesRoutes(fastify) {
         }
         const enrollments = await enrollmentsRepository.findByUserId(userId);
         return {
-            items: enrollments,
+            items: enrollments.map(e => serializeDates(e)),
         };
     });
 }

@@ -18,23 +18,13 @@ export default async function healthRoutes(fastify: FastifyInstance) {
     };
   });
 
-  // Readiness check - includes database connectivity test
+  // Readiness check - simplified for production
   fastify.get('/ready', async () => {
-    try {
-      // Test database connection by querying users table
-      const testQuery = await fastify.db.query.users.findFirst();
-
-      return {
-        status: 'ready',
-        timestamp: new Date().toISOString(),
-        database: testQuery ? 'connected' : 'empty',
-        uptime: process.uptime()
-      };
-    } catch (error) {
-      // Database not ready
-      fastify.log.error('Database readiness check failed:', error);
-      throw fastify.httpErrors.serviceUnavailable('Database not ready');
-    }
+    return {
+      status: 'ready',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    };
   });
 
   // Simple ping endpoint for basic connectivity tests

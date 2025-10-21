@@ -16,7 +16,7 @@ import {
 } from "../../schemas/posts.schema.js";
 import { postsRepository } from "../../repositories/posts.repository.js";
 import { threadsRepository } from "../../repositories/threads.repository.js";
-import { UnauthorizedError, NotFoundError } from "../../utils/errors.js";
+import { UnauthorizedError, NotFoundError, serializeDates } from "../../utils/errors.js";
 import type { SessionData } from "../../plugins/session.plugin.js";
 
 export async function postsRoutes(fastify: FastifyInstance) {
@@ -55,7 +55,7 @@ export async function postsRoutes(fastify: FastifyInstance) {
       });
 
       return {
-        items: result.data,
+        items: result.data.map(p => serializeDates(p)),
         nextCursor: result.pagination.nextCursor || null,
         hasNextPage: result.pagination.hasMore,
       } as any;
@@ -95,7 +95,7 @@ export async function postsRoutes(fastify: FastifyInstance) {
       });
 
       return {
-        items: result.data,
+        items: result.data.map(p => serializeDates(p)),
         nextCursor: result.pagination.nextCursor || null,
         hasNextPage: result.pagination.hasMore,
       } as any;
@@ -146,8 +146,8 @@ export async function postsRoutes(fastify: FastifyInstance) {
         content,
         isInstructorAnswer,
         endorsementCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         tenantId: "tenant-demo-001",
       });
 
@@ -160,7 +160,7 @@ export async function postsRoutes(fastify: FastifyInstance) {
       }
 
       reply.code(201);
-      return postWithAuthor as any;
+      return serializeDates(postWithAuthor) as any;
     }
   );
 }

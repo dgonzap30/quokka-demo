@@ -38,4 +38,6 @@ export declare class InternalError extends APIError {
 export declare class DatabaseError extends APIError {
     constructor(message: string);
 }
+export declare function serializeDate(date: Date | string | null | undefined): string | null;
+export declare function serializeDates<T extends Record<string, any>>(obj: T): any;
 //# sourceMappingURL=errors.d.ts.map

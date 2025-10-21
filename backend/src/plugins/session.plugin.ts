@@ -1,23 +1,26 @@
 /**
- * Session Plugin (Simple Demo Version)
+ * Session Plugin (JWT-Based)
  *
- * Uses @fastify/cookie for simple session management
- * Stores session data in signed cookies (good for demo, easy to scale to Redis later)
+ * Uses JWT tokens stored in HTTP-only cookies for stateless authentication
+ * Supports both access tokens (short-lived) and refresh tokens (long-lived)
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
 import fastifyCookie from "@fastify/cookie";
 import fp from "fastify-plugin";
+import { generateTokenPair, verifyToken, refreshAccessToken } from "../auth/jwt.utils.js";
 
-const SESSION_COOKIE_NAME = "quokka.session";
-const SESSION_SECRET = process.env.SESSION_SECRET || "demo-secret-change-in-production";
-const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+const ACCESS_TOKEN_COOKIE = "quokka.token";
+const REFRESH_TOKEN_COOKIE = "quokka.refresh";
+const ACCESS_TOKEN_MAX_AGE = 15 * 60; // 15 minutes in seconds
+const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 
 export interface SessionData {
   userId: string;
   email: string;
   role: string;
-  createdAt: string;
+  tenantId: string;
+  createdAt?: string; // For backward compatibility
 }
 
 // Extend Fastify request type
@@ -28,53 +31,111 @@ declare module "fastify" {
 }
 
 async function sessionPlugin(fastify: FastifyInstance) {
-  // Register cookie plugin
+  // Register cookie plugin (no secret needed for JWT, tokens are self-signed)
   await fastify.register(fastifyCookie, {
-    secret: SESSION_SECRET,
     hook: "onRequest",
   });
 
-  // Decorator to get session from cookie
+  // Decorator to get session from JWT
   fastify.decorateRequest("session", null);
 
-  // Hook to parse session from cookie on every request
-  fastify.addHook("onRequest", async (request, _reply) => {
-    const sessionCookie = request.cookies[SESSION_COOKIE_NAME];
+  // Hook to parse JWT from cookie on every request
+  fastify.addHook("onRequest", async (request, reply) => {
+    const accessToken = request.cookies[ACCESS_TOKEN_COOKIE];
+    const refreshToken = request.cookies[REFRESH_TOKEN_COOKIE];
 
-    if (sessionCookie) {
+    if (accessToken) {
       try {
-        // Verify and parse signed cookie
-        const unsignedValue = request.unsignCookie(sessionCookie);
+        // Verify access token
+        const payload = await verifyToken(accessToken, "access");
 
-        if (unsignedValue.valid && unsignedValue.value) {
-          const sessionData = JSON.parse(unsignedValue.value) as SessionData;
-          request.session = sessionData;
+        // Set session data from token payload
+        request.session = {
+          userId: payload.userId,
+          email: payload.email,
+          role: payload.role,
+          tenantId: payload.tenantId,
+        };
+      } catch (error: any) {
+        // Access token is invalid or expired
+        if (error.message === "Token has expired" && refreshToken) {
+          try {
+            // Try to refresh the access token
+            const newAccessToken = await refreshAccessToken(refreshToken);
+            const payload = await verifyToken(newAccessToken, "access");
+
+            // Set new access token cookie
+            reply.setCookie(ACCESS_TOKEN_COOKIE, newAccessToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+              maxAge: ACCESS_TOKEN_MAX_AGE,
+              path: "/",
+            });
+
+            // Set session data
+            request.session = {
+              userId: payload.userId,
+              email: payload.email,
+              role: payload.role,
+              tenantId: payload.tenantId,
+            };
+
+            request.log.info("Access token refreshed successfully");
+          } catch (refreshError) {
+            // Refresh token is also invalid, clear cookies
+            request.log.warn("Refresh token is invalid, clearing session");
+            reply.clearCookie(ACCESS_TOKEN_COOKIE, { path: "/" });
+            reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: "/" });
+          }
+        } else {
+          // Other errors, just clear the session
+          request.log.warn({ error: error.message }, "Invalid access token");
         }
-      } catch (error) {
-        // Invalid session cookie, ignore and continue
-        request.log.warn("Invalid session cookie, ignoring");
       }
     }
   });
 
-  // Helper to set session
-  fastify.decorate("setSession", function (reply: FastifyReply, sessionData: SessionData) {
-    const cookieValue = JSON.stringify(sessionData);
+  // Helper to set session (generates JWT tokens)
+  fastify.decorate("setSession", async function (reply: FastifyReply, sessionData: SessionData) {
+    try {
+      // Generate access and refresh tokens
+      const { accessToken, refreshToken } = await generateTokenPair({
+        userId: sessionData.userId,
+        email: sessionData.email,
+        role: sessionData.role,
+        tenantId: sessionData.tenantId,
+      });
 
-    reply.setCookie(SESSION_COOKIE_NAME, cookieValue, {
-      signed: true,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: SESSION_MAX_AGE,
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? undefined : "localhost", // Allow cross-port cookies in dev
-    });
+      // Set access token cookie (short-lived)
+      reply.setCookie(ACCESS_TOKEN_COOKIE, accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        maxAge: ACCESS_TOKEN_MAX_AGE,
+        path: "/",
+      });
+
+      // Set refresh token cookie (long-lived)
+      reply.setCookie(REFRESH_TOKEN_COOKIE, refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        maxAge: REFRESH_TOKEN_MAX_AGE,
+        path: "/",
+      });
+    } catch (error) {
+      fastify.log.error({ error }, "Failed to generate session tokens");
+      throw error;
+    }
   });
 
   // Helper to clear session
   fastify.decorate("clearSession", function (reply: FastifyReply) {
-    reply.clearCookie(SESSION_COOKIE_NAME, {
+    reply.clearCookie(ACCESS_TOKEN_COOKIE, {
+      path: "/",
+    });
+    reply.clearCookie(REFRESH_TOKEN_COOKIE, {
       path: "/",
     });
   });

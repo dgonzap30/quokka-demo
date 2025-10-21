@@ -20,7 +20,7 @@ export declare class AIAnswersRepository extends BaseRepository<typeof aiAnswers
     getEndorsement(aiAnswerId: string, userId: string): Promise<{
         id: string;
         tenantId: string;
-        createdAt: string;
+        createdAt: Date;
         userId: string;
         aiAnswerId: string;
     }>;

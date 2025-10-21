@@ -7,7 +7,7 @@
 
 import type { SQL } from "drizzle-orm";
 import { asc, desc, and, or, gt, lt } from "drizzle-orm";
-import type { SQLiteTable } from "drizzle-orm/sqlite-core";
+import type { PgTable } from "drizzle-orm/pg-core";
 import { db } from "../db/client.js";
 
 /**
@@ -45,7 +45,7 @@ interface Cursor {
  * Extend this class for domain-specific repositories
  */
 export abstract class BaseRepository<
-  TTable extends SQLiteTable,
+  TTable extends PgTable,
   TSelect = TTable["$inferSelect"],
   TInsert = TTable["$inferInsert"]
 > {
@@ -97,8 +97,8 @@ export abstract class BaseRepository<
    * Delete entity by ID
    */
   async delete(id: string): Promise<boolean> {
-    const result = await db.delete(this.table).where(this.idEquals(id));
-    return result.changes > 0;
+    const result = await db.delete(this.table).where(this.idEquals(id)).returning({ id: (this.table as any).id });
+    return result.length > 0;
   }
 
   /**

@@ -16,14 +16,14 @@ export declare const postSchema: z.ZodObject<{
         role: z.ZodEnum<["student", "instructor", "ta"]>;
         avatar: z.ZodNullable<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
     }, {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -39,8 +39,8 @@ export declare const postSchema: z.ZodObject<{
     threadId: string;
     isInstructorAnswer: boolean;
     author: {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -56,8 +56,8 @@ export declare const postSchema: z.ZodObject<{
     threadId: string;
     isInstructorAnswer: boolean;
     author: {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -104,14 +104,14 @@ export declare const listPostsResponseSchema: z.ZodObject<{
             role: z.ZodEnum<["student", "instructor", "ta"]>;
             avatar: z.ZodNullable<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
         }, {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -127,8 +127,8 @@ export declare const listPostsResponseSchema: z.ZodObject<{
         threadId: string;
         isInstructorAnswer: boolean;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -144,8 +144,8 @@ export declare const listPostsResponseSchema: z.ZodObject<{
         threadId: string;
         isInstructorAnswer: boolean;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -165,8 +165,8 @@ export declare const listPostsResponseSchema: z.ZodObject<{
         threadId: string;
         isInstructorAnswer: boolean;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -186,8 +186,8 @@ export declare const listPostsResponseSchema: z.ZodObject<{
         threadId: string;
         isInstructorAnswer: boolean;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;

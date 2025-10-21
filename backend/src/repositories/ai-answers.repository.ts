@@ -104,7 +104,7 @@ export class AIAnswersRepository extends BaseRepository<
     tenantId: string
   ): Promise<AIAnswerEndorsement> {
     const id = `ai-endorse-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date();
 
     const [endorsement] = await db
       .insert(aiAnswerEndorsements)

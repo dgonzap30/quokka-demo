@@ -30,8 +30,8 @@ export class BaseRepository {
         return results[0] || null;
     }
     async delete(id) {
-        const result = await db.delete(this.table).where(this.idEquals(id));
-        return result.changes > 0;
+        const result = await db.delete(this.table).where(this.idEquals(id)).returning({ id: this.table.id });
+        return result.length > 0;
     }
     async count(where) {
         const query = db.select().from(this.table);

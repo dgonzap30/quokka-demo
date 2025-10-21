@@ -3,7 +3,7 @@ import { createConversationBodySchema, sendMessageBodySchema, convertToThreadBod
 import { conversationsRepository } from "../../repositories/conversations.repository.js";
 import { threadsRepository } from "../../repositories/threads.repository.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { NotFoundError } from "../../utils/errors.js";
+import { NotFoundError, serializeDates } from "../../utils/errors.js";
 import { db } from "../../db/client.js";
 import { aiAnswers } from "../../db/schema.js";
 export async function conversationsRoutes(fastify) {
@@ -23,7 +23,7 @@ export async function conversationsRoutes(fastify) {
         const { userId } = request.query;
         const conversations = await conversationsRepository.findByUserId(userId);
         return {
-            conversations,
+            conversations: conversations.map(c => serializeDates(c)),
         };
     });
     server.get("/conversations/:conversationId", {
@@ -51,7 +51,7 @@ export async function conversationsRoutes(fastify) {
         if (!conversation) {
             throw new NotFoundError("Conversation");
         }
-        return conversation;
+        return serializeDates(conversation);
     });
     server.post("/conversations", {
         schema: {
@@ -69,7 +69,7 @@ export async function conversationsRoutes(fastify) {
             throw new NotFoundError("User");
         }
         const id = `conv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const now = new Date().toISOString();
+        const now = new Date();
         const conversation = await conversationsRepository.create({
             id,
             userId,
@@ -82,7 +82,7 @@ export async function conversationsRoutes(fastify) {
             tenantId: user.tenantId,
         });
         reply.code(201);
-        return conversation;
+        return serializeDates(conversation);
     });
     server.get("/users/:userId/conversations", {
         schema: {
@@ -97,7 +97,7 @@ export async function conversationsRoutes(fastify) {
         const { userId } = request.params;
         const conversations = await conversationsRepository.findByUserId(userId);
         return {
-            conversations,
+            conversations: conversations.map(c => serializeDates(c)),
         };
     });
     server.get("/conversations/:conversationId/messages", {
@@ -117,7 +117,7 @@ export async function conversationsRoutes(fastify) {
         }
         const messages = await conversationsRepository.findMessages(conversationId);
         return {
-            messages: messages,
+            messages: messages.map(m => serializeDates(m)),
         };
     });
     server.post("/conversations/:conversationId/messages", {
@@ -142,7 +142,7 @@ export async function conversationsRoutes(fastify) {
             throw new NotFoundError("User");
         }
         const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const now = new Date().toISOString();
+        const now = new Date();
         const userMessage = await conversationsRepository.createMessage({
             id: messageId,
             conversationId,
@@ -155,7 +155,7 @@ export async function conversationsRoutes(fastify) {
         });
         reply.code(201);
         return {
-            userMessage: userMessage,
+            userMessage: serializeDates(userMessage),
             aiMessage: null,
         };
     });
@@ -214,7 +214,7 @@ export async function conversationsRoutes(fastify) {
         })
             .join("\n\n---\n\n");
         const threadId = `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const now = new Date().toISOString();
+        const now = new Date();
         const thread = await threadsRepository.create({
             id: threadId,
             courseId,

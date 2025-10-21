@@ -3,7 +3,8 @@ export interface SessionData {
     userId: string;
     email: string;
     role: string;
-    createdAt: string;
+    tenantId: string;
+    createdAt?: string;
 }
 declare module "fastify" {
     interface FastifyRequest {

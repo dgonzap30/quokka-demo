@@ -69,4 +69,31 @@ export class DatabaseError extends APIError {
         this.name = "DatabaseError";
     }
 }
+export function serializeDate(date) {
+    if (!date)
+        return null;
+    if (typeof date === "string")
+        return date;
+    return date.toISOString();
+}
+export function serializeDates(obj) {
+    const result = { ...obj };
+    for (const key in result) {
+        const value = result[key];
+        if (value instanceof Date) {
+            result[key] = value.toISOString();
+        }
+        else if (Array.isArray(value)) {
+            result[key] = value.map((item) => typeof item === "object" && item !== null && item instanceof Date
+                ? item.toISOString()
+                : typeof item === "object" && item !== null
+                    ? serializeDates(item)
+                    : item);
+        }
+        else if (value && typeof value === "object") {
+            result[key] = serializeDates(value);
+        }
+    }
+    return result;
+}
 //# sourceMappingURL=errors.js.map

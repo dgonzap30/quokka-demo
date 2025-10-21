@@ -86,7 +86,7 @@ export class PostsRepository extends BaseRepository {
                 id: crypto.randomUUID(),
                 postId,
                 userId,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
                 tenantId: "tenant-demo-001",
             });
             await db
@@ -96,7 +96,8 @@ export class PostsRepository extends BaseRepository {
             return true;
         }
         catch (error) {
-            if (error.code === "SQLITE_CONSTRAINT_UNIQUE" || error.message?.includes("UNIQUE")) {
+            const err = error;
+            if (err.code === "23505" || err.message?.includes("unique")) {
                 return false;
             }
             throw error;
@@ -105,8 +106,9 @@ export class PostsRepository extends BaseRepository {
     async removeEndorsement(postId, userId) {
         const result = await db
             .delete(postEndorsements)
-            .where(and(eq(postEndorsements.postId, postId), eq(postEndorsements.userId, userId)));
-        if (result.changes > 0) {
+            .where(and(eq(postEndorsements.postId, postId), eq(postEndorsements.userId, userId)))
+            .returning({ id: postEndorsements.id });
+        if (result.length > 0) {
             await db
                 .update(posts)
                 .set({ endorsementCount: sql `${posts.endorsementCount} - 1` })

@@ -279,13 +279,13 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
         threadId,
         userId,
         tenantId,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       });
       return true;
     } catch (error: unknown) {
       // Check if it's a unique constraint violation (already upvoted)
       const err = error as { code?: string; message?: string };
-      if (err.code === "SQLITE_CONSTRAINT_UNIQUE" || err.message?.includes("UNIQUE")) {
+      if (err.code === "23505" || err.message?.includes("unique")) {
         return false;
       }
       throw error;
@@ -299,9 +299,10 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
   async removeUpvote(threadId: string, userId: string): Promise<boolean> {
     const result = await db
       .delete(threadUpvotes)
-      .where(and(eq(threadUpvotes.threadId, threadId), eq(threadUpvotes.userId, userId))!);
+      .where(and(eq(threadUpvotes.threadId, threadId), eq(threadUpvotes.userId, userId))!)
+      .returning({ id: threadUpvotes.id });
 
-    return result.changes > 0;
+    return result.length > 0;
   }
 
   /**
@@ -323,7 +324,7 @@ export class ThreadsRepository extends BaseRepository<typeof threads, Thread, Ne
   async updateStatus(id: string, status: string): Promise<Thread | null> {
     const result = await db
       .update(threads)
-      .set({ status, updatedAt: new Date().toISOString() })
+      .set({ status, updatedAt: new Date() })
       .where(eq(threads.id, id))
       .returning();
 

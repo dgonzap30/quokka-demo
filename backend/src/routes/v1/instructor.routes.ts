@@ -16,7 +16,13 @@ import {
 } from "../../schemas/instructor.schema.js";
 import { instructorRepository } from "../../repositories/instructor.repository.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { NotFoundError } from "../../utils/errors.js";
+import { threadsRepository } from "../../repositories/threads.repository.js";
+import { aiAnswersRepository } from "../../repositories/ai-answers.repository.js";
+import { postsRepository } from "../../repositories/posts.repository.js";
+import { NotFoundError, serializeDates } from "../../utils/errors.js";
+import { db } from "../../db/client.js";
+import { threads, posts, aiAnswers } from "../../db/schema.js";
+import { eq, and, count, sql } from "drizzle-orm";
 
 export async function instructorRoutes(fastify: FastifyInstance) {
   const server = fastify.withTypeProvider<ZodTypeProvider>();
@@ -45,7 +51,7 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       const templates = await instructorRepository.findByUserId(userId);
 
       return {
-        templates: templates as any,
+        templates: templates.map(t => serializeDates(t)) as any,
       };
     }
   );
@@ -76,7 +82,7 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       }
 
       const id = `template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const now = new Date().toISOString();
+      const now = new Date();
 
       const template = await instructorRepository.create({
         id,
@@ -92,10 +98,10 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       });
 
       reply.code(201);
-      return {
+      return serializeDates({
         ...template,
         tags: tags,
-      };
+      });
     }
   );
 
@@ -155,12 +161,53 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      // TODO: Implement proper metrics calculation
+      const { courseId } = request.query;
+
+      // Get total threads for the course
+      const [totalResult] = await db
+        .select({
+          count: sql<number>`COUNT(DISTINCT ${threads.id})`.as('count')
+        })
+        .from(threads)
+        .where(eq(threads.courseId, courseId));
+
+      const totalThreads = totalResult?.count || 0;
+
+      // Get threads with AI answers
+      const [aiAnsweredResult] = await db
+        .select({
+          count: sql<number>`COUNT(DISTINCT ${threads.id})`.as('count')
+        })
+        .from(threads)
+        .leftJoin(aiAnswers, eq(threads.id, aiAnswers.threadId))
+        .where(and(
+          eq(threads.courseId, courseId),
+          sql`${aiAnswers.id} IS NOT NULL`
+        ));
+
+      const aiAnsweredThreads = aiAnsweredResult?.count || 0;
+
+      // Get threads with any posts (human answered)
+      const [answeredResult] = await db
+        .select({
+          count: sql<number>`COUNT(DISTINCT ${threads.id})`.as('count')
+        })
+        .from(threads)
+        .leftJoin(posts, eq(threads.id, posts.threadId))
+        .where(and(
+          eq(threads.courseId, courseId),
+          sql`${posts.id} IS NOT NULL`
+        ));
+
+      const answeredThreads = answeredResult?.count || 0;
+
+      const unansweredThreads = totalThreads - answeredThreads;
+
       return {
-        totalThreads: 0,
-        answeredThreads: 0,
-        unansweredThreads: 0,
-        aiAnsweredThreads: 0,
+        totalThreads,
+        answeredThreads,
+        unansweredThreads,
+        aiAnsweredThreads,
       };
     }
   );
@@ -184,8 +231,29 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      // TODO: Implement proper unanswered threads query
-      return [];
+      const { courseId } = request.query;
+
+      // Get threads without any posts
+      const unansweredThreads = await db
+        .select({
+          id: threads.id,
+          title: threads.title,
+          content: threads.content,
+          authorId: threads.authorId,
+          courseId: threads.courseId,
+          status: threads.status,
+          createdAt: threads.createdAt,
+        })
+        .from(threads)
+        .leftJoin(posts, eq(threads.id, posts.threadId))
+        .where(and(
+          eq(threads.courseId, courseId),
+          sql`${posts.id} IS NULL`
+        ))
+        .orderBy(sql`${threads.createdAt} DESC`)
+        .limit(50);
+
+      return unansweredThreads.map(t => serializeDates(t));
     }
   );
 
@@ -208,8 +276,23 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      // TODO: Implement proper moderation queue logic
-      return [];
+      const { courseId } = request.query;
+
+      // Get recent threads needing attention (last 7 days, open status)
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const needsAttention = await db
+        .select()
+        .from(threads)
+        .where(and(
+          eq(threads.courseId, courseId),
+          eq(threads.status, 'open'),
+          sql`${threads.createdAt} >= ${sevenDaysAgo}`
+        ))
+        .orderBy(sql`${threads.createdAt} DESC`)
+        .limit(20);
+
+      return needsAttention.map(t => serializeDates(t));
     }
   );
 
@@ -235,7 +318,7 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       const templates = await instructorRepository.findByUserId(userId);
 
       return {
-        templates: templates as any,
+        templates: templates.map(t => serializeDates(t)) as any,
       };
     }
   );
@@ -266,7 +349,7 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       }
 
       const id = `template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const now = new Date().toISOString();
+      const now = new Date();
 
       const template = await instructorRepository.create({
         id,
@@ -282,10 +365,10 @@ export async function instructorRoutes(fastify: FastifyInstance) {
       });
 
       reply.code(201);
-      return {
+      return serializeDates({
         ...template,
         tags: tags,
-      };
+      });
     }
   );
 

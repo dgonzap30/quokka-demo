@@ -1,5 +1,5 @@
 import type { SQL } from "drizzle-orm";
-import type { SQLiteTable } from "drizzle-orm/sqlite-core";
+import type { PgTable } from "drizzle-orm/pg-core";
 export interface PaginationOptions {
     cursor?: string;
     limit?: number;
@@ -12,7 +12,7 @@ export interface PaginatedResult<T> {
         hasMore: boolean;
     };
 }
-export declare abstract class BaseRepository<TTable extends SQLiteTable, TSelect = TTable["$inferSelect"], TInsert = TTable["$inferInsert"]> {
+export declare abstract class BaseRepository<TTable extends PgTable, TSelect = TTable["$inferSelect"], TInsert = TTable["$inferInsert"]> {
     protected readonly table: TTable;
     constructor(table: TTable);
     findById(id: string): Promise<TSelect | null>;

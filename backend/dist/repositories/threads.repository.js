@@ -83,13 +83,19 @@ export class ThreadsRepository extends BaseRepository {
             };
             nextCursor = Buffer.from(JSON.stringify(cursorObj)).toString("base64");
         }
-        const threadsWithAuthor = results.map((row) => ({
-            ...row.thread,
-            author: row.author,
-            upvoteCount: row.upvoteCount,
-            postCount: row.postCount,
-            hasAiAnswer: row.hasAiAnswer,
-        }));
+        const threadsWithAuthor = results.map((row) => {
+            const threadAny = row.thread;
+            const views = threadAny.viewCount ?? threadAny.view_count ?? 0;
+            const { viewCount, replyCount, hasAIAnswer, view_count, reply_count, has_ai_answer, ...threadFields } = threadAny;
+            return {
+                ...threadFields,
+                views,
+                author: row.author,
+                upvoteCount: row.upvoteCount,
+                postCount: row.postCount,
+                hasAiAnswer: row.hasAiAnswer,
+            };
+        });
         return {
             data: threadsWithAuthor,
             pagination: {
@@ -125,8 +131,12 @@ export class ThreadsRepository extends BaseRepository {
             .from(aiAnswers)
             .where(eq(aiAnswers.threadId, thread.id));
         const hasAiAnswer = (aiResults[0]?.count || 0) > 0;
+        const threadAny = thread;
+        const views = threadAny.viewCount ?? threadAny.view_count ?? 0;
+        const { viewCount, replyCount, hasAIAnswer, view_count, reply_count, has_ai_answer, ...threadFields } = threadAny;
         return {
-            ...thread,
+            ...threadFields,
+            views,
             author,
             upvoteCount,
             postCount,
@@ -151,12 +161,13 @@ export class ThreadsRepository extends BaseRepository {
                 threadId,
                 userId,
                 tenantId,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
             });
             return true;
         }
         catch (error) {
-            if (error.code === "SQLITE_CONSTRAINT_UNIQUE" || error.message?.includes("UNIQUE")) {
+            const err = error;
+            if (err.code === "23505" || err.message?.includes("unique")) {
                 return false;
             }
             throw error;
@@ -165,8 +176,9 @@ export class ThreadsRepository extends BaseRepository {
     async removeUpvote(threadId, userId) {
         const result = await db
             .delete(threadUpvotes)
-            .where(and(eq(threadUpvotes.threadId, threadId), eq(threadUpvotes.userId, userId)));
-        return result.changes > 0;
+            .where(and(eq(threadUpvotes.threadId, threadId), eq(threadUpvotes.userId, userId)))
+            .returning({ id: threadUpvotes.id });
+        return result.length > 0;
     }
     async hasUserUpvoted(threadId, userId) {
         const results = await db
@@ -179,7 +191,7 @@ export class ThreadsRepository extends BaseRepository {
     async updateStatus(id, status) {
         const result = await db
             .update(threads)
-            .set({ status, updatedAt: new Date().toISOString() })
+            .set({ status, updatedAt: new Date() })
             .where(eq(threads.id, id))
             .returning();
         return result[0] || null;

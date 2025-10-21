@@ -15,14 +15,14 @@ export declare const authResponseSchema: z.ZodObject<{
         role: z.ZodEnum<["student", "instructor", "ta"]>;
         avatar: z.ZodNullable<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
     }, {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -31,8 +31,8 @@ export declare const authResponseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     message: string;
     user: {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -40,8 +40,8 @@ export declare const authResponseSchema: z.ZodObject<{
 }, {
     message: string;
     user: {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -56,15 +56,15 @@ export declare const currentUserSchema: z.ZodObject<{
     avatar: z.ZodNullable<z.ZodString>;
     createdAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     id: string;
+    name: string;
     email: string;
     role: "student" | "instructor" | "ta";
     avatar: string | null;
     createdAt: string;
 }, {
-    name: string;
     id: string;
+    name: string;
     email: string;
     role: "student" | "instructor" | "ta";
     avatar: string | null;

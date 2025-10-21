@@ -1,6 +1,6 @@
 import { devLoginSchema, authResponseSchema, currentUserSchema, logoutResponseSchema } from "../../schemas/auth.schema.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { UnauthorizedError, NotFoundError } from "../../utils/errors.js";
+import { UnauthorizedError, NotFoundError, serializeDate } from "../../utils/errors.js";
 export async function authRoutes(fastify) {
     const server = fastify.withTypeProvider();
     server.post("/dev-login", {
@@ -22,9 +22,10 @@ export async function authRoutes(fastify) {
             userId: user.id,
             email: user.email,
             role: user.role,
+            tenantId: user.tenantId,
             createdAt: new Date().toISOString(),
         };
-        fastify.setSession(reply, sessionData);
+        await fastify.setSession(reply, sessionData);
         return {
             user: {
                 id: user.id,
@@ -58,7 +59,7 @@ export async function authRoutes(fastify) {
             email: user.email,
             role: user.role,
             avatar: user.avatar,
-            createdAt: user.createdAt,
+            createdAt: serializeDate(user.createdAt),
         };
     });
     server.post("/logout", {

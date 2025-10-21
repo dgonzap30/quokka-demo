@@ -10,11 +10,11 @@ export declare class EnrollmentsRepository extends BaseRepository<typeof enrollm
         userId: string;
         courseId: string;
         role: string;
-        enrolledAt: string;
+        enrolledAt: Date;
         tenantId: string;
         course: {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;

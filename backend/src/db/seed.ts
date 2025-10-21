@@ -29,6 +29,15 @@ function loadMockFile<T>(filename: string): T[] {
 }
 
 /**
+ * Convert ISO string to Date object for Postgres timestamps
+ * Returns null if value is null/undefined
+ */
+function toDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  return new Date(value);
+}
+
+/**
  * Main seed function
  */
 async function seed() {
@@ -69,7 +78,7 @@ async function seed() {
         role: user.role,
         avatar: user.avatar || null,
         tenantId: DEMO_TENANT_ID,
-        createdAt: user.createdAt,
+        createdAt: toDate(user.createdAt) || new Date(),
       });
     }
     console.log(`✅ Seeded ${usersData.length} users\n`);
@@ -87,7 +96,7 @@ async function seed() {
         status: course.status,
         enrollmentCount: course.enrollmentCount || 0,
         tenantId: DEMO_TENANT_ID,
-        createdAt: course.createdAt,
+        createdAt: toDate(course.createdAt) || new Date(),
       });
     }
     console.log(`✅ Seeded ${coursesData.length} courses\n`);
@@ -101,7 +110,7 @@ async function seed() {
         userId: enrollment.userId,
         courseId: enrollment.courseId,
         role: enrollment.role,
-        enrolledAt: enrollment.enrolledAt,
+        enrolledAt: toDate(enrollment.enrolledAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
     }
@@ -118,7 +127,7 @@ async function seed() {
         type: material.type,
         content: material.content,
         metadata: material.metadata ? JSON.stringify(material.metadata) : null,
-        createdAt: material.createdAt,
+        createdAt: toDate(material.createdAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
     }
@@ -134,11 +143,11 @@ async function seed() {
         courseId: assignment.courseId,
         title: assignment.title,
         description: assignment.description || "",
-        dueDate: assignment.dueDate,
+        dueDate: toDate(assignment.dueDate) || new Date(),
         status: assignment.status || "active",
         questionCount: assignment.questionCount || 0,
         tenantId: DEMO_TENANT_ID,
-        createdAt: assignment.createdAt,
+        createdAt: toDate(assignment.createdAt) || new Date(),
       });
     }
     console.log(`✅ Seeded ${assignmentsData.length} assignments\n`);
@@ -163,8 +172,8 @@ async function seed() {
         upvoteCount: thread.upvotedBy?.length || 0,
         duplicatesOf: thread.duplicatesOf || null,
         mergedInto: thread.mergedInto || null,
-        createdAt: thread.createdAt,
-        updatedAt: thread.updatedAt,
+        createdAt: toDate(thread.createdAt) || new Date(),
+        updatedAt: toDate(thread.updatedAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
 
@@ -175,7 +184,7 @@ async function seed() {
             id: generateUuid(),
             threadId: thread.id,
             userId,
-            createdAt: thread.createdAt,
+            createdAt: toDate(thread.createdAt) || new Date(),
             tenantId: DEMO_TENANT_ID,
           });
         }
@@ -188,7 +197,7 @@ async function seed() {
             id: generateUuid(),
             threadId: thread.id,
             userId,
-            createdAt: thread.createdAt,
+            createdAt: toDate(thread.createdAt) || new Date(),
             tenantId: DEMO_TENANT_ID,
           });
         }
@@ -207,8 +216,8 @@ async function seed() {
         content: post.content,
         isInstructorAnswer: post.isInstructorAnswer ? true : false,
         endorsementCount: post.endorsedBy?.length || 0,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt || post.createdAt,
+        createdAt: toDate(post.createdAt) || new Date(),
+        updatedAt: toDate(post.updatedAt || post.createdAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
 
@@ -219,7 +228,7 @@ async function seed() {
             id: generateUuid(),
             postId: post.id,
             userId,
-            createdAt: post.createdAt,
+            createdAt: toDate(post.createdAt) || new Date(),
             tenantId: DEMO_TENANT_ID,
           });
         }
@@ -239,7 +248,7 @@ async function seed() {
         confidenceLevel: answer.confidenceLevel,
         routing: answer.routing ? JSON.stringify(answer.routing) : null,
         endorsementCount: answer.endorsedBy?.length || 0,
-        generatedAt: answer.generatedAt,
+        generatedAt: toDate(answer.generatedAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
 
@@ -290,7 +299,7 @@ async function seed() {
         threadId: notification.threadId || null,
         postId: notification.postId || null,
         read: notification.read ? true : false,
-        createdAt: notification.createdAt,
+        createdAt: toDate(notification.createdAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
     }
@@ -306,8 +315,8 @@ async function seed() {
         courseId: conversation.courseId || null,
         title: conversation.title,
         messageCount: conversation.messageCount || 0,
-        lastMessageAt: conversation.updatedAt,
-        createdAt: conversation.createdAt,
+        lastMessageAt: toDate(conversation.updatedAt) || new Date(),
+        createdAt: toDate(conversation.createdAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
     }
@@ -322,7 +331,7 @@ async function seed() {
         conversationId: message.conversationId,
         role: message.role,
         content: message.content,
-        createdAt: message.timestamp,
+        createdAt: toDate(message.timestamp) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
     }
@@ -339,7 +348,7 @@ async function seed() {
         content: template.content,
         tags: template.tags ? JSON.stringify(template.tags) : null,
         courseId: template.courseId || null,
-        createdAt: template.createdAt,
+        createdAt: toDate(template.createdAt) || new Date(),
         tenantId: DEMO_TENANT_ID,
       });
     }

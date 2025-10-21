@@ -40,7 +40,7 @@ export class AIAnswersRepository extends BaseRepository {
     }
     async createEndorsement(aiAnswerId, userId, tenantId) {
         const id = `ai-endorse-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const createdAt = new Date().toISOString();
+        const createdAt = new Date();
         const [endorsement] = await db
             .insert(aiAnswerEndorsements)
             .values({

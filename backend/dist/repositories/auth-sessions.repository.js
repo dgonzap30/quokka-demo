@@ -25,7 +25,7 @@ export class AuthSessionsRepository extends BaseRepository {
         return results[0] || null;
     }
     async findValidSession(token) {
-        const now = new Date().toISOString();
+        const now = new Date();
         const results = await db
             .select()
             .from(this.table)
@@ -43,21 +43,24 @@ export class AuthSessionsRepository extends BaseRepository {
     async deleteByToken(token) {
         const result = await db
             .delete(this.table)
-            .where(eq(this.table.token, token));
-        return result.changes > 0;
+            .where(eq(this.table.token, token))
+            .returning({ id: this.table.id });
+        return result.length > 0;
     }
     async deleteByUserId(userId) {
         const result = await db
             .delete(this.table)
-            .where(eq(this.table.userId, userId));
-        return result.changes;
+            .where(eq(this.table.userId, userId))
+            .returning({ id: this.table.id });
+        return result.length;
     }
     async deleteExpiredSessions() {
-        const now = new Date().toISOString();
+        const now = new Date();
         const result = await db
             .delete(this.table)
-            .where(lt(this.table.expiresAt, now));
-        return result.changes;
+            .where(lt(this.table.expiresAt, now))
+            .returning({ id: this.table.id });
+        return result.length;
     }
 }
 export const authSessionsRepository = new AuthSessionsRepository();

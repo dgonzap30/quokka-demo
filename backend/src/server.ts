@@ -6,6 +6,7 @@
  * Future phases: Auth, validation, routes, plugins
  */
 
+import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { isDatabaseHealthy, closeDatabase } from "./db/client.js";
@@ -55,9 +56,31 @@ const fastify = Fastify({
 // ============================================================================
 
 // CORS for frontend integration
+// Supports: localhost (dev) + Netlify (production demo)
+const allowedOrigins = [
+  "http://localhost:3000", // Local development
+  process.env.FRONTEND_URL, // Netlify production (e.g., https://your-app.netlify.app)
+].filter((url): url is string => typeof url === "string"); // Remove undefined values with type guard
+
 await fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-  credentials: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    // Type guard: origin is now guaranteed to be a string
+    const originStr: string = origin;
+
+    // Check if origin is in allowed list
+    if (allowedOrigins.some((allowed) => originStr.startsWith(allowed))) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Origin ${originStr} not allowed by CORS`), false);
+    }
+  },
+  credentials: true, // Allow cookies
 });
 
 // Session management (must be before routes)

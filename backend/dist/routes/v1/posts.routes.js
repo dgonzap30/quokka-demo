@@ -2,7 +2,7 @@ import { z } from "zod";
 import { postSchema, createPostSchema, listPostsQuerySchema, listPostsResponseSchema, threadIdParamsSchema, } from "../../schemas/posts.schema.js";
 import { postsRepository } from "../../repositories/posts.repository.js";
 import { threadsRepository } from "../../repositories/threads.repository.js";
-import { UnauthorizedError, NotFoundError } from "../../utils/errors.js";
+import { UnauthorizedError, NotFoundError, serializeDates } from "../../utils/errors.js";
 export async function postsRoutes(fastify) {
     const server = fastify.withTypeProvider();
     server.get("/posts", {
@@ -26,7 +26,11 @@ export async function postsRoutes(fastify) {
             cursor,
             limit,
         });
-        return result;
+        return {
+            items: result.data.map(p => serializeDates(p)),
+            nextCursor: result.pagination.nextCursor || null,
+            hasNextPage: result.pagination.hasMore,
+        };
     });
     server.get("/threads/:threadId/posts", {
         schema: {
@@ -49,7 +53,11 @@ export async function postsRoutes(fastify) {
             cursor,
             limit,
         });
-        return result;
+        return {
+            items: result.data.map(p => serializeDates(p)),
+            nextCursor: result.pagination.nextCursor || null,
+            hasNextPage: result.pagination.hasMore,
+        };
     });
     server.post("/posts", {
         schema: {
@@ -79,17 +87,17 @@ export async function postsRoutes(fastify) {
             content,
             isInstructorAnswer,
             endorsementCount: 0,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
             tenantId: "tenant-demo-001",
         });
         const postResults = await postsRepository.findByThread(threadId);
-        const postWithAuthor = postResults.items.find((p) => p.id === newPost.id);
+        const postWithAuthor = postResults.data.find((p) => p.id === newPost.id);
         if (!postWithAuthor) {
             throw new Error("Failed to fetch created post");
         }
         reply.code(201);
-        return postWithAuthor;
+        return serializeDates(postWithAuthor);
     });
 }
 //# sourceMappingURL=posts.routes.js.map

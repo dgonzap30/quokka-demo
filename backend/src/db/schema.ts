@@ -2,18 +2,17 @@
  * Drizzle ORM Schema Definition
  *
  * 18 tables mirroring lib/models/types.ts
- * Works on SQLite (dev) and Postgres (prod) via UUID helpers
+ * Postgres-compatible with UUID and timestamp types
  * Foreign keys with CASCADE/SET NULL rules
  * Performance indexes on common query patterns
  */
 
-import { sqliteTable, text, integer, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { pgTable, uuid, timestamp, varchar, text, integer, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { randomUUID } from "crypto";
 
-// UUID Helpers (inlined for drizzle-kit compatibility)
+// UUID Helpers (Text-based for demo compatibility)
 function uuidColumn(name: string) {
-  return text(name).notNull().primaryKey().$defaultFn(() => randomUUID());
+  return text(name).notNull().primaryKey();
 }
 
 function uuidRefNotNull(name: string) {
@@ -32,17 +31,17 @@ function uuidRef(name: string) {
  * Users Table
  * Stores all user accounts (students, instructors, TAs)
  */
-export const users = sqliteTable(
+export const users = pgTable(
   "users",
   {
     id: uuidColumn("id"),
-    name: text("name").notNull(),
-    email: text("email").notNull(),
-    password: text("password").notNull(), // Hashed (would use bcrypt in production)
-    role: text("role").notNull(), // 'student' | 'instructor' | 'ta'
-    avatar: text("avatar"),
+    name: varchar("name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    password: varchar("password", { length: 255 }).notNull(), // Hashed (would use bcrypt in production)
+    role: varchar("role", { length: 50 }).notNull(), // 'student' | 'instructor' | 'ta'
+    avatar: varchar("avatar", { length: 500 }),
     tenantId: uuidRefNotNull("tenant_id"), // Future multi-tenant support
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     emailIdx: uniqueIndex("idx_users_email").on(table.email),
@@ -69,18 +68,18 @@ export const usersRelations = relations(users, ({ many }) => ({
  * Courses Table
  * Academic courses with enrollment tracking
  */
-export const courses = sqliteTable(
+export const courses = pgTable(
   "courses",
   {
     id: uuidColumn("id"),
-    code: text("code").notNull(),
-    name: text("name").notNull(),
-    term: text("term").notNull(),
+    code: varchar("code", { length: 50 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    term: varchar("term", { length: 50 }).notNull(),
     description: text("description").notNull(),
-    status: text("status").notNull(), // 'active' | 'archived'
+    status: varchar("status", { length: 50 }).notNull(), // 'active' | 'archived'
     enrollmentCount: integer("enrollment_count").notNull().default(0),
     tenantId: uuidRefNotNull("tenant_id"),
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     codeIdx: index("idx_courses_code").on(table.code),
@@ -106,14 +105,14 @@ export const coursesRelations = relations(courses, ({ many }) => ({
  * Auth Sessions Table
  * Session management for authenticated users
  */
-export const authSessions = sqliteTable(
+export const authSessions = pgTable(
   "auth_sessions",
   {
     id: uuidColumn("id"),
     userId: uuidRefNotNull("user_id"),
-    token: text("token").notNull(),
-    expiresAt: text("expires_at").notNull(),
-    createdAt: text("created_at").notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -134,14 +133,14 @@ export const authSessionsRelations = relations(authSessions, ({ one }) => ({
  * Enrollments Table
  * User-course relationships with roles
  */
-export const enrollments = sqliteTable(
+export const enrollments = pgTable(
   "enrollments",
   {
     id: uuidColumn("id"),
     userId: uuidRefNotNull("user_id"),
     courseId: uuidRefNotNull("course_id"),
-    role: text("role").notNull(), // 'student' | 'instructor' | 'ta'
-    enrolledAt: text("enrolled_at").notNull(),
+    role: varchar("role", { length: 50 }).notNull(), // 'student' | 'instructor' | 'ta'
+    enrolledAt: timestamp("enrolled_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -169,16 +168,16 @@ export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
  * Course Materials Table
  * Educational content for AI context (lectures, slides, readings)
  */
-export const courseMaterials = sqliteTable(
+export const courseMaterials = pgTable(
   "course_materials",
   {
     id: uuidColumn("id"),
     courseId: uuidRefNotNull("course_id"),
-    title: text("title").notNull(),
-    type: text("type").notNull(), // 'lecture' | 'slide' | 'reading' | 'video' | 'assignment'
+    title: varchar("title", { length: 500 }).notNull(),
+    type: varchar("type", { length: 50 }).notNull(), // 'lecture' | 'slide' | 'reading' | 'video' | 'assignment'
     content: text("content").notNull(),
     metadata: text("metadata"), // JSON: { week, topic, keywords[], url }
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -199,18 +198,18 @@ export const courseMaterialsRelations = relations(courseMaterials, ({ one, many 
  * Assignments Table
  * Course assignments with Q&A opportunities
  */
-export const assignments = sqliteTable(
+export const assignments = pgTable(
   "assignments",
   {
     id: uuidColumn("id"),
     courseId: uuidRefNotNull("course_id"),
-    title: text("title").notNull(),
+    title: varchar("title", { length: 500 }).notNull(),
     description: text("description").notNull(),
-    dueDate: text("due_date").notNull(),
-    status: text("status").notNull(), // 'upcoming' | 'active' | 'past'
+    dueDate: timestamp("due_date").notNull(),
+    status: varchar("status", { length: 50 }).notNull(), // 'upcoming' | 'active' | 'past'
     questionCount: integer("question_count").notNull().default(0),
     tenantId: uuidRefNotNull("tenant_id"),
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     courseIdx: index("idx_assignments_course").on(table.courseId),
@@ -234,17 +233,17 @@ export const assignmentsRelations = relations(assignments, ({ one }) => ({
  * Threads Table
  * Discussion threads (questions)
  */
-export const threads = sqliteTable(
+export const threads = pgTable(
   "threads",
   {
     id: uuidColumn("id"),
     courseId: uuidRefNotNull("course_id"),
     authorId: uuidRef("author_id"), // SET NULL if user deleted
-    title: text("title").notNull(),
+    title: varchar("title", { length: 500 }).notNull(),
     content: text("content").notNull(),
     tags: text("tags"), // JSON array: string[]
-    status: text("status").notNull(), // 'open' | 'answered' | 'resolved'
-    hasAIAnswer: integer("has_ai_answer", { mode: "boolean" }).notNull().default(false),
+    status: varchar("status", { length: 50 }).notNull(), // 'open' | 'answered' | 'resolved'
+    hasAIAnswer: boolean("has_ai_answer").notNull().default(false),
     aiAnswerId: uuidRef("ai_answer_id"),
     replyCount: integer("reply_count").notNull().default(0),
     viewCount: integer("view_count").notNull().default(0),
@@ -252,8 +251,8 @@ export const threads = sqliteTable(
     upvoteCount: integer("upvote_count").notNull().default(0),
     duplicatesOf: uuidRef("duplicates_of"), // Self-reference for merged threads
     mergedInto: uuidRef("merged_into"),
-    createdAt: text("created_at").notNull(),
-    updatedAt: text("updated_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -288,17 +287,17 @@ export const threadsRelations = relations(threads, ({ one, many }) => ({
  * Posts Table
  * Replies to discussion threads
  */
-export const posts = sqliteTable(
+export const posts = pgTable(
   "posts",
   {
     id: uuidColumn("id"),
     threadId: uuidRefNotNull("thread_id"),
     authorId: uuidRef("author_id"), // SET NULL if user deleted
     content: text("content").notNull(),
-    isInstructorAnswer: integer("is_instructor_answer", { mode: "boolean" }).notNull().default(false),
+    isInstructorAnswer: boolean("is_instructor_answer").notNull().default(false),
     endorsementCount: integer("endorsement_count").notNull().default(0),
-    createdAt: text("created_at").notNull(),
-    updatedAt: text("updated_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -329,17 +328,17 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
  * AI Answers Table
  * AI-generated responses to threads
  */
-export const aiAnswers = sqliteTable(
+export const aiAnswers = pgTable(
   "ai_answers",
   {
     id: uuidColumn("id"),
     threadId: uuidRefNotNull("thread_id"),
     courseId: uuidRefNotNull("course_id"),
     content: text("content").notNull(),
-    confidenceLevel: text("confidence_level").notNull(), // 'high' | 'medium' | 'low'
+    confidenceLevel: varchar("confidence_level", { length: 50 }).notNull(), // 'high' | 'medium' | 'low'
     routing: text("routing"), // JSON: Self-RAG routing metadata
     endorsementCount: integer("endorsement_count").notNull().default(0),
-    generatedAt: text("generated_at").notNull(),
+    generatedAt: timestamp("generated_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -366,7 +365,7 @@ export const aiAnswersRelations = relations(aiAnswers, ({ one, many }) => ({
  * AI Answer Citations Table
  * Links AI answers to course materials
  */
-export const aiAnswerCitations = sqliteTable(
+export const aiAnswerCitations = pgTable(
   "ai_answer_citations",
   {
     id: uuidColumn("id"),
@@ -402,13 +401,13 @@ export const aiAnswerCitationsRelations = relations(aiAnswerCitations, ({ one })
  * Thread Endorsements Table
  * Prof/TA endorsements on threads
  */
-export const threadEndorsements = sqliteTable(
+export const threadEndorsements = pgTable(
   "thread_endorsements",
   {
     id: uuidColumn("id"),
     threadId: uuidRefNotNull("thread_id"),
     userId: uuidRefNotNull("user_id"),
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -431,13 +430,13 @@ export const threadEndorsementsRelations = relations(threadEndorsements, ({ one 
  * Thread Upvotes Table
  * Student upvotes on threads (quality signals)
  */
-export const threadUpvotes = sqliteTable(
+export const threadUpvotes = pgTable(
   "thread_upvotes",
   {
     id: uuidColumn("id"),
     threadId: uuidRefNotNull("thread_id"),
     userId: uuidRefNotNull("user_id"),
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -460,13 +459,13 @@ export const threadUpvotesRelations = relations(threadUpvotes, ({ one }) => ({
  * Post Endorsements Table
  * Prof/TA endorsements on posts
  */
-export const postEndorsements = sqliteTable(
+export const postEndorsements = pgTable(
   "post_endorsements",
   {
     id: uuidColumn("id"),
     postId: uuidRefNotNull("post_id"),
     userId: uuidRefNotNull("user_id"),
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -489,13 +488,13 @@ export const postEndorsementsRelations = relations(postEndorsements, ({ one }) =
  * AI Answer Endorsements Table
  * Prof/TA endorsements on AI answers
  */
-export const aiAnswerEndorsements = sqliteTable(
+export const aiAnswerEndorsements = pgTable(
   "ai_answer_endorsements",
   {
     id: uuidColumn("id"),
     aiAnswerId: uuidRefNotNull("ai_answer_id"),
     userId: uuidRefNotNull("user_id"),
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -522,17 +521,17 @@ export const aiAnswerEndorsementsRelations = relations(aiAnswerEndorsements, ({ 
  * AI Conversations Table
  * Private LLM conversations with persistence
  */
-export const aiConversations = sqliteTable(
+export const aiConversations = pgTable(
   "ai_conversations",
   {
     id: uuidColumn("id"),
     userId: uuidRefNotNull("user_id"),
     courseId: uuidRef("course_id"), // NULL for multi-course conversations
-    title: text("title").notNull(),
-    lastMessageAt: text("last_message_at").notNull(),
+    title: varchar("title", { length: 500 }).notNull(),
+    lastMessageAt: timestamp("last_message_at").notNull().defaultNow(),
     messageCount: integer("message_count").notNull().default(0),
     convertedThreadId: uuidRef("converted_thread_id"), // If converted to public thread
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -558,16 +557,16 @@ export const aiConversationsRelations = relations(aiConversations, ({ one, many 
  * AI Messages Table
  * Individual messages in AI conversations
  */
-export const aiMessages = sqliteTable(
+export const aiMessages = pgTable(
   "ai_messages",
   {
     id: uuidColumn("id"),
     conversationId: uuidRefNotNull("conversation_id"),
-    role: text("role").notNull(), // 'user' | 'assistant'
+    role: varchar("role", { length: 50 }).notNull(), // 'user' | 'assistant'
     content: text("content").notNull(),
     materialReferences: text("material_references"), // JSON: MaterialReference[]
     confidenceScore: integer("confidence_score"), // 0-100 (for assistant messages)
-    createdAt: text("created_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -592,18 +591,18 @@ export const aiMessagesRelations = relations(aiMessages, ({ one }) => ({
  * Response Templates Table
  * Saved response templates for instructors
  */
-export const responseTemplates = sqliteTable(
+export const responseTemplates = pgTable(
   "response_templates",
   {
     id: uuidColumn("id"),
     userId: uuidRefNotNull("user_id"),
     courseId: uuidRef("course_id"), // Nullable for general templates
-    title: text("title").notNull(),
+    title: varchar("title", { length: 500 }).notNull(),
     content: text("content").notNull(),
     tags: text("tags"), // JSON array: string[]
     usageCount: integer("usage_count").notNull().default(0),
-    lastUsedAt: text("last_used_at"),
-    createdAt: text("created_at").notNull(),
+    lastUsedAt: timestamp("last_used_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({
@@ -632,18 +631,18 @@ export const responseTemplatesRelations = relations(responseTemplates, ({ one })
  * Notifications Table
  * User notifications for activity
  */
-export const notifications = sqliteTable(
+export const notifications = pgTable(
   "notifications",
   {
     id: uuidColumn("id"),
     userId: uuidRefNotNull("user_id"),
-    type: text("type").notNull(), // 'thread_reply' | 'ai_answer' | 'endorsement' | 'mention'
-    title: text("title").notNull(),
+    type: varchar("type", { length: 50 }).notNull(), // 'thread_reply' | 'ai_answer' | 'endorsement' | 'mention'
+    title: varchar("title", { length: 500 }).notNull(),
     message: text("message").notNull(),
     threadId: uuidRef("thread_id"),
     postId: uuidRef("post_id"),
-    read: integer("read", { mode: "boolean" }).notNull().default(false),
-    createdAt: text("created_at").notNull(),
+    read: boolean("read").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
     tenantId: uuidRefNotNull("tenant_id"),
   },
   (table) => ({

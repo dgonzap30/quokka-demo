@@ -18,7 +18,7 @@ import {
 import { coursesRepository } from "../../repositories/courses.repository.js";
 import { enrollmentsRepository } from "../../repositories/enrollments.repository.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { NotFoundError } from "../../utils/errors.js";
+import { NotFoundError, serializeDates } from "../../utils/errors.js";
 
 export async function coursesRoutes(fastify: FastifyInstance) {
   const server = fastify.withTypeProvider<ZodTypeProvider>();
@@ -42,7 +42,7 @@ export async function coursesRoutes(fastify: FastifyInstance) {
       const courses = await coursesRepository.findAll(false); // Active only
 
       return {
-        items: courses,
+        items: courses.map(c => serializeDates(c)),
       };
     }
   );
@@ -72,7 +72,7 @@ export async function coursesRoutes(fastify: FastifyInstance) {
         throw new NotFoundError("Course");
       }
 
-      return course;
+      return serializeDates(course);
     }
   );
 
@@ -105,7 +105,7 @@ export async function coursesRoutes(fastify: FastifyInstance) {
       const enrollments = await enrollmentsRepository.findByUserId(userId);
 
       return {
-        items: enrollments as any,
+        items: enrollments.map(e => serializeDates(e)) as any,
       };
     }
   );

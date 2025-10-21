@@ -6,14 +6,14 @@ export declare const authorSchema: z.ZodObject<{
     role: z.ZodEnum<["student", "instructor", "ta"]>;
     avatar: z.ZodNullable<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    name: string;
     id: string;
+    name: string;
     email: string;
     role: "student" | "instructor" | "ta";
     avatar: string | null;
 }, {
-    name: string;
     id: string;
+    name: string;
     email: string;
     role: "student" | "instructor" | "ta";
     avatar: string | null;
@@ -35,14 +35,14 @@ export declare const threadSchema: z.ZodObject<{
         role: z.ZodEnum<["student", "instructor", "ta"]>;
         avatar: z.ZodNullable<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
     }, {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -61,8 +61,8 @@ export declare const threadSchema: z.ZodObject<{
     upvoteCount: number;
     updatedAt: string;
     author: {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -81,8 +81,8 @@ export declare const threadSchema: z.ZodObject<{
     upvoteCount: number;
     updatedAt: string;
     author: {
-        name: string;
         id: string;
+        name: string;
         email: string;
         role: "student" | "instructor" | "ta";
         avatar: string | null;
@@ -135,14 +135,14 @@ export declare const listThreadsResponseSchema: z.ZodObject<{
             role: z.ZodEnum<["student", "instructor", "ta"]>;
             avatar: z.ZodNullable<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
         }, {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -161,8 +161,8 @@ export declare const listThreadsResponseSchema: z.ZodObject<{
         upvoteCount: number;
         updatedAt: string;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -181,8 +181,8 @@ export declare const listThreadsResponseSchema: z.ZodObject<{
         upvoteCount: number;
         updatedAt: string;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -205,8 +205,8 @@ export declare const listThreadsResponseSchema: z.ZodObject<{
         upvoteCount: number;
         updatedAt: string;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;
@@ -229,8 +229,8 @@ export declare const listThreadsResponseSchema: z.ZodObject<{
         upvoteCount: number;
         updatedAt: string;
         author: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             role: "student" | "instructor" | "ta";
             avatar: string | null;

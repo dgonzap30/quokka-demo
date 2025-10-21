@@ -137,8 +137,8 @@ export declare const searchMaterialsBodySchema: z.ZodObject<{
     types?: ("lecture" | "slide" | "reading" | "video" | "assignment" | "lab" | "textbook")[] | undefined;
 }, {
     query: string;
-    limit?: number | undefined;
     types?: ("lecture" | "slide" | "reading" | "video" | "assignment" | "lab" | "textbook")[] | undefined;
+    limit?: number | undefined;
     minRelevance?: number | undefined;
 }>;
 export declare const courseMaterialSearchResultSchema: z.ZodObject<{

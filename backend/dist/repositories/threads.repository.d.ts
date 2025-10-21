@@ -1,7 +1,8 @@
 import { type SQL } from "drizzle-orm";
 import { BaseRepository, type PaginationOptions, type PaginatedResult } from "./base.repository.js";
 import { threads, type Thread, type NewThread } from "../db/schema.js";
-export interface ThreadWithAuthor extends Thread {
+export interface ThreadWithAuthor extends Omit<Thread, 'viewCount' | 'replyCount' | 'hasAIAnswer'> {
+    views: number;
     author: {
         id: string;
         name: string;

@@ -8,7 +8,7 @@ import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "../../plugins/validation.plugin.js";
 import { devLoginSchema, authResponseSchema, currentUserSchema, logoutResponseSchema } from "../../schemas/auth.schema.js";
 import { usersRepository } from "../../repositories/users.repository.js";
-import { UnauthorizedError, NotFoundError } from "../../utils/errors.js";
+import { UnauthorizedError, NotFoundError, serializeDate } from "../../utils/errors.js";
 import type { SessionData } from "../../plugins/session.plugin.js";
 
 export async function authRoutes(fastify: FastifyInstance) {
@@ -45,11 +45,12 @@ export async function authRoutes(fastify: FastifyInstance) {
         userId: user.id,
         email: user.email,
         role: user.role,
+        tenantId: user.tenantId,
         createdAt: new Date().toISOString(),
       };
 
-      // Set session cookie
-      fastify.setSession(reply, sessionData);
+      // Set session cookie (JWT-based)
+      await fastify.setSession(reply, sessionData);
 
       return {
         user: {
@@ -98,7 +99,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         email: user.email,
         role: user.role as "student" | "instructor" | "ta",
         avatar: user.avatar,
-        createdAt: user.createdAt,
+        createdAt: serializeDate(user.createdAt)!,
       };
     }
   );

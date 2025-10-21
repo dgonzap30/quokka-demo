@@ -37,15 +37,15 @@ export declare const enrollmentWithCourseSchema: z.ZodObject<{
         description: z.ZodString;
         status: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         description: string;
         status: string;
         code: string;
         term: string;
     }, {
-        name: string;
         id: string;
+        name: string;
         description: string;
         status: string;
         code: string;
@@ -66,15 +66,15 @@ export declare const enrollmentWithCourseSchema: z.ZodObject<{
         description: z.ZodString;
         status: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         description: string;
         status: string;
         code: string;
         term: string;
     }, {
-        name: string;
         id: string;
+        name: string;
         description: string;
         status: string;
         code: string;
@@ -95,15 +95,15 @@ export declare const enrollmentWithCourseSchema: z.ZodObject<{
         description: z.ZodString;
         status: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         id: string;
+        name: string;
         description: string;
         status: string;
         code: string;
         term: string;
     }, {
-        name: string;
         id: string;
+        name: string;
         description: string;
         status: string;
         code: string;
@@ -135,15 +135,15 @@ export declare const listEnrollmentsResponseSchema: z.ZodObject<{
             description: z.ZodString;
             status: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
             term: string;
         }, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
@@ -164,15 +164,15 @@ export declare const listEnrollmentsResponseSchema: z.ZodObject<{
             description: z.ZodString;
             status: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
             term: string;
         }, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
@@ -193,15 +193,15 @@ export declare const listEnrollmentsResponseSchema: z.ZodObject<{
             description: z.ZodString;
             status: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
             term: string;
         }, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
@@ -224,15 +224,15 @@ export declare const listEnrollmentsResponseSchema: z.ZodObject<{
             description: z.ZodString;
             status: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
             term: string;
         }, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
@@ -255,15 +255,15 @@ export declare const listEnrollmentsResponseSchema: z.ZodObject<{
             description: z.ZodString;
             status: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;
             term: string;
         }, {
-            name: string;
             id: string;
+            name: string;
             description: string;
             status: string;
             code: string;

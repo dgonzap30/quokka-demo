@@ -58,7 +58,7 @@ export class AuthSessionsRepository extends BaseRepository<
    * Find valid session by token (not expired)
    */
   async findValidSession(token: string): Promise<AuthSession | null> {
-    const now = new Date().toISOString();
+    const now = new Date();
 
     const results = await db
       .select()
@@ -87,9 +87,10 @@ export class AuthSessionsRepository extends BaseRepository<
   async deleteByToken(token: string): Promise<boolean> {
     const result = await db
       .delete(this.table)
-      .where(eq(this.table.token, token));
+      .where(eq(this.table.token, token))
+      .returning({ id: this.table.id });
 
-    return result.changes > 0;
+    return result.length > 0;
   }
 
   /**
@@ -98,22 +99,24 @@ export class AuthSessionsRepository extends BaseRepository<
   async deleteByUserId(userId: string): Promise<number> {
     const result = await db
       .delete(this.table)
-      .where(eq(this.table.userId, userId));
+      .where(eq(this.table.userId, userId))
+      .returning({ id: this.table.id });
 
-    return result.changes;
+    return result.length;
   }
 
   /**
    * Clean up expired sessions (run periodically)
    */
   async deleteExpiredSessions(): Promise<number> {
-    const now = new Date().toISOString();
+    const now = new Date();
 
     const result = await db
       .delete(this.table)
-      .where(lt(this.table.expiresAt, now));
+      .where(lt(this.table.expiresAt, now))
+      .returning({ id: this.table.id });
 
-    return result.changes;
+    return result.length;
   }
 }
 
