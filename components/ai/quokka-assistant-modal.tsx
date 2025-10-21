@@ -40,9 +40,10 @@ import {
   useConvertConversationToThread,
 } from "@/lib/api/hooks";
 import { usePersistedChat } from "@/lib/llm/hooks/usePersistedChat";
-import { QDSConversation, QDSPromptInput } from "@/components/ai/elements";
+import { QDSConversation, QDSPromptInputEnhanced } from "@/components/ai/elements";
 import { RateLimitIndicator } from "@/components/ai/rate-limit-indicator";
 import type { CourseSummary, User } from "@/lib/models/types";
+import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 
 export interface QuokkaAssistantModalProps {
   /** Whether the modal is open */
@@ -81,19 +82,18 @@ function QuokkaAssistantModalContent({
   const router = useRouter();
 
   // Local state
-  const [input, setInput] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showPostSuccess, setShowPostSuccess] = useState(false);
   const [postedThreadId, setPostedThreadId] = useState<string | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [showPostConfirm, setShowPostConfirm] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-4o");
 
   // Accessibility state
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const triggerElementRef = useRef<HTMLElement | null>(null);
-  const messageInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Conversation hooks
   const { data: conversations } = useAIConversations(user.id); // user is guaranteed to exist
@@ -140,25 +140,12 @@ function QuokkaAssistantModalContent({
   // Check if chat is ready (has conversation ID and not currently creating)
   const isChatReady = !!activeConversationId && !createConversation.isPending;
 
-  // Auto-load or create conversation when modal opens
+  // Always create fresh conversation when modal opens
   useEffect(() => {
     if (!isOpen || !user || activeConversationId) return;
 
-    // Try to find existing conversation for this context
-    if (conversations && conversations.length > 0) {
-      // Filter by courseId if in course context
-      const contextConversations = activeCourseId
-        ? conversations.filter((c) => c.courseId === activeCourseId)
-        : conversations.filter((c) => c.courseId === null);
-
-      if (contextConversations.length > 0) {
-        // Load most recent matching conversation
-        setActiveConversationId(contextConversations[0].id);
-        return;
-      }
-    }
-
-    // Create new conversation if none exists for this context
+    // Create new conversation every time modal opens
+    // Users can access old conversations via sidebar (to be implemented)
     createConversation.mutate(
       {
         userId: user.id,
@@ -171,26 +158,9 @@ function QuokkaAssistantModalContent({
         },
       }
     );
-  }, [isOpen, user, conversations, activeCourseId, activeConversationId, activeCourse, createConversation]);
+  }, [isOpen, user, activeCourseId, activeConversationId, activeCourse, createConversation]);
 
-  // Capture trigger element and handle focus return
-  useEffect(() => {
-    if (isOpen) {
-      // Capture the currently focused element (the trigger)
-      triggerElementRef.current = document.activeElement as HTMLElement;
-
-      // Auto-focus input when modal opens
-      setTimeout(() => {
-        messageInputRef.current?.focus();
-      }, 100);
-    } else {
-      // Return focus to trigger element when modal closes
-      if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
-        triggerElementRef.current.focus();
-        triggerElementRef.current = null;
-      }
-    }
-  }, [isOpen]);
+  // Let Radix handle focus management automatically
 
   // Announce streaming status for screen readers
   useEffect(() => {
@@ -220,15 +190,14 @@ function QuokkaAssistantModalContent({
   }, [chat.error]);
 
   // Handle message submission
-  const handleSubmit = async () => {
-    if (!input.trim() || !activeConversationId || !user || isStreaming) return;
+  const handleSubmit = async (message: PromptInputMessage) => {
+    if (!activeConversationId || !user || isStreaming) return;
+    if (!message.text?.trim() && (!message.files || message.files.length === 0)) return;
 
-    const messageContent = input.trim();
-    setInput("");
-
-    // Send message via AI SDK (includes streaming)
+    // Send message via AI SDK (includes streaming and file attachments)
     await chat.sendMessage({
-      text: messageContent,
+      text: message.text || "",
+      files: message.files,
     });
   };
 
@@ -379,7 +348,17 @@ function QuokkaAssistantModalContent({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-7xl h-[95vh] glass-panel-strong p-0">
+        <DialogContent
+          className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-7xl h-[95vh] glass-panel-strong p-0"
+          onOpenAutoFocus={(e) => {
+            // Prevent default focus behavior
+            e.preventDefault();
+            // Focus the input after a brief delay to ensure DOM is ready
+            setTimeout(() => {
+              messageInputRef.current?.focus();
+            }, 0);
+          }}
+        >
           <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <DialogHeader className="flex-shrink-0 p-4 border-b border-[var(--border-glass)] space-y-3">
@@ -397,6 +376,42 @@ function QuokkaAssistantModalContent({
                         : "Study Assistant"}
                   </DialogDescription>
                 </div>
+
+                {/* Conversation Actions Dropdown - Positioned in header */}
+                {messages.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isStreaming}
+                        className="h-9 w-9 p-0 mr-8"
+                        aria-label="Conversation actions"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {/* Post as Thread - show when course is active */}
+                      {(activeCourseId || currentCourseId) && (
+                        <DropdownMenuItem
+                          onClick={handlePostAsThread}
+                          disabled={convertToThread.isPending}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Post to {activeCourse?.code || currentCourseCode || "Course"}
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => setShowClearConfirm(true)}
+                        className="text-danger focus:text-danger"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear Conversation
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
 
               {/* Course Selector (Dashboard only) */}
@@ -456,82 +471,16 @@ function QuokkaAssistantModalContent({
 
             {/* Input */}
             <div className="flex-shrink-0 border-t border-[var(--border-glass)] p-4">
-              {/* Quick prompts (only show when no messages) */}
-              {messages.length === 0 && (
-                <div className="mb-3">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">Quick prompts:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {getQuickPrompts()
-                      .slice(0, 2)
-                      .map((prompt) => (
-                        <Button
-                          key={prompt}
-                          variant="outline"
-                          size="default"
-                          onClick={() => setInput(prompt)}
-                          className="text-xs min-h-[44px]"
-                        >
-                          {prompt}
-                        </Button>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Conversation Actions Menu */}
-              {messages.length > 0 && (
-                <div className="mb-3 flex items-center justify-end gap-2">
-                  {/* Conversation Actions Dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={isStreaming}
-                        className="gap-2"
-                        aria-label="Conversation actions"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {/* Post as Thread - show when course is active */}
-                      {(activeCourseId || currentCourseId) && (
-                        <DropdownMenuItem
-                          onClick={handlePostAsThread}
-                          disabled={convertToThread.isPending}
-                        >
-                          <Share2 className="h-4 w-4 mr-2" />
-                          Post to {activeCourse?.code || currentCourseCode || "Course"}
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={() => setShowClearConfirm(true)}
-                        className="text-danger focus:text-danger"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Clear Conversation
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
-
-              {/* Rate Limit Indicator */}
-              <div className="px-4 py-2">
-                <RateLimitIndicator compact showReset />
-              </div>
-
-              {/* Prompt Input - Using QDSPromptInput Component */}
-              <QDSPromptInput
-                value={input}
-                onChange={setInput}
+              {/* Prompt Input - Using Enhanced QDSPromptInput with File Attachments */}
+              <QDSPromptInputEnhanced
+                status={chat.status}
                 onSubmit={handleSubmit}
                 onStop={handleStop}
-                isStreaming={isStreaming}
                 disabled={!activeConversationId}
                 placeholder="Ask me anything..."
                 inputRef={messageInputRef}
+                model={selectedModel}
+                onModelChange={setSelectedModel}
               />
             </div>
           </div>
