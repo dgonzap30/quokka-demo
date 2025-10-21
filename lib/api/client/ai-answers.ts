@@ -73,13 +73,22 @@ export const aiAnswersAPI = {
 
     // Generate mock AI answer (backend AI generation not yet implemented)
     // TODO: Add backend endpoint when AI answer generation is implemented
+    const now = new Date().toISOString();
     const aiAnswer: AIAnswer = {
       id: generateId("ai"),
       threadId: input.threadId,
+      courseId: input.courseId,
       content: `This is a simulated AI response for: "${input.title}". In a production system, this would contain an AI-generated answer based on course materials and context.`,
-      materialReferences: null,
-      confidence: 0.85,
-      createdAt: new Date().toISOString(),
+      confidenceLevel: 'high',
+      confidenceScore: 85,
+      citations: [],
+      studentEndorsements: 0,
+      instructorEndorsements: 0,
+      totalEndorsements: 0,
+      endorsedBy: [],
+      instructorEndorsed: false,
+      generatedAt: now,
+      updatedAt: now,
     };
 
     addAIAnswer(aiAnswer);

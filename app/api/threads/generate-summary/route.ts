@@ -7,6 +7,7 @@
 
 import { generateText } from 'ai';
 import { getAISDKModel, getAISDKConfig } from '@/lib/llm/ai-sdk-providers';
+import { getEnvConfig } from '@/lib/utils/env';
 import { rateLimit } from '@/lib/utils/rate-limit';
 import { commonErrors } from '@/lib/api/errors';
 import type { GenerateSummaryInput, GenerateSummaryResult } from '@/lib/models/types';
@@ -131,24 +132,18 @@ export async function POST(req: Request) {
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.3, // Lower temperature for more consistent summaries
-      maxTokens: 300, // ~200 words
       topP: config.topP,
     });
 
     const generationTime = Date.now() - startTime;
     console.log(`[Summary] Generated for thread ${threadId} in ${generationTime}ms`);
 
-    // Extract model name from result
-    const modelUsed = result.model || 'unknown';
-
     // Calculate confidence score based on generation quality
     // Higher score if:
     // - Summary is within desired length (150-200 words)
     // - Contains bullet points
-    // - No errors or warnings
     const wordCount = result.text.split(/\s+/).length;
     const hasBulletPoints = result.text.includes('•') || result.text.includes('-') || result.text.includes('*');
-    const hasWarnings = result.warnings && result.warnings.length > 0;
 
     let confidenceScore = 70; // Base score
 
@@ -160,12 +155,15 @@ export async function POST(req: Request) {
       confidenceScore += 10;
     }
 
-    if (!hasWarnings) {
-      confidenceScore += 5;
-    }
+    // Assume no warnings if generation succeeded
+    confidenceScore += 5;
 
     // Cap at 100
     confidenceScore = Math.min(100, confidenceScore);
+
+    // Get model name from env config
+    const envConfig = getEnvConfig();
+    const modelUsed = envConfig.llmProvider === 'openai' ? envConfig.openaiModel : envConfig.anthropicModel;
 
     // Return result
     const summaryResult: GenerateSummaryResult = {

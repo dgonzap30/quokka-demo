@@ -155,7 +155,6 @@ export async function POST(req: Request) {
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.5, // Moderate temperature for balance between creativity and consistency
-      maxTokens: 1500, // ~1000 words total
       topP: config.topP,
     });
 

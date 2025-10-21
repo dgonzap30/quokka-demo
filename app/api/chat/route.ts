@@ -105,7 +105,6 @@ export async function POST(req: Request) {
       system: systemPrompt + courseContextInfo,
       messages: coreMessages,
       tools: ragTools,
-      maxSteps: 5, // Allow up to 5 steps (tool calls + text generation)
       temperature: config.temperature,
       topP: config.topP,
     });
