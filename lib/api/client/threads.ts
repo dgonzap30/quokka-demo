@@ -489,6 +489,8 @@ export const threadsAPI = {
    * Uses TF-IDF + cosine similarity to find existing threads similar to the proposed new thread.
    * Returns threads with 80%+ similarity to help prevent duplicate questions.
    *
+   * NOTE: Backend endpoint not yet implemented - using localStorage implementation only.
+   *
    * @param input - Thread creation input (title, content, courseId)
    * @returns Array of similar threads with similarity scores
    *
@@ -512,25 +514,8 @@ export const threadsAPI = {
   async checkThreadDuplicates(
     input: CreateThreadInput
   ): Promise<SimilarThread[]> {
-    // Check feature flag for backend
-    if (BACKEND_FEATURE_FLAGS.threads) {
-      try {
-        // Call backend endpoint
-        const response = await httpPost<SimilarThread[]>(
-          `/api/v1/courses/${input.courseId}/threads/check-duplicates`,
-          {
-            title: input.title,
-            content: input.content,
-          }
-        );
-        return response;
-      } catch (error) {
-        console.error('[Threads] Backend checkThreadDuplicates failed:', error);
-        // Fall through to localStorage fallback
-      }
-    }
-
-    // Fallback to localStorage (existing implementation)
+    // Duplicate detection uses localStorage implementation
+    // Backend endpoint not yet implemented - skip backend call to avoid 404 errors
     await delay(200 + Math.random() * 200); // 200-400ms
     seedData();
 
