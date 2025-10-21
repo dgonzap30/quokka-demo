@@ -478,27 +478,10 @@ function QuokkaAssistantModalContent({
                 </div>
               )}
 
-              {/* Action Buttons - Clear & Post Thread */}
+              {/* Conversation Actions Menu */}
               {messages.length > 0 && (
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  {/* Post as Thread - show when course is active */}
-                  {(activeCourseId || currentCourseId) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePostAsThread}
-                      disabled={isStreaming || convertToThread.isPending}
-                      className="gap-2"
-                    >
-                      <Share2 className="h-4 w-4" />
-                      Post to {activeCourse?.code || currentCourseCode || "Course"}
-                    </Button>
-                  )}
-
-                  {/* Spacer */}
-                  <div className="flex-1" />
-
-                  {/* Clear Conversation Dropdown */}
+                <div className="mb-3 flex items-center justify-end gap-2">
+                  {/* Conversation Actions Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -512,6 +495,16 @@ function QuokkaAssistantModalContent({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {/* Post as Thread - show when course is active */}
+                      {(activeCourseId || currentCourseId) && (
+                        <DropdownMenuItem
+                          onClick={handlePostAsThread}
+                          disabled={convertToThread.isPending}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Post to {activeCourse?.code || currentCourseCode || "Course"}
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => setShowClearConfirm(true)}
                         className="text-danger focus:text-danger"
