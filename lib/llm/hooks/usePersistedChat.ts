@@ -109,7 +109,19 @@ export function usePersistedChat(options: UsePersistedChatOptions) {
     if (!conversationId) return [];
 
     const aiMessages = getConversationMessages(conversationId);
-    return aiMessages.map(aiMessageToUIMessage);
+
+    // Deduplicate messages by ID (keep first occurrence)
+    const seenIds = new Set<string>();
+    const uniqueMessages = aiMessages.filter((msg) => {
+      if (seenIds.has(msg.id)) {
+        console.warn(`[usePersistedChat] Duplicate message ID detected: ${msg.id}`);
+        return false;
+      }
+      seenIds.add(msg.id);
+      return true;
+    });
+
+    return uniqueMessages.map(aiMessageToUIMessage);
   }, [conversationId]);
 
   // Create transport with body params

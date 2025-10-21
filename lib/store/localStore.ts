@@ -726,6 +726,14 @@ export function addMessage(message: AIMessage): void {
   if (typeof window === "undefined") return;
 
   let messages = getAllConversationMessages();
+
+  // Check for duplicate ID before adding
+  const isDuplicate = messages.some((m) => m.id === message.id);
+  if (isDuplicate) {
+    console.warn(`[localStore] Attempted to add duplicate message ID: ${message.id}`);
+    return; // Skip adding duplicate
+  }
+
   messages.push(message);
 
   // Enforce quota for this conversation
