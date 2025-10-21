@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AIBadge } from "@/components/ui/ai-badge";
 import { StatusBadge } from "@/components/course/status-badge";
 import { EndorsedBadge } from "@/components/course/endorsed-badge";
-import { Eye, Calendar, Tag, ThumbsUp } from "lucide-react";
+import { Eye, Calendar, Tag, ThumbsUp, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Thread } from "@/lib/models/types";
 
@@ -69,7 +69,25 @@ export function ThreadCard({ thread, variant = "full", className }: ThreadCardPr
                 <h2 className="text-lg font-semibold leading-snug line-clamp-2 glass-text">
                   {thread.title}
                 </h2>
-                {!isCompact && (
+
+                {/* AI Summary Section */}
+                {!isCompact && thread.aiSummary && (
+                  <div className="glass-panel p-3 rounded-lg mt-2" role="complementary" aria-label="AI-generated key takeaways">
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="size-4 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-muted-foreground glass-text mb-1">
+                          Key Takeaways
+                        </p>
+                        <div className="text-sm leading-relaxed whitespace-pre-line glass-text">
+                          {thread.aiSummary.content}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isCompact && !thread.aiSummary && (
                   <CardDescription className="text-sm leading-relaxed line-clamp-2 glass-text">
                     {thread.content}
                   </CardDescription>

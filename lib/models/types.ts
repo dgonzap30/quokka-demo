@@ -411,6 +411,9 @@ export interface Thread {
   // Phase 3: Duplicate tracking
   duplicatesOf?: string; // Thread ID if merged
   mergedFrom?: string[]; // Array of merged thread IDs
+
+  // AI-generated summary of key takeaways
+  aiSummary?: AISummary;
 }
 
 export interface Post {
@@ -431,6 +434,36 @@ export interface Post {
 // ============================================
 // AI Answer Types
 // ============================================
+
+/**
+ * AI-generated summary of thread key takeaways
+ *
+ * Provides a concise summary of the main insights and learning outcomes
+ * from a thread, focusing on actionable takeaways rather than question recap.
+ *
+ * @example
+ * ```typescript
+ * const summary: AISummary = {
+ *   content: "• Binary search achieves O(log n) by halving search space\n• Requires sorted array as input\n• Common pitfall: off-by-one errors in boundary conditions",
+ *   generatedAt: "2025-10-20T12:00:00Z",
+ *   confidenceScore: 85,
+ *   modelUsed: "gpt-4o"
+ * };
+ * ```
+ */
+export interface AISummary {
+  /** Summary content (2-4 bullet points, markdown format) */
+  content: string;
+
+  /** ISO 8601 timestamp when summary was generated */
+  generatedAt: string;
+
+  /** Confidence score 0-100 (based on LLM's assessment of thread quality) */
+  confidenceScore: number;
+
+  /** Model used for generation (e.g., "gpt-4o", "claude-3-5-sonnet-20241022") */
+  modelUsed: string;
+}
 
 /**
  * Confidence level for AI-generated answers
@@ -585,6 +618,108 @@ export interface EndorseAIAnswerInput {
 
   /** Whether the endorser is an instructor */
   isInstructor: boolean;
+}
+
+/**
+ * Input for generating an AI summary of a thread
+ *
+ * Used to generate concise key takeaways from thread content.
+ * Can be called for new threads or to regenerate summaries.
+ *
+ * @example
+ * ```typescript
+ * const input: GenerateSummaryInput = {
+ *   threadId: "thread-123",
+ *   threadTitle: "How does binary search work?",
+ *   threadContent: "I understand the concept...",
+ *   aiAnswerContent: "Binary search is an efficient algorithm...",
+ *   conversationMessages: undefined // Only for conversation conversions
+ * };
+ * ```
+ */
+export interface GenerateSummaryInput {
+  /** Thread ID for reference */
+  threadId: string;
+
+  /** Thread title (used for context) */
+  threadTitle: string;
+
+  /** Thread content (main question or discussion) */
+  threadContent: string;
+
+  /** Optional AI answer content (if thread has AI answer) */
+  aiAnswerContent?: string;
+
+  /** Optional conversation messages (for conversation-to-thread conversions) */
+  conversationMessages?: AIMessage[];
+}
+
+/**
+ * Result of AI summary generation
+ *
+ * Contains the generated summary and metadata for storage.
+ */
+export interface GenerateSummaryResult {
+  /** Generated summary content (2-4 bullet points) */
+  summary: string;
+
+  /** Confidence score 0-100 */
+  confidenceScore: number;
+
+  /** Model used for generation */
+  modelUsed: string;
+}
+
+/**
+ * Input for restructuring a conversation to thread format
+ *
+ * Used during conversation-to-thread conversion to intelligently
+ * restructure the conversation into clear Q&A format with citations.
+ *
+ * @example
+ * ```typescript
+ * const input: RestructureConversationInput = {
+ *   messages: [...conversationMessages],
+ *   courseId: "course-cs101",
+ *   courseCode: "CS101"
+ * };
+ * ```
+ */
+export interface RestructureConversationInput {
+  /** Conversation messages to restructure */
+  messages: AIMessage[];
+
+  /** Target course ID */
+  courseId: string;
+
+  /** Course code for context */
+  courseCode: string;
+}
+
+/**
+ * Result of conversation restructuring
+ *
+ * Contains intelligently restructured content ready for thread creation.
+ * Includes extracted citations and auto-generated tags.
+ */
+export interface RestructureConversationResult {
+  /** Clear, concise thread title */
+  title: string;
+
+  /** Reformulated main question */
+  mainQuestion: string;
+
+  /** Best answer with improvements */
+  bestAnswer: string;
+
+  /** Additional helpful context */
+  supportingContext: string;
+
+  /** Extracted citations from AI responses */
+  citations: Citation[];
+
+  /** Auto-generated relevant tags */
+  tags: string[];
 }
 
 /**

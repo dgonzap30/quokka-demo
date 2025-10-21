@@ -42,6 +42,9 @@ import type {
   CreateConversationInput,
   SendMessageInput,
   Thread,
+  GenerateSummaryInput,
+  GenerateSummaryResult,
+  AISummary,
 } from "@/lib/models/types";
 import { api } from "./client";
 import { isAuthSuccess } from "@/lib/models/types";
@@ -595,6 +598,115 @@ export function useEndorseAIAnswer() {
 
       // Invalidate instructor dashboard (AI coverage stats may change)
       queryClient.invalidateQueries({ queryKey: ["instructorDashboard"] });
+    },
+  });
+}
+
+// ============================================
+// Thread Summary Hooks
+// ============================================
+
+/**
+ * Generate AI summary for a thread
+ *
+ * Creates a concise key takeaways summary for a thread using LLM.
+ * Uses optimistic updates to provide instant UI feedback.
+ *
+ * @example
+ * ```ts
+ * const generateSummary = useGenerateSummary();
+ *
+ * generateSummary.mutate({
+ *   threadId: "thread-123",
+ *   threadTitle: "How does binary search work?",
+ *   threadContent: "I'm trying to understand...",
+ *   aiAnswerContent: "Binary search is an algorithm..."
+ * });
+ * ```
+ */
+export function useGenerateSummary() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: GenerateSummaryInput): Promise<GenerateSummaryResult> => {
+      const response = await fetch('/api/threads/generate-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate summary');
+      }
+
+      return response.json() as Promise<GenerateSummaryResult>;
+    },
+
+    // Optimistic update: show loading state
+    onMutate: async ({ threadId }) => {
+      const queryKey = queryKeys.thread(threadId);
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      // Get current cached data
+      const previousThread = queryClient.getQueryData(queryKey);
+
+      // Return context for rollback
+      return { previousThread, threadId };
+    },
+
+    // On success: update thread with summary
+    onSuccess: (result, input, context) => {
+      if (!context?.threadId) return;
+
+      const queryKey = queryKeys.thread(context.threadId);
+
+      // Build AISummary object from result
+      const aiSummary: AISummary = {
+        content: result.summary,
+        generatedAt: new Date().toISOString(),
+        confidenceScore: result.confidenceScore,
+        modelUsed: result.modelUsed,
+      };
+
+      // Update thread cache with summary
+      queryClient.setQueryData(queryKey, (old: { thread?: Thread; posts?: unknown[]; aiAnswer?: AIAnswer } | undefined) => {
+        if (!old?.thread) return old;
+
+        return {
+          ...old,
+          thread: {
+            ...old.thread,
+            aiSummary,
+          },
+        };
+      });
+
+      // Invalidate thread query to refetch from source
+      queryClient.invalidateQueries({ queryKey });
+
+      // Invalidate course threads (summary visible in list)
+      const threadData = queryClient.getQueryData<{ thread?: Thread; posts?: unknown[]; aiAnswer?: AIAnswer }>(queryKey);
+      if (threadData?.thread?.courseId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.courseThreads(threadData.thread.courseId)
+        });
+      }
+    },
+
+    // On error: log and show error
+    onError: (error, input, context) => {
+      console.error('[Summary] Generation failed:', error);
+
+      // Could show toast notification here
+      if (context?.previousThread && context?.threadId) {
+        // Rollback not needed since we're not doing optimistic updates
+        console.warn('[Summary] Error occurred, thread state unchanged');
+      }
     },
   });
 }

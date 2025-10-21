@@ -528,6 +528,45 @@ export const conversationsAPI = {
       aiAnswer = aiAnswerData;
     }
 
+    // Auto-generate AI summary for the converted thread (fire-and-forget)
+    // Use conversation messages for better context
+    setTimeout(async () => {
+      try {
+        const summaryResponse = await fetch('/api/threads/generate-summary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            threadId: newThread.id,
+            threadTitle: threadTitle,
+            threadContent: threadContent,
+            aiAnswerContent: aiMessages.length > 0 ? aiMessages[aiMessages.length - 1].content : undefined,
+            conversationMessages: messages, // Include full conversation for better summary
+          }),
+        });
+
+        if (summaryResponse.ok) {
+          const summaryResult = await summaryResponse.json();
+
+          // Update thread with summary in localStorage
+          updateThread(newThread.id, {
+            aiSummary: {
+              content: summaryResult.summary,
+              generatedAt: new Date().toISOString(),
+              confidenceScore: summaryResult.confidenceScore,
+              modelUsed: summaryResult.modelUsed,
+            },
+          });
+
+          console.log('[Conversations] AI summary generated for converted thread:', newThread.id);
+        }
+      } catch (error) {
+        console.error('[Conversations] AI summary generation failed:', error);
+        // Graceful degradation - thread works without summary
+      }
+    }, 100); // Small delay to ensure thread is fully created
+
     // Mark conversation as converted (optional: could add flag to conversation type)
     updateConversation(conversationId, {
       updatedAt: new Date().toISOString(),

@@ -287,6 +287,44 @@ export const threadsAPI = {
         tags: input.tags,
       });
 
+      // Auto-generate AI summary for the new thread (fire-and-forget)
+      // Don't block thread creation waiting for summary
+      setTimeout(async () => {
+        try {
+          const summaryResponse = await fetch('/api/threads/generate-summary', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              threadId: newThread.id,
+              threadTitle: input.title,
+              threadContent: input.content,
+              aiAnswerContent: aiAnswer?.content,
+            }),
+          });
+
+          if (summaryResponse.ok) {
+            const summaryResult = await summaryResponse.json();
+
+            // Update thread with summary in localStorage
+            updateThread(newThread.id, {
+              aiSummary: {
+                content: summaryResult.summary,
+                generatedAt: new Date().toISOString(),
+                confidenceScore: summaryResult.confidenceScore,
+                modelUsed: summaryResult.modelUsed,
+              },
+            });
+
+            console.log('[Threads] AI summary generated for thread:', newThread.id);
+          }
+        } catch (error) {
+          console.error('[Threads] AI summary generation failed:', error);
+          // Graceful degradation - thread works without summary
+        }
+      }, 100); // Small delay to ensure thread is fully created
+
       // Fetch updated thread with AI answer flags
       const updatedThread = getThreadById(newThread.id);
       return { thread: updatedThread || newThread, aiAnswer };
