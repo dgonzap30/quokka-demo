@@ -91,6 +91,7 @@ function QuokkaAssistantModalContent({
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4o");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
 
   // Accessibility state
   const [statusMessage, setStatusMessage] = useState("");
@@ -148,25 +149,40 @@ function QuokkaAssistantModalContent({
   // Check if chat is ready (has conversation ID and not currently creating)
   const isChatReady = !!activeConversationId && !createConversation.isPending;
 
-  // Always create fresh conversation when modal opens
+  // Load most recent conversation when modal opens, or create if none exist
   useEffect(() => {
-    if (!isOpen || !user || activeConversationId) return;
+    if (!isOpen || !user) return;
 
-    // Create new conversation every time modal opens
-    // Users can access old conversations via sidebar (to be implemented)
-    createConversation.mutate(
-      {
-        userId: user.id,
-        courseId: activeCourseId || null,
-        title: `Quokka Chat - ${activeCourse?.code || "General"}`,
-      },
-      {
-        onSuccess: (newConversation) => {
-          setActiveConversationId(newConversation.id);
+    // If we already have an active conversation, don't change it
+    if (activeConversationId) return;
+
+    // If conversations loaded and available, resume most recent
+    if (activeConversations && activeConversations.length > 0) {
+      // Conversations are already sorted by most recent first
+      setActiveConversationId(activeConversations[0].id);
+      return;
+    }
+
+    // Only create new conversation if:
+    // 1. No active conversation
+    // 2. Conversations have loaded (not undefined)
+    // 3. No conversations exist
+    // 4. Not already creating
+    if (conversations !== undefined && activeConversations.length === 0 && !createConversation.isPending) {
+      createConversation.mutate(
+        {
+          userId: user.id,
+          courseId: activeCourseId || null,
+          title: `Quokka Chat - ${activeCourse?.code || "General"}`,
         },
-      }
-    );
-  }, [isOpen, user, activeCourseId, activeConversationId, activeCourse, createConversation]);
+        {
+          onSuccess: (newConversation) => {
+            setActiveConversationId(newConversation.id);
+          },
+        }
+      );
+    }
+  }, [isOpen, user, conversations, activeConversations, activeConversationId, activeCourseId, activeCourse, createConversation]);
 
   // Handler for creating new conversation from sidebar
   const handleNewConversation = () => {
@@ -227,34 +243,49 @@ function QuokkaAssistantModalContent({
     });
   };
 
-  // Handle clear conversation
-  const handleClearConversation = () => {
-    if (!activeConversationId || !user) return;
+  // Handle delete conversation from sidebar
+  const handleDeleteConversation = (conversationId: string) => {
+    setConversationToDelete(conversationId);
+  };
 
-    // Delete current conversation
+  // Confirm delete conversation
+  const confirmDeleteConversation = () => {
+    if (!conversationToDelete || !user) return;
+
+    const isActive = conversationToDelete === activeConversationId;
+
     deleteConversation.mutate(
       {
-        conversationId: activeConversationId,
+        conversationId: conversationToDelete,
         userId: user.id,
       },
       {
         onSuccess: () => {
-          // Create new conversation for this context
-          setActiveConversationId(null);
-          setShowClearConfirm(false);
+          setConversationToDelete(null);
 
-          createConversation.mutate({
-            userId: user.id,
-            courseId: activeCourseId || null,
-            title: `Quokka Chat - ${activeCourse?.code || "General"}`,
-          }, {
-            onSuccess: (newConversation) => {
-              setActiveConversationId(newConversation.id);
-            },
-          });
+          // If deleted conversation was active, create a new one
+          if (isActive) {
+            setActiveConversationId(null);
+            createConversation.mutate({
+              userId: user.id,
+              courseId: activeCourseId || null,
+              title: `Quokka Chat - ${activeCourse?.code || "General"}`,
+            }, {
+              onSuccess: (newConversation) => {
+                setActiveConversationId(newConversation.id);
+              },
+            });
+          }
         },
       }
     );
+  };
+
+  // Handle clear conversation (legacy - now same as delete)
+  const handleClearConversation = () => {
+    if (!activeConversationId) return;
+    handleDeleteConversation(activeConversationId);
+    setShowClearConfirm(false);
   };
 
   // Handle close modal
@@ -402,6 +433,7 @@ function QuokkaAssistantModalContent({
               activeConversationId={activeConversationId}
               onConversationSelect={setActiveConversationId}
               onNewConversation={handleNewConversation}
+              onDeleteConversation={handleDeleteConversation}
               isLoading={!conversations}
               isOpen={isSidebarOpen}
               onClose={() => setIsSidebarOpen(false)}
@@ -410,7 +442,7 @@ function QuokkaAssistantModalContent({
             {/* Main Content */}
             <div className="flex flex-col h-full overflow-hidden">
               {/* Header */}
-              <DialogHeader className="flex-shrink-0 p-4 border-b border-[var(--border-glass)] space-y-3">
+              <DialogHeader className="flex-shrink-0 p-4 border-b border-glass space-y-3">
                 {/* Mobile: Conversations Toggle Button */}
                 <div className="flex items-center gap-3 md:hidden mb-2">
                   <Button
@@ -498,40 +530,52 @@ function QuokkaAssistantModalContent({
               )}
             </DialogHeader>
 
-            {/* Messages - Using QDSConversation Component */}
-            {!isChatReady ? (
-              <div className="flex-1 h-0 flex items-center justify-center">
-                <div className="text-center space-y-2">
-                  <div className="animate-pulse text-muted-foreground">
-                    <Sparkles className="h-8 w-8 mx-auto mb-2" />
-                    <p className="text-sm">Initializing conversation...</p>
+            {/* Messages Container - Constrain height to ensure input is visible */}
+            <div className="flex-1 min-h-0 overflow-hidden">
+              {/* Messages - Using QDSConversation Component */}
+              {!conversations ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <div className="animate-pulse text-muted-foreground">
+                      <Sparkles className="h-8 w-8 mx-auto mb-2" />
+                      <p className="text-sm">Loading conversations...</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <QDSConversation
-                key={activeConversationId || 'no-conversation'}
-                className="flex-1 h-0"
-                messages={messages}
-                isStreaming={isStreaming}
-                onCopy={handleCopy}
-                onRetry={handleRetry}
-                canRetry={messages.length > 0 && messages[messages.length - 1].role === "assistant"}
-                pageContext={pageContext}
-                courseCode={currentCourseCode}
-                error={chat.error ? {
-                  message: chat.error.message || 'Failed to send message. Please try again.',
-                  onDismiss: () => chat.clearError?.(),
-                  onRetry: () => {
-                    chat.clearError?.();
-                    chat.regenerate();
-                  }
-                } : undefined}
-              />
-            )}
+              ) : !isChatReady ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <div className="animate-pulse text-muted-foreground">
+                      <Sparkles className="h-8 w-8 mx-auto mb-2" />
+                      <p className="text-sm">Initializing conversation...</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <QDSConversation
+                  key={activeConversationId || 'no-conversation'}
+                  className="h-full"
+                  messages={messages}
+                  isStreaming={isStreaming}
+                  onCopy={handleCopy}
+                  onRetry={handleRetry}
+                  canRetry={messages.length > 0 && messages[messages.length - 1].role === "assistant"}
+                  pageContext={pageContext}
+                  courseCode={currentCourseCode}
+                  error={chat.error ? {
+                    message: chat.error.message || 'Failed to send message. Please try again.',
+                    onDismiss: () => chat.clearError?.(),
+                    onRetry: () => {
+                      chat.clearError?.();
+                      chat.regenerate();
+                    }
+                  } : undefined}
+                />
+              )}
+            </div>
 
             {/* Input */}
-            <div className="flex-shrink-0 border-t border-[var(--border-glass)] p-4">
+            <div className="flex-shrink-0 border-t border-glass p-4">
               {/* Prompt Input - Using Enhanced QDSPromptInput with File Attachments */}
               <QDSPromptInputEnhanced
                 status={chat.status}
@@ -563,6 +607,28 @@ function QuokkaAssistantModalContent({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleClearConversation} className="bg-danger hover:bg-danger/90">
               Clear Conversation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Conversation Confirmation Dialog */}
+      <AlertDialog open={!!conversationToDelete} onOpenChange={(open) => !open && setConversationToDelete(null)}>
+        <AlertDialogContent className="glass-panel-strong">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="glass-text">Delete this conversation?</AlertDialogTitle>
+            <AlertDialogDescription className="glass-text">
+              This will permanently delete this conversation and all its messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConversationToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteConversation}
+              className="bg-danger hover:bg-danger/90"
+              disabled={deleteConversation.isPending}
+            >
+              {deleteConversation.isPending ? "Deleting..." : "Delete Conversation"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -179,7 +179,7 @@ export function MetricsDashboard({ className, showReset = false }: MetricsDashbo
           </div>
 
           {/* Placeholder for future features */}
-          <div className="mt-4 pt-4 border-t border-[var(--border-glass)]">
+          <div className="mt-4 pt-4 border-t border-glass">
             <p className="text-xs text-muted-foreground glass-text italic">
               💡 In production: token counts, cost estimates, and rate limit tracking would appear
               here.

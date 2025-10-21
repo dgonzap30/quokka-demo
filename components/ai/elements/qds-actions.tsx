@@ -34,7 +34,7 @@ export function QDSActions({
       <Action
         tooltip="Copy message"
         onClick={handleCopy}
-        className="h-8 w-auto px-3 text-xs rounded-md border border-[var(--border-glass)] bg-glass hover:bg-accent/10 glass-text flex items-center gap-1.5 transition-all duration-200 shadow-sm"
+        className="h-8 w-auto px-3 text-xs rounded-md border border-glass bg-glass hover:bg-accent/10 glass-text flex items-center gap-1.5 transition-all duration-200 shadow-sm"
       >
         <Copy className="h-3.5 w-3.5" />
         <span className="text-xs font-medium">Copy</span>
@@ -45,7 +45,7 @@ export function QDSActions({
           tooltip="Retry generation"
           onClick={handleRetry}
           disabled={isStreaming}
-          className="h-8 w-auto px-3 text-xs rounded-md border border-[var(--border-glass)] bg-glass hover:bg-accent/10 glass-text disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all duration-200 shadow-sm"
+          className="h-8 w-auto px-3 text-xs rounded-md border border-glass bg-glass hover:bg-accent/10 glass-text disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all duration-200 shadow-sm"
         >
           <RefreshCcw className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">Retry</span>

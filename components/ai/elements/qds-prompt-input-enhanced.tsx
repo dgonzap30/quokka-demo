@@ -118,7 +118,7 @@ export function QDSPromptInputEnhanced({
       className={cn(
         // Glassmorphism base
         "glass-panel-strong relative overflow-hidden",
-        "border-2 border-[var(--border-glass)]",
+        "border-2 border-glass",
         "shadow-glass-lg",
         // Spacing and layout
         "p-4 rounded-2xl",
@@ -149,7 +149,7 @@ export function QDSPromptInputEnhanced({
             <PromptInputAttachment
               data={attachment}
               className={cn(
-                "glass-panel border-[var(--border-glass)]",
+                "glass-panel border-glass",
                 "hover:border-primary/40 hover:shadow-glass-md",
                 "transition-all duration-200",
                 "animate-slide-in-up"
@@ -184,11 +184,11 @@ export function QDSPromptInputEnhanced({
       <PromptInputFooter
         className={cn(
           "flex items-center justify-between gap-4",
-          "border-t border-[var(--border-glass)]/50",
+          "border-t border-glass/50",
           "pt-4 mt-3 px-1",
           // Subtle gradient divider
           "relative before:absolute before:top-0 before:left-0 before:right-0 before:h-[1px]",
-          "before:bg-gradient-to-r before:from-transparent before:via-[var(--border-glass)] before:to-transparent"
+          "before:bg-gradient-to-r before:from-transparent before:via-glass/50 before:to-transparent"
         )}
       >
         {/* Left Zone: Tools */}
@@ -202,7 +202,7 @@ export function QDSPromptInputEnhanced({
                     // Size and shape
                     "h-10 w-10 p-0 rounded-xl",
                     // Glass styling
-                    "glass-panel border-[var(--border-glass)]",
+                    "glass-panel border-glass",
                     // Hover effects
                     "hover:bg-primary/10 hover:border-primary/30",
                     "hover:scale-105 hover:shadow-glass-md",
@@ -217,7 +217,7 @@ export function QDSPromptInputEnhanced({
                   align="start"
                   className={cn(
                     "glass-panel-strong",
-                    "border-[var(--border-glass)]",
+                    "border-glass",
                     "shadow-glass-lg",
                     "animate-slide-in-up"
                   )}
@@ -231,7 +231,7 @@ export function QDSPromptInputEnhanced({
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="glass-panel border-[var(--border-glass)] text-xs"
+              className="glass-panel border-glass text-xs"
             >
               Attach files (max 5MB)
             </TooltipContent>
@@ -251,7 +251,7 @@ export function QDSPromptInputEnhanced({
                       "h-9 px-3 rounded-lg",
                       "text-xs font-medium",
                       // Glass styling
-                      "glass-panel border-[var(--border-glass)]",
+                      "glass-panel border-glass",
                       // Gradient background
                       "bg-gradient-to-br from-primary/5 to-primary/10",
                       // Hover effects
@@ -270,7 +270,7 @@ export function QDSPromptInputEnhanced({
                   <PromptInputModelSelectContent
                     className={cn(
                       "glass-panel-strong",
-                      "border-[var(--border-glass)]",
+                      "border-glass",
                       "shadow-glass-lg",
                       "animate-slide-in-up"
                     )}
@@ -293,7 +293,7 @@ export function QDSPromptInputEnhanced({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="glass-panel border-[var(--border-glass)] text-xs"
+                className="glass-panel border-glass text-xs"
               >
                 AI Model: {models.find(m => m.id === model)?.name}
               </TooltipContent>
@@ -351,7 +351,7 @@ export function QDSPromptInputEnhanced({
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="glass-panel border-[var(--border-glass)] text-xs"
+            className="glass-panel border-glass text-xs"
           >
             {isStreaming ? "Stop generation" : disabled ? "Enter a message" : "Send message (⏎)"}
           </TooltipContent>

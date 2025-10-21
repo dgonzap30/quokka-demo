@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * ConversationHistorySidebar - QDS-styled sidebar for conversation history
+ * ConversationHistorySidebar - ChatGPT/Claude-inspired sidebar for conversation history
  *
  * Features:
- * - Sorted conversation list (most recent first)
+ * - Timestamp-based grouping (Today, Yesterday, Previous 7 Days, etc.)
+ * - Always-visible conversation list
  * - "New Conversation" button
  * - Empty state with icon and message
  * - Loading skeletons
@@ -21,6 +22,51 @@ import { cn } from "@/lib/utils";
 import type { AIConversation } from "@/lib/models/types";
 import { ConversationHistoryItem } from "./conversation-history-item";
 import { NewConversationButton } from "./new-conversation-button";
+
+// Timestamp group labels
+type TimeGroup = "Today" | "Yesterday" | "Previous 7 Days" | "Previous 30 Days" | "Older";
+
+interface GroupedConversations {
+  group: TimeGroup;
+  conversations: AIConversation[];
+}
+
+/**
+ * Group conversations by timestamp relative to now
+ */
+function groupConversationsByTime(conversations: AIConversation[]): GroupedConversations[] {
+  const now = new Date();
+  const groups: Record<TimeGroup, AIConversation[]> = {
+    "Today": [],
+    "Yesterday": [],
+    "Previous 7 Days": [],
+    "Previous 30 Days": [],
+    "Older": [],
+  };
+
+  conversations.forEach((conv) => {
+    const updatedAt = new Date(conv.updatedAt);
+    const diffInHours = (now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      groups["Today"].push(conv);
+    } else if (diffInHours < 48) {
+      groups["Yesterday"].push(conv);
+    } else if (diffInHours < 24 * 7) {
+      groups["Previous 7 Days"].push(conv);
+    } else if (diffInHours < 24 * 30) {
+      groups["Previous 30 Days"].push(conv);
+    } else {
+      groups["Older"].push(conv);
+    }
+  });
+
+  // Return only non-empty groups in order
+  const groupOrder: TimeGroup[] = ["Today", "Yesterday", "Previous 7 Days", "Previous 30 Days", "Older"];
+  return groupOrder
+    .filter(group => groups[group].length > 0)
+    .map(group => ({ group, conversations: groups[group] }));
+}
 
 export interface ConversationHistorySidebarProps {
   /**
@@ -45,6 +91,12 @@ export interface ConversationHistorySidebarProps {
    * Called when user clicks "New Conversation" button
    */
   onNewConversation: () => void;
+
+  /**
+   * Handler for deleting a conversation
+   * Called when user clicks delete button on conversation item
+   */
+  onDeleteConversation?: (conversationId: string) => void;
 
   /**
    * Loading state for conversations list
@@ -74,16 +126,19 @@ export function ConversationHistorySidebar({
   activeConversationId,
   onConversationSelect,
   onNewConversation,
+  onDeleteConversation,
   isLoading = false,
   isOpen = true,
   onClose,
   className,
 }: ConversationHistorySidebarProps) {
-  // Sort conversations by most recent first
-  const sortedConversations = useMemo(() => {
-    return [...conversations].sort((a, b) => {
+  // Group conversations by timestamp (Today, Yesterday, etc.)
+  const groupedConversations = useMemo(() => {
+    // Sort conversations by most recent first
+    const sorted = [...conversations].sort((a, b) => {
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
+    return groupConversationsByTime(sorted);
   }, [conversations]);
 
   // Handle conversation click (with mobile close)
@@ -110,20 +165,18 @@ export function ConversationHistorySidebar({
         <NewConversationButton onClick={onNewConversation} />
       </div>
 
-      {/* Conversation List */}
+      {/* Conversation List - Always visible, fills remaining space */}
       <div
-        className="flex-1 overflow-y-auto px-2 py-2 space-y-2"
+        className="flex-1 min-h-0 overflow-y-auto px-2 py-3 scroll-smooth"
         role="list"
-        aria-label="Conversations"
+        aria-label="Conversation history"
       >
         {/* Loading State */}
         {isLoading && (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="p-3 rounded-lg glass-panel">
-                <Skeleton className="h-4 w-full mb-2 bg-glass-medium" />
-                <Skeleton className="h-3 w-3/4 mb-2 bg-glass-medium" />
-                <Skeleton className="h-3 w-1/2 bg-glass-medium" />
+              <div key={i} className="px-3 py-2 rounded-lg glass-panel">
+                <Skeleton className="h-4 w-full bg-glass-medium" />
               </div>
             ))}
           </div>
@@ -142,19 +195,30 @@ export function ConversationHistorySidebar({
           </div>
         )}
 
-        {/* Conversation Items */}
-        {!isLoading && sortedConversations.map((conversation) => (
-          <div key={conversation.id} role="listitem">
-            <ConversationHistoryItem
-              conversation={conversation}
-              isActive={activeConversationId === conversation.id}
-              onClick={() => handleConversationClick(conversation.id)}
-            />
+        {/* Grouped Conversation Items */}
+        {!isLoading && groupedConversations.map(({ group, conversations: groupConvs }) => (
+          <div key={group} className="mb-6 last:mb-0">
+            {/* Group Header */}
+            <h3 className="px-3 mb-2 text-xs font-medium text-muted-foreground glass-text uppercase tracking-wide">
+              {group}
+            </h3>
+
+            {/* Conversations in this group */}
+            <div className="space-y-1">
+              {groupConvs.map((conversation) => (
+                <div key={conversation.id} role="listitem">
+                  <ConversationHistoryItem
+                    conversation={conversation}
+                    isActive={activeConversationId === conversation.id}
+                    onClick={() => handleConversationClick(conversation.id)}
+                    onDelete={onDeleteConversation}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
-
-      {/* Footer (optional - could add "Manage Conversations" link) */}
     </nav>
   );
 }
