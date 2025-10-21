@@ -228,7 +228,10 @@ export const threadsAPI = {
         });
 
         // AI answer generation still happens in frontend (for now)
-        // This keeps the existing AI/LLM integration working
+        // Wait for thread to be fully persisted before generating AI answer
+        // This prevents "Thread not found" race condition
+        await delay(500);
+
         let aiAnswer: AIAnswer | null = null;
         try {
           aiAnswer = await aiAnswersAPI.generateAIAnswer({
