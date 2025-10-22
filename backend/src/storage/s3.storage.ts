@@ -15,6 +15,7 @@ import {
   type PutObjectCommandInput,
   type GetObjectCommandInput,
   type HeadObjectCommandOutput,
+  type _Object,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "stream";
@@ -227,7 +228,7 @@ export class S3StorageProvider implements IStorageProvider {
       return [];
     }
 
-    return response.Contents.filter((obj) => obj.Key).map((obj) => ({
+    return response.Contents.filter((obj: _Object) => obj.Key).map((obj: _Object) => ({
       key: obj.Key!,
       size: obj.Size || 0,
       contentType: "application/octet-stream", // S3 doesn't return content type in list
