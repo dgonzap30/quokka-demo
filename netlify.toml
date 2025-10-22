@@ -8,6 +8,7 @@
 [build.environment]
   NODE_VERSION = "20"
   SECRETS_SCAN_OMIT_PATHS = "doccloud/**,docs/**,*.md,backend/**,.env.*.example,DEPLOYMENT-CONFIG.md"
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_LLM_PROVIDER,NEXT_PUBLIC_MAX_TOKENS,NEXT_PUBLIC_API_URL,NEXT_PUBLIC_OPENAI_MODEL"
 
 [[redirects]]
   from = "/*"
