@@ -106,6 +106,10 @@ function hashQuestion(text: string): string {
 
 /**
  * Get current authenticated user
+ *
+ * IMPORTANT: Retries are disabled to prevent infinite render loops
+ * when backend is unavailable or returns 401. The getCurrentUser()
+ * function handles errors gracefully and falls back to localStorage.
  */
 export function useCurrentUser() {
   return useQuery({
@@ -113,6 +117,8 @@ export function useCurrentUser() {
     queryFn: () => api.getCurrentUser(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: false, // Don't retry - prevents render loops on login page
+    retryOnMount: false, // Don't retry on component mount
   });
 }
 
