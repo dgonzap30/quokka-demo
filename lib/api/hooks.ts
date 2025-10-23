@@ -147,8 +147,8 @@ export function useLogin() {
         // Update user query with logged-in user
         queryClient.setQueryData(queryKeys.currentUser, result.session.user);
         queryClient.setQueryData(queryKeys.session, result.session);
-        // Invalidate to refetch
-        queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
+        // Don't invalidate - we already have the fresh data from login
+        // Invalidating here causes infinite loop when backend returns 401
       }
     },
   });
@@ -167,8 +167,8 @@ export function useSignup() {
         // Update user query with new user
         queryClient.setQueryData(queryKeys.currentUser, result.session.user);
         queryClient.setQueryData(queryKeys.session, result.session);
-        // Invalidate to refetch
-        queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
+        // Don't invalidate - we already have the fresh data from signup
+        // Invalidating here causes infinite loop when backend returns 401
       }
     },
   });
