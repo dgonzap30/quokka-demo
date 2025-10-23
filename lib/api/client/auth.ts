@@ -244,6 +244,11 @@ export const authAPI = {
 
         return user;
       } catch (error) {
+        // 401 is expected when not authenticated - don't log as error
+        if (error instanceof Error && error.message.includes('Not authenticated')) {
+          return null;
+        }
+        // Log other errors (network failures, 500s, etc.)
         console.error('[Auth] Backend getCurrentUser failed:', error);
         // Fall through to localStorage fallback
       }

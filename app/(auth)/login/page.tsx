@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api/client";
-import { useCurrentUser } from "@/lib/api/hooks";
+import { useCurrentUser, useLogin } from "@/lib/api/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,9 +21,9 @@ import { isAuthSuccess, type UserRole } from "@/lib/models/types";
 export default function LoginPage() {
   const router = useRouter();
   const { data: user, isLoading: userLoading } = useCurrentUser();
+  const loginMutation = useLogin();
 
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -60,38 +59,38 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      // Call backend dev-login endpoint
-      const result = await api.login({ email, password: "" });
-
-      if (isAuthSuccess(result)) {
-        // Redirect based on role
-        redirectToRoleDashboard(result.session.user.role);
-      } else {
-        setError(result.error || "Login failed. Please try again.");
+    // Use mutation hook for login
+    loginMutation.mutate(
+      { email, password: "" },
+      {
+        onSuccess: (result) => {
+          if (isAuthSuccess(result)) {
+            // Redirect based on role (cache is already updated by hook)
+            redirectToRoleDashboard(result.session.user.role);
+          } else {
+            setError(result.error || "Login failed. Please try again.");
+          }
+        },
+        onError: (err) => {
+          // Handle backend errors
+          if (err instanceof Error) {
+            if (err.message.includes("404") || err.message.includes("not found")) {
+              setError(
+                "User not found. Try: student@demo.com or instructor@demo.com"
+              );
+            } else if (err.message.includes("fetch")) {
+              setError(
+                "Cannot connect to backend server. Please start the backend: cd backend && npm start"
+              );
+            } else {
+              setError(err.message);
+            }
+          } else {
+            setError("An unexpected error occurred. Please try again.");
+          }
+        },
       }
-    } catch (err) {
-      // Handle backend errors
-      if (err instanceof Error) {
-        if (err.message.includes("404") || err.message.includes("not found")) {
-          setError(
-            "User not found. Try: student@demo.com or instructor@demo.com"
-          );
-        } else if (err.message.includes("fetch")) {
-          setError(
-            "Cannot connect to backend server. Please start the backend: cd backend && npm start"
-          );
-        } else {
-          setError(err.message);
-        }
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
   // Show loading state while checking auth
@@ -134,7 +133,7 @@ export default function LoginPage() {
               placeholder="student@demo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
               className="w-full"
               aria-describedby={error ? "login-error" : undefined}
             />
@@ -151,11 +150,11 @@ export default function LoginPage() {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isLoading || !email}
+            disabled={loginMutation.isPending || !email}
             className="w-full"
             size="lg"
           >
-            {isLoading ? (
+            {loginMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Signing in...
@@ -178,7 +177,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setEmail("student@demo.com")}
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
               className="glass-panel px-3 py-2 rounded-lg text-left hover:bg-accent/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
             >
               <div className="font-medium">Student</div>
@@ -187,7 +186,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setEmail("instructor@demo.com")}
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
               className="glass-panel px-3 py-2 rounded-lg text-left hover:bg-accent/10 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
             >
               <div className="font-medium">Instructor</div>
