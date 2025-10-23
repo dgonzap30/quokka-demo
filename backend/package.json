@@ -13,9 +13,12 @@
     "docker:reset": "docker compose down -v && docker compose up -d && sleep 3 && npm run db:migrate && npm run db:seed",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
+    "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
+    "db:seed:prod": "node dist/db/seed.js",
     "db:studio": "drizzle-kit studio",
     "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
+    "db:init:prod": "npm run db:push && npm run db:seed:prod",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },
@@ -38,14 +41,14 @@
     "pino-pretty": "^11.2.2",
     "postgres": "^3.4.4",
     "tsx": "^4.19.1",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "drizzle-kit": "^0.24.2"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.5.5",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
-    "drizzle-kit": "^0.24.2",
     "eslint": "^9.11.0",
     "typescript": "^5.6.2"
   },
