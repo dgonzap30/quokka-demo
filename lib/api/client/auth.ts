@@ -244,13 +244,22 @@ export const authAPI = {
 
         return user;
       } catch (error) {
-        // 401 is expected when not authenticated - don't log as error
-        if (error instanceof Error && error.message.includes('Not authenticated')) {
-          return null;
+        // Log backend errors (except expected auth failures)
+        if (error instanceof Error) {
+          // Silent fallback for expected cases: not authenticated, backend unavailable, wrong server
+          const isSilentError =
+            error.message.includes('Not authenticated') ||
+            error.message.includes('HTTP 404') ||
+            error.message.includes('HTTP 401') ||
+            error.message.includes('<!DOCTYPE');  // HTML response = hitting Next.js instead of backend
+
+          if (!isSilentError) {
+            // Log unexpected errors (network failures, 500s, timeouts, etc.)
+            console.error('[Auth] Backend getCurrentUser failed:', error);
+          }
         }
-        // Log other errors (network failures, 500s, etc.)
-        console.error('[Auth] Backend getCurrentUser failed:', error);
-        // Fall through to localStorage fallback
+        // Always fall through to localStorage fallback on any backend error
+        // This ensures existing sessions work when backend is unavailable
       }
     }
 
